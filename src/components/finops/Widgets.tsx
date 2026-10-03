@@ -27,9 +27,9 @@ function Ring({ value, tone = "success", size = 96 }: { value: number; tone?: "s
 export function KpiCards() {
   const total = kpis.resources.vms + kpis.resources.containers + kpis.resources.databases;
   return (
-    <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
       <article className="organic-card subtle-lift p-6 sm:col-span-2">
-        <div className="flex items-start justify-between"><Label>Monthly cloud spend</Label><span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-1 text-xs text-warning"><ArrowUpRight className="size-3" />{kpis.spendTrend}%</span></div>
+        <div className="flex items-start justify-between"><Label>Monthly cloud spend</Label><span className="inline-flex items-center gap-1 rounded-full bg-warning-soft px-2 py-1 text-xs text-warning"><ArrowUpRight className="size-3" />{kpis.spendTrend}%</span></div>
         <p className="metric-numbers mt-7 text-4xl font-medium sm:text-5xl">{fmtUSD(kpis.monthlySpend)}</p>
         <div className="mt-7 flex items-center gap-3 text-xs text-muted-foreground"><span className="size-2 rounded-full bg-success" />$51,270 remaining in Q4</div>
       </article>
@@ -76,7 +76,7 @@ export function BudgetForecast() {
   const percentage = Math.min(100, Math.round((forecast / budget) * 100));
   return (
     <article className="organic-card flex h-full min-h-[410px] flex-col p-6 md:p-8">
-      <div className="flex items-start justify-between"><div><Label>Budget & forecast</Label><h2 className="mt-2 text-xl font-medium">Q4 trajectory</h2></div><span className={`rounded-full px-2 py-1 text-xs ${percentage > 95 ? "bg-warning/10 text-warning" : "bg-success/10 text-success"}`}>{percentage}% projected</span></div>
+      <div className="flex items-start justify-between"><div><Label>Budget & forecast</Label><h2 className="mt-2 text-xl font-medium">Q4 trajectory</h2></div><span className={`rounded-full px-2 py-1 text-xs ${percentage > 95 ? "bg-warning-soft text-warning" : "bg-success-soft text-success"}`}>{percentage}% projected</span></div>
       <div className="mt-8 flex justify-center"><Ring value={percentage} tone={percentage > 95 ? "warning" : "success"} size={154} /></div>
       <div className="mt-6 grid grid-cols-2 gap-4 border-t border-border pt-5"><div><Label>Forecast</Label><p className="metric-numbers mt-2 text-xl font-medium">${forecast}k</p></div><div><Label>Budget</Label><p className="metric-numbers mt-2 text-xl font-medium">${budget}k</p></div></div>
       <div className="mt-auto pt-6"><div className="mb-3 flex justify-between text-xs text-muted-foreground"><span>Adjust scenario</span><span className="metric-numbers">${budget}k</span></div><Slider value={[budget]} min={260} max={360} step={5} onValueChange={(value) => setBudget(value[0] ?? 300)} aria-label="Quarterly budget" /></div>
@@ -100,7 +100,7 @@ export function InfrastructureStatus() {
   }, []);
   return (
     <article id="infrastructure" className="organic-card p-6 md:p-8">
-      <div className="flex flex-wrap items-start justify-between gap-4"><div><Label>Live infrastructure</Label><h2 className="mt-2 text-xl font-medium">Kubernetes health</h2></div><span className="inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-1.5 text-xs text-success"><span className="pulse-dot size-1.5 rounded-full bg-success" />Live · {tick + 1}s</span></div>
+      <div className="flex flex-wrap items-start justify-between gap-4"><div><Label>Live infrastructure</Label><h2 className="mt-2 text-xl font-medium">Kubernetes health</h2></div><span className="inline-flex items-center gap-2 rounded-full bg-success-soft px-3 py-1.5 text-xs text-success"><span className="pulse-dot size-1.5 rounded-full bg-success" />Live · {tick + 1}s</span></div>
       <div className="mt-7 grid gap-6 md:grid-cols-[1fr_1fr_1.3fr]">
         <div className="flex items-center gap-4 rounded-2xl bg-secondary p-4"><Ring value={cpu} size={78} /><div><Cpu className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">CPU utilization</p><p className="text-xs text-muted-foreground">Across 42 nodes</p></div></div>
         <div className="flex items-center gap-4 rounded-2xl bg-secondary p-4"><Ring value={memory} tone="warning" size={78} /><div><MemoryStick className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">Memory</p><p className="text-xs text-muted-foreground">9.8 TB allocated</p></div></div>
@@ -136,7 +136,7 @@ export function Allocation() {
   );
 }
 
-const statusStyle: Record<ResourceStatus, string> = { Running: "bg-success/10 text-success", Idle: "bg-muted text-muted-foreground", Warning: "bg-warning/10 text-warning" };
+const statusStyle: Record<ResourceStatus, string> = { Running: "bg-success-soft text-success", Idle: "bg-muted text-muted-foreground", Warning: "bg-warning-soft text-warning" };
 
 export function ResourceTable() {
   const [query, setQuery] = useState("");
