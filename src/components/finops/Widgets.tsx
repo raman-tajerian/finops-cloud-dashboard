@@ -1,242 +1,151 @@
-import { useMemo, useState } from "react";
-import {
-  Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
-} from "recharts";
-import {
-  TrendingUp, Boxes, Sparkles, AlertTriangle, ShieldAlert, ChevronDown, Search, Scale, Square, ScrollText,
-} from "lucide-react";
-import {
-  alerts, allocation, fmtUSD, kpis, resources, type CostPoint, type ResourceStatus,
-} from "@/lib/finops-data";
+import { useEffect, useMemo, useState } from "react";
+import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Activity, ArrowDownRight, ArrowUpRight, Check, ChevronRight, CircleAlert, Cpu, Database, MemoryStick, Search, Server, Sparkles } from "lucide-react";
+import { allocation, fmtUSD, kpis, resources, type CostPoint, type ResourceStatus } from "@/lib/finops-data";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 
-const Label = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{children}</p>
-);
+const Label = ({ children }: { children: React.ReactNode }) => <p className="text-[11px] font-medium uppercase text-muted-foreground">{children}</p>;
+const tooltipStyle = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 14, fontSize: 12, color: "var(--foreground)" };
 
-export function AlertBanner() {
-  const [open, setOpen] = useState(true);
+function Ring({ value, tone = "success", size = 96 }: { value: number; tone?: "success" | "warning"; size?: number }) {
+  const r = 34;
+  const circumference = 2 * Math.PI * r;
+  const color = tone === "success" ? "var(--success)" : "var(--warning)";
   return (
-    <section className="overflow-hidden rounded-xl bg-accent ring-1 ring-primary/15">
-      <button onClick={() => setOpen(!open)} className="flex w-full items-center gap-2.5 px-6 py-3 text-left">
-        <ShieldAlert className="size-3.5 text-primary" />
-        <span className="text-sm font-medium">Security & compliance</span>
-        <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs text-destructive">{alerts.length} findings</span>
-        <ChevronDown className={`ml-auto size-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
-      </button>
-      {open && (
-        <div className="grid gap-6 border-t border-primary/10 px-6 py-5 md:grid-cols-3">
-          {alerts.map((a) => (
-            <div key={a.id} className="flex gap-2.5">
-              <AlertTriangle className={`mt-1 size-3.5 shrink-0 ${a.severity === "critical" ? "text-destructive" : "text-warning"}`} />
-              <div>
-                <p className="text-sm font-medium">{a.title}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">{a.detail}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
-function Ring({ value }: { value: number }) {
-  const r = 34, c = 2 * Math.PI * r;
-  return (
-    <svg viewBox="0 0 84 84" className="size-24 -rotate-90">
-      <defs>
-        <linearGradient id="ring" x1="0" x2="1"><stop offset="0" stopColor="var(--teal)" /><stop offset="1" stopColor="var(--primary)" /></linearGradient>
-      </defs>
-      <circle cx="42" cy="42" r={r} fill="none" stroke="var(--muted)" strokeWidth="7" />
-      <circle cx="42" cy="42" r={r} fill="none" stroke="url(#ring)" strokeWidth="7" strokeLinecap="round"
-        strokeDasharray={c} strokeDashoffset={c * (1 - value / 100)}
-        style={{ transition: "stroke-dashoffset 1s" }} />
-    </svg>
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <svg viewBox="0 0 84 84" className="size-full -rotate-90" aria-label={`${value} percent`}>
+        <circle cx="42" cy="42" r={r} fill="none" stroke="var(--muted)" strokeWidth="6" />
+        <circle cx="42" cy="42" r={r} fill="none" stroke={color} strokeWidth="6" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - value / 100)} />
+      </svg>
+      <span className="metric-numbers absolute inset-0 grid place-items-center text-sm font-medium">{value}%</span>
+    </div>
   );
 }
 
 export function KpiCards() {
   const total = kpis.resources.vms + kpis.resources.containers + kpis.resources.databases;
   return (
-    <section className="glass grid overflow-hidden sm:grid-cols-2 xl:grid-cols-4 xl:divide-x divide-border">
-      <div className="glass-hover p-8">
-        <Label>Monthly cloud spend</Label>
-        <p className="mt-3 font-mono text-3xl font-semibold tracking-tight">{fmtUSD(kpis.monthlySpend)}</p>
-        <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary">
-          <TrendingUp className="size-3" /> +{kpis.spendTrend}% vs last month
-        </span>
-      </div>
-      <div className="glass-hover p-8">
-        <div className="flex items-center justify-between"><Label>Active resources</Label><Boxes className="size-4 text-teal" /></div>
-        <p className="mt-3 font-mono text-3xl font-semibold tracking-tight">{total.toLocaleString()}</p>
-        <div className="mt-3 flex gap-4 text-xs text-muted-foreground">
-          <span><b className="text-foreground">{kpis.resources.vms}</b> VMs</span>
-          <span><b className="text-foreground">{kpis.resources.containers.toLocaleString()}</b> Containers</span>
-          <span><b className="text-foreground">{kpis.resources.databases}</b> DBs</span>
-        </div>
-      </div>
-      <div className="glass-hover flex items-center gap-5 p-8">
-        <div className="relative">
-          <Ring value={kpis.finopsScore} />
-          <span className="absolute inset-0 grid place-items-center font-mono text-xl font-semibold">{kpis.finopsScore}</span>
-        </div>
-        <div>
-          <Label>FinOps score</Label>
-          <p className="mt-2 text-sm font-medium text-teal">{kpis.finopsScore}/100 Optimized</p>
-          <p className="mt-1 text-xs text-muted-foreground">Top 12% of peers</p>
-        </div>
-      </div>
-      <div className="glass-hover p-8">
-        <div className="flex items-center justify-between"><Label>Potential savings</Label><Sparkles className="size-4 text-teal" /></div>
-        <p className="mt-3 font-mono text-3xl font-semibold tracking-tight text-teal">{fmtUSD(kpis.potentialSavings)}<span className="text-sm text-muted-foreground">/mo</span></p>
-        <button onClick={() => toast.success("Auto-optimize queued for 14 recommendations")}
-          className="btn-teal mt-3 rounded-lg px-3 py-1.5 text-xs font-semibold">Auto-Optimize</button>
-      </div>
+    <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      <article className="organic-card subtle-lift p-6 sm:col-span-2">
+        <div className="flex items-start justify-between"><Label>Monthly cloud spend</Label><span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-1 text-xs text-warning"><ArrowUpRight className="size-3" />{kpis.spendTrend}%</span></div>
+        <p className="metric-numbers mt-7 text-4xl font-medium sm:text-5xl">{fmtUSD(kpis.monthlySpend)}</p>
+        <div className="mt-7 flex items-center gap-3 text-xs text-muted-foreground"><span className="size-2 rounded-full bg-success" />$51,270 remaining in Q4</div>
+      </article>
+      <article className="organic-card subtle-lift p-6">
+        <div className="flex items-start justify-between"><Label>Active resources</Label><Server className="size-4 text-muted-foreground" /></div>
+        <p className="metric-numbers mt-7 text-4xl font-medium">{total.toLocaleString("en-US")}</p>
+        <p className="mt-2 text-xs text-muted-foreground">Across AWS & Azure</p>
+      </article>
+      <article className="organic-card subtle-lift flex items-center gap-5 p-6">
+        <Ring value={kpis.finopsScore} size={84} />
+        <div><Label>FinOps score</Label><p className="mt-2 text-xl font-medium">Optimized</p><p className="mt-1 text-xs text-success">Top 12% of peers</p></div>
+      </article>
     </section>
   );
 }
 
-const tooltipStyle = {
-  background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 10, fontSize: 12, color: "var(--foreground)",
-};
-
 export function CostTrend({ data }: { data: CostPoint[] }) {
   return (
-    <div className="glass p-8 md:p-10">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div><Label>Cost trends</Label><p className="mt-1 text-sm text-muted-foreground">AWS vs Azure spend</p></div>
-        <div className="flex gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-aws" />AWS</span>
-          <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-azure" />Azure</span>
-        </div>
+    <article className="organic-card h-full min-h-[410px] p-6 md:p-8">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div><Label>Cloud spend</Label><h2 className="mt-2 text-xl font-medium">Cost velocity</h2><p className="mt-1 text-sm text-muted-foreground">Actual spend by provider</p></div>
+        <div className="flex gap-4 text-xs text-muted-foreground"><span className="flex items-center gap-2"><i className="size-2 rounded-full bg-aws" />AWS</span><span className="flex items-center gap-2"><i className="size-2 rounded-full bg-azure" />Azure</span></div>
       </div>
-      <div className="mt-8 h-96">
+      <div className="mt-8 h-[290px]">
         <ResponsiveContainer>
-          <AreaChart data={data} margin={{ left: -10, right: 4 }}>
-            <defs>
-              <linearGradient id="gAws" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--aws)" stopOpacity={0.35} /><stop offset="1" stopColor="var(--aws)" stopOpacity={0} /></linearGradient>
-              <linearGradient id="gAz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--azure)" stopOpacity={0.35} /><stop offset="1" stopColor="var(--azure)" stopOpacity={0} /></linearGradient>
-            </defs>
+          <AreaChart data={data} margin={{ left: -16, right: 4 }}>
+            <defs><linearGradient id="awsFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--aws)" stopOpacity={0.18} /><stop offset="1" stopColor="var(--aws)" stopOpacity={0} /></linearGradient></defs>
             <CartesianGrid stroke="var(--border)" vertical={false} />
-            <XAxis dataKey="label" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={20} />
-            <YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false}
-              tickFormatter={(v) => (v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${v}`)} />
+            <XAxis dataKey="label" tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} minTickGap={28} />
+            <YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${Math.round(v / 1000)}k`} />
             <Tooltip contentStyle={tooltipStyle} formatter={(v) => fmtUSD(Number(v))} />
-            <Area type="monotone" dataKey="aws" name="AWS" stroke="var(--aws)" strokeWidth={2} fill="url(#gAws)" />
-            <Area type="monotone" dataKey="azure" name="Azure" stroke="var(--azure)" strokeWidth={2} fill="url(#gAz)" />
+            <Area type="monotone" dataKey="aws" name="AWS" stroke="var(--aws)" strokeWidth={2} fill="url(#awsFill)" />
+            <Area type="monotone" dataKey="azure" name="Azure" stroke="var(--azure)" strokeWidth={2} fill="transparent" />
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </article>
+  );
+}
+
+export function BudgetForecast() {
+  const [budget, setBudget] = useState(300);
+  const forecast = 284.6;
+  const percentage = Math.min(100, Math.round((forecast / budget) * 100));
+  return (
+    <article className="organic-card flex h-full min-h-[410px] flex-col p-6 md:p-8">
+      <div className="flex items-start justify-between"><div><Label>Budget & forecast</Label><h2 className="mt-2 text-xl font-medium">Q4 trajectory</h2></div><span className={`rounded-full px-2 py-1 text-xs ${percentage > 95 ? "bg-warning/10 text-warning" : "bg-success/10 text-success"}`}>{percentage}% projected</span></div>
+      <div className="mt-8 flex justify-center"><Ring value={percentage} tone={percentage > 95 ? "warning" : "success"} size={154} /></div>
+      <div className="mt-6 grid grid-cols-2 gap-4 border-t border-border pt-5"><div><Label>Forecast</Label><p className="metric-numbers mt-2 text-xl font-medium">${forecast}k</p></div><div><Label>Budget</Label><p className="metric-numbers mt-2 text-xl font-medium">${budget}k</p></div></div>
+      <div className="mt-auto pt-6"><div className="mb-3 flex justify-between text-xs text-muted-foreground"><span>Adjust scenario</span><span className="metric-numbers">${budget}k</span></div><Slider value={[budget]} min={260} max={360} step={5} onValueChange={(value) => setBudget(value[0] ?? 300)} aria-label="Quarterly budget" /></div>
+    </article>
+  );
+}
+
+const initialLogs = [
+  { time: "12:11:04", event: "checkout-api v3.18 deployed", state: "Healthy" },
+  { time: "12:08:31", event: "worker-pool scaled 18 → 24 pods", state: "Scaled" },
+  { time: "12:02:17", event: "payments-db readiness probe recovered", state: "Recovered" },
+];
+
+export function InfrastructureStatus() {
+  const [cpu, setCpu] = useState(64);
+  const [memory, setMemory] = useState(71);
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const timer = window.setInterval(() => { setCpu((v) => Math.max(42, Math.min(78, v + (Math.random() > .5 ? 1 : -1)))); setMemory((v) => Math.max(60, Math.min(82, v + (Math.random() > .5 ? 1 : -1)))); setTick((v) => v + 1); }, 2400);
+    return () => window.clearInterval(timer);
+  }, []);
+  return (
+    <article id="infrastructure" className="organic-card p-6 md:p-8">
+      <div className="flex flex-wrap items-start justify-between gap-4"><div><Label>Live infrastructure</Label><h2 className="mt-2 text-xl font-medium">Kubernetes health</h2></div><span className="inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-1.5 text-xs text-success"><span className="pulse-dot size-1.5 rounded-full bg-success" />Live · {tick + 1}s</span></div>
+      <div className="mt-7 grid gap-6 md:grid-cols-[1fr_1fr_1.3fr]">
+        <div className="flex items-center gap-4 rounded-2xl bg-secondary p-4"><Ring value={cpu} size={78} /><div><Cpu className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">CPU utilization</p><p className="text-xs text-muted-foreground">Across 42 nodes</p></div></div>
+        <div className="flex items-center gap-4 rounded-2xl bg-secondary p-4"><Ring value={memory} tone="warning" size={78} /><div><MemoryStick className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">Memory</p><p className="text-xs text-muted-foreground">9.8 TB allocated</p></div></div>
+        <div className="rounded-2xl bg-secondary p-4"><div className="flex items-center justify-between"><span className="text-xs font-medium">Cluster status</span><span className="text-xs text-success">286 / 288 pods</span></div><div className="mt-4 grid grid-cols-3 gap-2 text-center"><div><p className="metric-numbers text-lg font-medium">3</p><p className="text-[10px] text-muted-foreground">Clusters</p></div><div><p className="metric-numbers text-lg font-medium">42</p><p className="text-[10px] text-muted-foreground">Nodes</p></div><div><p className="metric-numbers text-lg font-medium text-warning">2</p><p className="text-[10px] text-muted-foreground">Pending</p></div></div></div>
+      </div>
+      <div className="mt-6 border-t border-border pt-5"><div className="mb-3 flex items-center justify-between"><span className="text-xs font-medium">Deployment activity</span><Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={() => toast("Deployment log opened")}>View all <ChevronRight /></Button></div><div className="space-y-3">{initialLogs.map((log) => <div key={log.time} className="grid grid-cols-[66px_1fr_auto] items-center gap-2 text-xs"><span className="metric-numbers font-mono text-muted-foreground">{log.time}</span><span className="truncate">{log.event}</span><span className="text-success">{log.state}</span></div>)}</div></div>
+    </article>
+  );
+}
+
+const savingItems = [
+  { id: 1, title: "Right-size 4 RDS instances", detail: "Low CPU over 30 days", amount: 1240 },
+  { id: 2, title: "Release unattached volumes", detail: "1.2 TB idle storage", amount: 580 },
+  { id: 3, title: "Schedule dev clusters", detail: "Pause outside office hours", amount: 3420 },
+];
+
+export function SavingsWorkflow() {
+  const [done, setDone] = useState<number[]>([]);
+  const pending = savingItems.filter((item) => !done.includes(item.id));
+  return (
+    <article id="savings" className="organic-card h-full p-6 md:p-8">
+      <div className="flex items-start justify-between"><div><Label>Savings workflow</Label><h2 className="mt-2 text-xl font-medium">{fmtUSD(pending.reduce((sum, item) => sum + item.amount, 0))} ready</h2></div><Sparkles className="size-5 text-primary" /></div>
+      <div className="mt-6 space-y-3">{savingItems.map((item) => { const complete = done.includes(item.id); return <div key={item.id} className={`rounded-2xl border p-4 transition-colors ${complete ? "border-success/20 bg-success/5" : "border-border bg-secondary"}`}><div className="flex gap-3"><div className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full ${complete ? "bg-success text-primary-foreground" : "bg-card text-muted-foreground"}`}>{complete ? <Check className="size-3.5" /> : <CircleAlert className="size-3.5" />}</div><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-3"><p className={`text-sm font-medium ${complete ? "text-muted-foreground line-through" : ""}`}>{item.title}</p><span className="metric-numbers text-sm font-medium text-primary">{fmtUSD(item.amount)}</span></div><p className="mt-1 text-xs text-muted-foreground">{item.detail}</p>{!complete && <Button variant="ghost" size="sm" className="mt-2 h-7 px-0 text-xs text-foreground hover:bg-transparent" onClick={() => { setDone((current) => [...current, item.id]); toast.success(`${item.title} marked complete`); }}>Mark complete <ArrowDownRight /></Button>}</div></div></div>; })}</div>
+      {done.length > 0 && <Button variant="outline" className="mt-4 w-full rounded-xl" onClick={() => setDone([])}>Reset workflow</Button>}
+    </article>
   );
 }
 
 export function Allocation() {
-  const total = allocation.reduce((s, a) => s + a.value, 0);
+  const total = allocation.reduce((sum, item) => sum + item.value, 0);
   return (
-    <div className="glass grid items-center gap-10 p-8 md:grid-cols-2 md:p-10">
-      <div><Label>Allocation by service</Label>
-      <div className="relative mt-6 h-72">
-        <ResponsiveContainer>
-          <PieChart>
-            <Pie data={allocation} dataKey="value" innerRadius={90} outerRadius={125} paddingAngle={3} stroke="none">
-              {allocation.map((a) => <Cell key={a.name} fill={a.color} />)}
-            </Pie>
-            <Tooltip contentStyle={tooltipStyle} formatter={(v) => fmtUSD(Number(v))} />
-          </PieChart>
-        </ResponsiveContainer>
-        <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
-          <div><p className="font-mono text-lg font-semibold">{fmtUSD(total)}</p><p className="text-xs text-muted-foreground">this month</p></div>
-        </div>
-      </div>
-      </div>
-      <ul className="space-y-5">
-        {allocation.map((a) => (
-          <li key={a.name} className="flex items-center gap-3 border-b border-border pb-5 text-sm last:border-0">
-            <i className="size-2 rounded-full" style={{ background: a.color }} />
-            <span className="text-muted-foreground">{a.name}</span>
-            <span className="ml-auto font-mono text-muted-foreground">{fmtUSD(a.value)}</span>
-            <span className="w-12 text-right font-mono font-semibold">{Math.round((a.value / total) * 100)}%</span>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <article className="organic-card h-full p-6 md:p-8"><Label>Cost allocation</Label><h2 className="mt-2 text-xl font-medium">By service</h2><div className="relative mt-4 h-48"><ResponsiveContainer><PieChart><Pie data={allocation} dataKey="value" innerRadius={58} outerRadius={78} paddingAngle={4} stroke="none">{allocation.map((item) => <Cell key={item.name} fill={item.color} />)}</Pie><Tooltip contentStyle={tooltipStyle} formatter={(v) => fmtUSD(Number(v))} /></PieChart></ResponsiveContainer><div className="pointer-events-none absolute inset-0 grid place-items-center text-center"><div><p className="metric-numbers text-base font-medium">{fmtUSD(total)}</p><p className="text-[10px] text-muted-foreground">this month</p></div></div></div><ul className="space-y-3">{allocation.map((item) => <li key={item.name} className="flex items-center gap-3 text-xs"><i className="size-2 rounded-full" style={{ background: item.color }} /><span className="text-muted-foreground">{item.name}</span><span className="metric-numbers ml-auto">{Math.round(item.value / total * 100)}%</span></li>)}</ul></article>
   );
 }
 
-const statusStyle: Record<ResourceStatus, string> = {
-  Running: "bg-success/10 text-success",
-  Idle: "bg-muted text-muted-foreground",
-  Warning: "bg-warning/10 text-warning",
-};
+const statusStyle: Record<ResourceStatus, string> = { Running: "bg-success/10 text-success", Idle: "bg-muted text-muted-foreground", Warning: "bg-warning/10 text-warning" };
 
 export function ResourceTable() {
-  const [q, setQ] = useState("");
+  const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"All" | ResourceStatus>("All");
-  const rows = useMemo(
-    () => resources.filter((r) =>
-      (status === "All" || r.status === status) &&
-      `${r.name} ${r.type} ${r.region}`.toLowerCase().includes(q.toLowerCase())),
-    [q, status],
-  );
-  const act = (a: string, n: string) => toast(`${a} → ${n}`);
+  const rows = useMemo(() => resources.filter((item) => (status === "All" || item.status === status) && `${item.name} ${item.type} ${item.region}`.toLowerCase().includes(query.toLowerCase())), [query, status]);
   return (
-    <section className="glass overflow-hidden">
-      <div className="flex flex-wrap items-center gap-4 p-8">
-        <div><Label>Resources</Label><p className="mt-1 text-sm text-muted-foreground">{rows.length} of {resources.length} shown</p></div>
-        <div className="ml-auto flex w-full gap-2 sm:w-auto">
-          <label className="flex flex-1 items-center gap-2 rounded-lg border border-input bg-secondary/50 px-3 py-1.5 sm:w-64">
-            <Search className="size-4 text-muted-foreground" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search resources…"
-              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
-          </label>
-          <select value={status} onChange={(e) => setStatus(e.target.value as typeof status)}
-            className="rounded-lg border border-input bg-secondary px-3 py-1.5 text-sm outline-none">
-            {["All", "Running", "Idle", "Warning"].map((s) => <option key={s}>{s}</option>)}
-          </select>
-        </div>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[820px] text-sm">
-          <thead>
-            <tr className="bg-muted text-left text-xs uppercase tracking-wider text-foreground">
-              {["Resource", "Provider", "Type", "Region", "Cost/mo", "Status", ""].map((h) => (
-                <th key={h} className={`px-8 py-4 font-semibold ${h === "Cost/mo" ? "text-right" : ""}`}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.id} className="group transition-colors hover:bg-muted">
-                <td className="px-8 py-5 font-mono text-[13px]">{r.name}</td>
-                <td className="px-8 py-5">
-                  <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ${r.provider === "AWS" ? "bg-primary/10 text-primary" : "bg-success/10 text-success"}`}>
-                    {r.provider}
-                  </span>
-                </td>
-                <td className="px-8 py-5 text-muted-foreground">{r.type}</td>
-                <td className="px-8 py-5 text-muted-foreground">{r.region}</td>
-                <td className="px-8 py-5 text-right font-mono">{fmtUSD(r.monthlyCost)}</td>
-                <td className="px-8 py-5">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs ${statusStyle[r.status]}`}>
-                    <i className="size-1.5 rounded-full bg-current" />{r.status}
-                  </span>
-                </td>
-                <td className="px-8 py-5">
-                  <div className="flex justify-end gap-1 opacity-60 transition-opacity group-hover:opacity-100">
-                    {[{ i: Scale, l: "Scale" }, { i: Square, l: "Stop" }, { i: ScrollText, l: "View Logs" }].map(({ i: I, l }) => (
-                      <button key={l} title={l} onClick={() => act(l, r.name)}
-                        className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"><I className="size-4" /></button>
-                    ))}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {rows.length === 0 && <tr><td colSpan={7} className="px-5 py-10 text-center text-muted-foreground">No resources match.</td></tr>}
-          </tbody>
-        </table>
-      </div>
-    </section>
+    <article id="resources" className="organic-card h-full overflow-hidden">
+      <div className="p-6 md:p-8"><div className="flex flex-wrap items-end gap-3"><div><Label>Resource inventory</Label><h2 className="mt-2 text-xl font-medium">Cloud estate</h2></div><label className="ml-auto flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-input bg-secondary px-3 py-2 sm:max-w-56"><Search className="size-4 text-muted-foreground" /><input className="w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search…" /></label><select value={status} onChange={(event) => setStatus(event.target.value as typeof status)} className="rounded-xl border border-input bg-secondary px-3 py-2 text-sm outline-none"><option>All</option><option>Running</option><option>Idle</option><option>Warning</option></select></div></div>
+      <div className="max-h-[372px] overflow-auto"><table className="w-full min-w-[640px] text-left text-xs"><thead className="sticky top-0 bg-card text-muted-foreground"><tr><th className="px-6 py-3 font-medium">Resource</th><th className="px-4 py-3 font-medium">Provider</th><th className="px-4 py-3 font-medium">Cost / mo</th><th className="px-6 py-3 font-medium">Status</th></tr></thead><tbody>{rows.map((item) => <tr key={item.id} className="border-t border-border transition-colors hover:bg-secondary"><td className="px-6 py-4"><p className="font-medium">{item.name}</p><p className="mt-1 text-[10px] text-muted-foreground">{item.type} · {item.region}</p></td><td className="px-4 py-4 text-muted-foreground">{item.provider}</td><td className="metric-numbers px-4 py-4">{fmtUSD(item.monthlyCost)}</td><td className="px-6 py-4"><span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 ${statusStyle[item.status]}`}><i className="size-1.5 rounded-full bg-current" />{item.status}</span></td></tr>)}{rows.length === 0 && <tr><td colSpan={4} className="px-6 py-10 text-center text-muted-foreground">No matching resources</td></tr>}</tbody></table></div>
+    </article>
   );
 }

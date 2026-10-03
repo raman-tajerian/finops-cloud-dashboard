@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep FinOps feature data local and typed so it can later be replaced by the planned C# API without changing presentation components.
+- Treat the dashboard as a single responsive bento workspace; operational widgets own their temporary interactive state.
