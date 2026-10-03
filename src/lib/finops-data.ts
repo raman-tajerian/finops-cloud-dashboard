@@ -26,9 +26,9 @@ const series = (n: number, fmt: (i: number) => string, base: number) =>
 const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct"];
 export const costTrends: Record<TimeRange, CostPoint[]> = {
   "24h": series(24, (i) => `${String(i).padStart(2, "0")}:00`, 210),
-  "7d": series(7, (i) => ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][i], 4900),
+  "7d": series(7, (i) => ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][i] ?? "", 4900),
   "30d": series(30, (i) => `Sep ${i + 3}`, 4800),
-  YTD: series(10, (i) => months[i], 138000),
+  YTD: series(10, (i) => months[i] ?? "", 138000),
 };
 
 export const kpis = {
