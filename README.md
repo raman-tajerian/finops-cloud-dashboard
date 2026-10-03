@@ -1,24 +1,35 @@
-# Pixel Perfect Replication
+En instrumentpanel för molnkostnader och infrastruktur, byggd för DevOps- och FinOps-team.
 
-Implement exactly the screenshot and nothing else
+---
 
-This project was built with [Lovable](https://lovable.dev).
+## Länkar
 
-## Build with Lovable
+- Live Demo: https://finops-cloud-dashboard.lovable.app/
+- GitHub Repository: https://github.com/raman-tajerian/finops-cloud-dashboard
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/5d55d046-822e-4e19-b757-5252b33c9755).
+---
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+## Funktioner
 
-## Development
+- Multi-Cloud: Översikt för AWS, Azure och GCP.
+- Kostnadsfördelning: Uppdelning på Compute, Kubernetes, Storage och Networking.
+- Resursslöseri: Identifierar oanvända volymer och överdimensionerade noder.
+- Interaktiv Bento Grid: Grafer, tidsfilter och rekommendationer för besparingar.
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+---
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
+## Tech Stack
+
+- Frontend: React, TypeScript, Vite, Tailwind CSS, Shadcn UI
+- Backend (Planerad): C# .NET 9 Web API
+- Databas (Planerad): PostgreSQL / TimescaleDB
+- DevOps (Planerad): Docker, GitHub Actions, Terraform
+
+---
+
+## Färdplan (Roadmap)
+
+- [ ] C# .NET API: Bygga REST API och ersätta testdata med riktiga endpoints.
+- [ ] Databas: Koppla PostgreSQL för historisk kostnadsdata.
+- [ ] Cloud SDKs: Integration med AWS Cost Explorer och Azure APIs.
+- [ ] CI/CD: Sätta upp GitHub Actions och Docker-filer.
