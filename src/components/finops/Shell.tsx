@@ -56,7 +56,7 @@ export function Shell({ children, range, onRange, onScan, scanning }: {
                 <Button key={item} size="sm" variant={range === item ? "secondary" : "ghost"} className={`h-7 px-2.5 text-xs ${range === item ? "bg-card" : "text-muted-foreground"}`} onClick={() => onRange(item)}>{item}</Button>
               ))}
             </div>
-            <Button onClick={onScan} disabled={scanning} className="rounded-xl bg-foreground text-background shadow-sm hover:bg-foreground/90">
+            <Button onClick={onScan} disabled={scanning} className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
               <Radar className={scanning ? "animate-spin" : ""} />
               <span className="hidden sm:inline">{scanning ? "Scanning…" : "Run scan"}</span>
             </Button>

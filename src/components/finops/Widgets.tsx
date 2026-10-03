@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 
-const Label = ({ children }: { children: React.ReactNode }) => <p className="text-[11px] font-medium uppercase text-muted-foreground">{children}</p>;
+const Label = ({ children }: { children: React.ReactNode }) => <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{children}</p>;
 const tooltipStyle = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 14, fontSize: 12, color: "var(--foreground)" };
 
 function Ring({ value, tone = "success", size = 96 }: { value: number; tone?: "success" | "warning"; size?: number }) {
@@ -16,8 +16,8 @@ function Ring({ value, tone = "success", size = 96 }: { value: number; tone?: "s
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg viewBox="0 0 84 84" className="size-full -rotate-90" aria-label={`${value} percent`}>
-        <circle cx="42" cy="42" r={r} fill="none" stroke="var(--muted)" strokeWidth="6" />
-        <circle cx="42" cy="42" r={r} fill="none" stroke={color} strokeWidth="6" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - value / 100)} />
+        <circle cx="42" cy="42" r={r} fill="none" stroke="var(--muted)" strokeWidth="4" />
+        <circle cx="42" cy="42" r={r} fill="none" stroke={color} strokeWidth="4" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - value / 100)} />
       </svg>
       <span className="metric-numbers absolute inset-0 grid place-items-center text-sm font-medium">{value}%</span>
     </div>
@@ -27,21 +27,19 @@ function Ring({ value, tone = "success", size = 96 }: { value: number; tone?: "s
 export function KpiCards() {
   const total = kpis.resources.vms + kpis.resources.containers + kpis.resources.databases;
   return (
-    <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-      <article className="organic-card subtle-lift p-6 sm:col-span-2">
-        <div className="flex items-start justify-between"><Label>Monthly cloud spend</Label><span className="inline-flex items-center gap-1 rounded-full bg-warning-soft px-2 py-1 text-xs text-warning"><ArrowUpRight className="size-3" />{kpis.spendTrend}%</span></div>
-        <p className="metric-numbers mt-7 text-4xl font-medium sm:text-5xl">{fmtUSD(kpis.monthlySpend)}</p>
-        <div className="mt-7 flex items-center gap-3 text-xs text-muted-foreground"><span className="size-2 rounded-full bg-success" />$51,270 remaining in Q4</div>
-      </article>
-      <article className="organic-card subtle-lift p-6">
-        <div className="flex items-start justify-between"><Label>Active resources</Label><Server className="size-4 text-muted-foreground" /></div>
-        <p className="metric-numbers mt-7 text-4xl font-medium">{total.toLocaleString("en-US")}</p>
-        <p className="mt-2 text-xs text-muted-foreground">Across AWS & Azure</p>
-      </article>
-      <article className="organic-card subtle-lift flex items-center gap-5 p-6">
-        <Ring value={kpis.finopsScore} size={84} />
-        <div><Label>FinOps score</Label><p className="mt-2 text-xl font-medium">Optimized</p><p className="mt-1 text-xs text-success">Top 12% of peers</p></div>
-      </article>
+    <section className="grid border-y border-foreground/25 sm:grid-cols-2 xl:grid-cols-4 [&>*]:border-border sm:[&>*:nth-child(odd)]:border-r xl:[&>*]:border-r xl:[&>*:last-child]:border-r-0 [&>*]:border-b sm:[&>*:nth-child(n+3)]:border-b-0 xl:[&>*]:border-b-0">
+      {[
+        { label: "Monthly cloud spend", value: fmtUSD(kpis.monthlySpend), note: `+${kpis.spendTrend}% vs. last month`, tone: "text-warning" },
+        { label: "Active resources", value: total.toLocaleString("en-US"), note: "Across AWS & Azure", tone: "text-muted-foreground" },
+        { label: "FinOps score", value: `${kpis.finopsScore}`, note: "Top 12% of peers", tone: "text-success" },
+        { label: "Potential savings", value: fmtUSD(kpis.potentialSavings), note: "$51,270 remaining in Q4", tone: "text-muted-foreground" },
+      ].map((k) => (
+        <article key={k.label} className="px-4 py-7 text-center">
+          <Label>{k.label}</Label>
+          <p className="metric-numbers mt-3 text-4xl font-normal 2xl:text-5xl">{k.value}</p>
+          <p className={`mt-3 font-mono text-[11px] ${k.tone}`}>{k.note}</p>
+        </article>
+      ))}
     </section>
   );
 }
@@ -101,10 +99,10 @@ export function InfrastructureStatus() {
   return (
     <article id="infrastructure" className="organic-card p-6 md:p-8">
       <div className="flex flex-wrap items-start justify-between gap-4"><div><Label>Live infrastructure</Label><h2 className="mt-2 text-xl font-medium">Kubernetes health</h2></div><span className="inline-flex items-center gap-2 rounded-full bg-success-soft px-3 py-1.5 text-xs text-success"><span className="pulse-dot size-1.5 rounded-full bg-success" />Live · {tick + 1}s</span></div>
-      <div className="mt-7 grid gap-6 md:grid-cols-[1fr_1fr_1.3fr]">
+      <div className="mt-7 grid gap-6 md:grid-cols-2">
         <div className="flex items-center gap-4 rounded-2xl bg-secondary p-4"><Ring value={cpu} size={78} /><div><Cpu className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">CPU utilization</p><p className="text-xs text-muted-foreground">Across 42 nodes</p></div></div>
         <div className="flex items-center gap-4 rounded-2xl bg-secondary p-4"><Ring value={memory} tone="warning" size={78} /><div><MemoryStick className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">Memory</p><p className="text-xs text-muted-foreground">9.8 TB allocated</p></div></div>
-        <div className="rounded-2xl bg-secondary p-4"><div className="flex items-center justify-between"><span className="text-xs font-medium">Cluster status</span><span className="text-xs text-success">286 / 288 pods</span></div><div className="mt-4 grid grid-cols-3 gap-2 text-center"><div><p className="metric-numbers text-lg font-medium">3</p><p className="text-[10px] text-muted-foreground">Clusters</p></div><div><p className="metric-numbers text-lg font-medium">42</p><p className="text-[10px] text-muted-foreground">Nodes</p></div><div><p className="metric-numbers text-lg font-medium text-warning">2</p><p className="text-[10px] text-muted-foreground">Pending</p></div></div></div>
+        <div className="rounded-2xl bg-secondary p-4 md:col-span-2"><div className="flex items-center justify-between"><span className="text-xs font-medium">Cluster status</span><span className="text-xs text-success">286 / 288 pods</span></div><div className="mt-4 grid grid-cols-3 gap-2 text-center"><div><p className="metric-numbers text-lg font-medium">3</p><p className="text-[10px] text-muted-foreground">Clusters</p></div><div><p className="metric-numbers text-lg font-medium">42</p><p className="text-[10px] text-muted-foreground">Nodes</p></div><div><p className="metric-numbers text-lg font-medium text-warning">2</p><p className="text-[10px] text-muted-foreground">Pending</p></div></div></div>
       </div>
       <div className="mt-6 border-t border-border pt-5"><div className="mb-3 flex items-center justify-between"><span className="text-xs font-medium">Deployment activity</span><Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={() => toast("Deployment log opened")}>View all <ChevronRight /></Button></div><div className="space-y-3">{initialLogs.map((log) => <div key={log.time} className="grid grid-cols-[66px_1fr_auto] items-center gap-2 text-xs"><span className="metric-numbers font-mono text-muted-foreground">{log.time}</span><span className="truncate">{log.event}</span><span className="text-success">{log.state}</span></div>)}</div></div>
     </article>
@@ -145,7 +143,7 @@ export function ResourceTable() {
   return (
     <article id="resources" className="organic-card h-full overflow-hidden">
       <div className="p-6 md:p-8"><div className="flex flex-wrap items-end gap-3"><div><Label>Resource inventory</Label><h2 className="mt-2 text-xl font-medium">Cloud estate</h2></div><label className="ml-auto flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-input bg-secondary px-3 py-2 sm:max-w-56"><Search className="size-4 text-muted-foreground" /><input className="w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search…" /></label><select value={status} onChange={(event) => setStatus(event.target.value as typeof status)} className="rounded-xl border border-input bg-secondary px-3 py-2 text-sm outline-none"><option>All</option><option>Running</option><option>Idle</option><option>Warning</option></select></div></div>
-      <div className="max-h-[372px] overflow-auto"><table className="w-full min-w-[640px] text-left text-xs"><thead className="sticky top-0 bg-card text-muted-foreground"><tr><th className="px-6 py-3 font-medium">Resource</th><th className="px-4 py-3 font-medium">Provider</th><th className="px-4 py-3 font-medium">Cost / mo</th><th className="px-6 py-3 font-medium">Status</th></tr></thead><tbody>{rows.map((item) => <tr key={item.id} className="border-t border-border transition-colors hover:bg-secondary"><td className="px-6 py-4"><p className="font-medium">{item.name}</p><p className="mt-1 text-[10px] text-muted-foreground">{item.type} · {item.region}</p></td><td className="px-4 py-4 text-muted-foreground">{item.provider}</td><td className="metric-numbers px-4 py-4">{fmtUSD(item.monthlyCost)}</td><td className="px-6 py-4"><span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 ${statusStyle[item.status]}`}><i className="size-1.5 rounded-full bg-current" />{item.status}</span></td></tr>)}{rows.length === 0 && <tr><td colSpan={4} className="px-6 py-10 text-center text-muted-foreground">No matching resources</td></tr>}</tbody></table></div>
+      <div className="max-h-[372px] overflow-auto"><table className="w-full min-w-[640px] text-left text-xs"><thead className="sticky top-0 bg-card font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground"><tr><th className="px-6 py-3 font-medium">Resource</th><th className="px-4 py-3 font-medium">Provider</th><th className="px-4 py-3 font-medium">Cost / mo</th><th className="px-6 py-3 font-medium">Status</th></tr></thead><tbody>{rows.map((item) => <tr key={item.id} className="border-t border-border transition-colors hover:bg-secondary"><td className="px-6 py-4"><p className="font-medium">{item.name}</p><p className="mt-1 text-[10px] text-muted-foreground">{item.type} · {item.region}</p></td><td className="px-4 py-4 text-muted-foreground">{item.provider}</td><td className="metric-numbers px-4 py-4">{fmtUSD(item.monthlyCost)}</td><td className="px-6 py-4"><span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 ${statusStyle[item.status]}`}><i className="size-1.5 rounded-full bg-current" />{item.status}</span></td></tr>)}{rows.length === 0 && <tr><td colSpan={4} className="px-6 py-10 text-center text-muted-foreground">No matching resources</td></tr>}</tbody></table></div>
     </article>
   );
 }

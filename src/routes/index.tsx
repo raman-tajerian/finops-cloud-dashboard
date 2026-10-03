@@ -30,7 +30,7 @@ function Index() {
   return (
     <Shell range={range} onRange={setRange} onScan={scan} scanning={scanning}>
       <div className="flex flex-wrap items-end justify-between gap-4 py-2">
-        <div><p className="text-xs font-medium text-muted-foreground">MULTI-CLOUD OVERVIEW</p><h1 className="mt-1 text-3xl font-medium md:text-4xl">Good afternoon, Raman.</h1></div>
+        <div><p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Multi-cloud overview · 1,872 resources</p><h1 className="mt-1 text-3xl font-semibold tracking-tight md:text-5xl">Good afternoon, Raman.</h1></div>
         <p className="max-w-sm text-sm leading-6 text-muted-foreground">Your cloud estate is healthy. Three opportunities need attention this week.</p>
       </div>
       <KpiCards />
@@ -42,7 +42,7 @@ function Index() {
         <div className="min-w-0 xl:col-span-5"><Allocation /></div>
         <div className="min-w-0 xl:col-span-7"><ResourceTable /></div>
       </section>
-      <Toaster theme="light" />
+      <Toaster theme="dark" />
     </Shell>
   );
 }
