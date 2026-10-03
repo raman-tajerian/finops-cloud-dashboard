@@ -141,7 +141,7 @@ export function DenseKpis({ scale, onOpen }: { scale: number; onOpen: (d: Detail
       {items.map((it) => (
         <button key={it.label} onClick={() => onOpen(it.detail as Detail)} className={`${card} subtle-lift group text-left`}>
           <div className="flex items-center justify-between"><Label>{it.label}</Label><ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></div>
-          <div className="mt-3 flex items-end justify-between gap-2"><p className="metric-numbers text-3xl">{it.value}</p><Spark seed={it.seed} color={it.color} /></div>
+          <div className="mt-3 flex items-end justify-between gap-2"><p className="metric-numbers whitespace-nowrap text-2xl 2xl:text-3xl">{it.value}</p><Spark seed={it.seed} color={it.color} /></div>
           <div className="mt-2">{it.pill}</div>
           <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4">
             {it.subs.map(([a, b]) => <div key={a}><dt className="text-[11px] text-muted-foreground">{a}</dt><dd className="metric-numbers mt-0.5 text-sm">{b}</dd></div>)}
