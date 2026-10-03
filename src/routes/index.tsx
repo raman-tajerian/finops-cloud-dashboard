@@ -29,18 +29,18 @@ function Index() {
   };
   return (
     <Shell range={range} onRange={setRange} onScan={scan} scanning={scanning}>
+      <AlertBanner />
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Overview</h1>
         <p className="mt-1 text-sm text-muted-foreground">Multi-cloud spend and health across AWS & Azure</p>
       </div>
-      <AlertBanner />
       <KpiCards />
-      <section className="grid gap-4 lg:grid-cols-3">
+      <section className="space-y-10">
         <CostTrend data={costTrends[range]} />
         <Allocation />
       </section>
       <ResourceTable />
-      <Toaster theme="dark" />
+      <Toaster theme="light" />
     </Shell>
   );
 }

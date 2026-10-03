@@ -29,7 +29,7 @@ export function Shell({
   return (
     <div className="flex min-h-screen">
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-border bg-background/80 backdrop-blur-xl transition-transform lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-border bg-card transition-transform lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="flex h-16 items-center gap-2.5 px-6">
           <div className="grid size-8 place-items-center rounded-lg btn-glow"><Cloud className="size-4" /></div>
@@ -44,16 +44,16 @@ export function Shell({
             </a>
           ))}
         </nav>
-        <div className="absolute inset-x-3 bottom-4 glass p-4 text-xs text-muted-foreground">
+        <div className="absolute inset-x-3 bottom-4 rounded-xl bg-muted p-4 text-xs text-muted-foreground">
           <p className="font-medium text-foreground">Q4 budget</p>
           <p className="mt-1">$248.7k of $300k used</p>
-          <div className="mt-3 h-1.5 rounded-full bg-muted"><div className="h-full w-[83%] rounded-full bg-gradient-to-r from-primary to-teal" /></div>
+          <div className="mt-3 h-1.5 rounded-full bg-muted"><div className="h-full w-[83%] rounded-full bg-primary" /></div>
         </div>
       </aside>
       {open && <div className="fixed inset-0 z-30 bg-background/60 lg:hidden" onClick={() => setOpen(false)} />}
 
       <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-background/70 px-4 backdrop-blur-xl md:px-8">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-md md:px-12">
           <button className="lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu"><Menu className="size-5" /></button>
           <div className="hidden items-center gap-2 md:flex">
             <StatusBadge label="AWS: Healthy" />
@@ -75,10 +75,10 @@ export function Shell({
               <Radar className={`size-4 ${scanning ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">{scanning ? "Scanning…" : "Run Full Scan"}</span>
             </button>
-            <div className="grid size-8 place-items-center rounded-full bg-gradient-to-br from-primary to-teal text-xs font-semibold text-primary-foreground">RT</div>
+            <div className="grid size-8 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">RT</div>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[1400px] flex-1 space-y-6 p-4 md:p-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1400px] flex-1 space-y-10 p-5 md:p-12">{children}</main>
       </div>
     </div>
   );

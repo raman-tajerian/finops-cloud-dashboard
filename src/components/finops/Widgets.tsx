@@ -17,18 +17,18 @@ const Label = ({ children }: { children: React.ReactNode }) => (
 export function AlertBanner() {
   const [open, setOpen] = useState(true);
   return (
-    <section className="glass overflow-hidden">
-      <button onClick={() => setOpen(!open)} className="flex w-full items-center gap-3 px-5 py-3.5 text-left">
-        <ShieldAlert className="size-4 text-destructive" />
+    <section className="overflow-hidden rounded-xl bg-accent ring-1 ring-primary/15">
+      <button onClick={() => setOpen(!open)} className="flex w-full items-center gap-2.5 px-6 py-3 text-left">
+        <ShieldAlert className="size-3.5 text-primary" />
         <span className="text-sm font-medium">Security & compliance</span>
         <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs text-destructive">{alerts.length} findings</span>
         <ChevronDown className={`ml-auto size-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <div className="grid gap-px border-t border-border bg-border md:grid-cols-3">
+        <div className="grid gap-6 border-t border-primary/10 px-6 py-5 md:grid-cols-3">
           {alerts.map((a) => (
-            <div key={a.id} className="flex gap-3 bg-background/80 px-5 py-4">
-              <AlertTriangle className={`mt-0.5 size-4 shrink-0 ${a.severity === "critical" ? "text-destructive" : "text-warning"}`} />
+            <div key={a.id} className="flex gap-2.5">
+              <AlertTriangle className={`mt-1 size-3.5 shrink-0 ${a.severity === "critical" ? "text-destructive" : "text-warning"}`} />
               <div>
                 <p className="text-sm font-medium">{a.title}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">{a.detail}</p>
@@ -51,7 +51,7 @@ function Ring({ value }: { value: number }) {
       <circle cx="42" cy="42" r={r} fill="none" stroke="var(--muted)" strokeWidth="7" />
       <circle cx="42" cy="42" r={r} fill="none" stroke="url(#ring)" strokeWidth="7" strokeLinecap="round"
         strokeDasharray={c} strokeDashoffset={c * (1 - value / 100)}
-        style={{ filter: "drop-shadow(0 0 6px var(--teal))", transition: "stroke-dashoffset 1s" }} />
+        style={{ transition: "stroke-dashoffset 1s" }} />
     </svg>
   );
 }
@@ -59,15 +59,15 @@ function Ring({ value }: { value: number }) {
 export function KpiCards() {
   const total = kpis.resources.vms + kpis.resources.containers + kpis.resources.databases;
   return (
-    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <div className="glass glass-hover p-5">
+    <section className="glass grid overflow-hidden sm:grid-cols-2 xl:grid-cols-4 xl:divide-x divide-border">
+      <div className="glass-hover p-8">
         <Label>Monthly cloud spend</Label>
         <p className="mt-3 font-mono text-3xl font-semibold tracking-tight">{fmtUSD(kpis.monthlySpend)}</p>
         <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary">
           <TrendingUp className="size-3" /> +{kpis.spendTrend}% vs last month
         </span>
       </div>
-      <div className="glass glass-hover p-5">
+      <div className="glass-hover p-8">
         <div className="flex items-center justify-between"><Label>Active resources</Label><Boxes className="size-4 text-teal" /></div>
         <p className="mt-3 font-mono text-3xl font-semibold tracking-tight">{total.toLocaleString()}</p>
         <div className="mt-3 flex gap-4 text-xs text-muted-foreground">
@@ -76,7 +76,7 @@ export function KpiCards() {
           <span><b className="text-foreground">{kpis.resources.databases}</b> DBs</span>
         </div>
       </div>
-      <div className="glass glass-hover flex items-center gap-4 p-5">
+      <div className="glass-hover flex items-center gap-5 p-8">
         <div className="relative">
           <Ring value={kpis.finopsScore} />
           <span className="absolute inset-0 grid place-items-center font-mono text-xl font-semibold">{kpis.finopsScore}</span>
@@ -87,7 +87,7 @@ export function KpiCards() {
           <p className="mt-1 text-xs text-muted-foreground">Top 12% of peers</p>
         </div>
       </div>
-      <div className="glass glass-hover p-5">
+      <div className="glass-hover p-8">
         <div className="flex items-center justify-between"><Label>Potential savings</Label><Sparkles className="size-4 text-teal" /></div>
         <p className="mt-3 font-mono text-3xl font-semibold tracking-tight text-teal">{fmtUSD(kpis.potentialSavings)}<span className="text-sm text-muted-foreground">/mo</span></p>
         <button onClick={() => toast.success("Auto-optimize queued for 14 recommendations")}
@@ -103,7 +103,7 @@ const tooltipStyle = {
 
 export function CostTrend({ data }: { data: CostPoint[] }) {
   return (
-    <div className="glass p-5 lg:col-span-2">
+    <div className="glass p-8 md:p-10">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div><Label>Cost trends</Label><p className="mt-1 text-sm text-muted-foreground">AWS vs Azure spend</p></div>
         <div className="flex gap-4 text-xs text-muted-foreground">
@@ -111,7 +111,7 @@ export function CostTrend({ data }: { data: CostPoint[] }) {
           <span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-azure" />Azure</span>
         </div>
       </div>
-      <div className="mt-4 h-72">
+      <div className="mt-8 h-96">
         <ResponsiveContainer>
           <AreaChart data={data} margin={{ left: -10, right: 4 }}>
             <defs>
@@ -135,12 +135,12 @@ export function CostTrend({ data }: { data: CostPoint[] }) {
 export function Allocation() {
   const total = allocation.reduce((s, a) => s + a.value, 0);
   return (
-    <div className="glass p-5">
-      <Label>Allocation by service</Label>
-      <div className="relative mt-2 h-48">
+    <div className="glass grid items-center gap-10 p-8 md:grid-cols-2 md:p-10">
+      <div><Label>Allocation by service</Label>
+      <div className="relative mt-6 h-72">
         <ResponsiveContainer>
           <PieChart>
-            <Pie data={allocation} dataKey="value" innerRadius={58} outerRadius={80} paddingAngle={3} stroke="none">
+            <Pie data={allocation} dataKey="value" innerRadius={90} outerRadius={125} paddingAngle={3} stroke="none">
               {allocation.map((a) => <Cell key={a.name} fill={a.color} />)}
             </Pie>
             <Tooltip contentStyle={tooltipStyle} formatter={(v) => fmtUSD(Number(v))} />
@@ -150,12 +150,14 @@ export function Allocation() {
           <div><p className="font-mono text-lg font-semibold">{fmtUSD(total)}</p><p className="text-xs text-muted-foreground">this month</p></div>
         </div>
       </div>
-      <ul className="mt-3 space-y-2.5">
+      </div>
+      <ul className="space-y-5">
         {allocation.map((a) => (
-          <li key={a.name} className="flex items-center gap-2 text-sm">
+          <li key={a.name} className="flex items-center gap-3 border-b border-border pb-5 text-sm last:border-0">
             <i className="size-2 rounded-full" style={{ background: a.color }} />
             <span className="text-muted-foreground">{a.name}</span>
-            <span className="ml-auto font-mono">{Math.round((a.value / total) * 100)}%</span>
+            <span className="ml-auto font-mono text-muted-foreground">{fmtUSD(a.value)}</span>
+            <span className="w-12 text-right font-mono font-semibold">{Math.round((a.value / total) * 100)}%</span>
           </li>
         ))}
       </ul>
@@ -164,9 +166,9 @@ export function Allocation() {
 }
 
 const statusStyle: Record<ResourceStatus, string> = {
-  Running: "bg-success/12 text-success",
+  Running: "bg-success/10 text-success",
   Idle: "bg-muted text-muted-foreground",
-  Warning: "bg-warning/12 text-warning",
+  Warning: "bg-warning/10 text-warning",
 };
 
 export function ResourceTable() {
@@ -181,7 +183,7 @@ export function ResourceTable() {
   const act = (a: string, n: string) => toast(`${a} → ${n}`);
   return (
     <section className="glass overflow-hidden">
-      <div className="flex flex-wrap items-center gap-3 p-5">
+      <div className="flex flex-wrap items-center gap-4 p-8">
         <div><Label>Resources</Label><p className="mt-1 text-sm text-muted-foreground">{rows.length} of {resources.length} shown</p></div>
         <div className="ml-auto flex w-full gap-2 sm:w-auto">
           <label className="flex flex-1 items-center gap-2 rounded-lg border border-input bg-secondary/50 px-3 py-1.5 sm:w-64">
@@ -198,30 +200,30 @@ export function ResourceTable() {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[820px] text-sm">
           <thead>
-            <tr className="border-y border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
+            <tr className="bg-muted text-left text-xs uppercase tracking-wider text-foreground">
               {["Resource", "Provider", "Type", "Region", "Cost/mo", "Status", ""].map((h) => (
-                <th key={h} className={`px-5 py-3 font-medium ${h === "Cost/mo" ? "text-right" : ""}`}>{h}</th>
+                <th key={h} className={`px-8 py-4 font-semibold ${h === "Cost/mo" ? "text-right" : ""}`}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.id} className="group border-b border-border/60 transition-colors hover:bg-accent/40">
-                <td className="px-5 py-3.5 font-mono text-[13px]">{r.name}</td>
-                <td className="px-5 py-3.5">
-                  <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ${r.provider === "AWS" ? "bg-aws/12 text-aws" : "bg-azure/12 text-azure"}`}>
+              <tr key={r.id} className="group transition-colors hover:bg-muted">
+                <td className="px-8 py-5 font-mono text-[13px]">{r.name}</td>
+                <td className="px-8 py-5">
+                  <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ${r.provider === "AWS" ? "bg-primary/10 text-primary" : "bg-success/10 text-success"}`}>
                     {r.provider}
                   </span>
                 </td>
-                <td className="px-5 py-3.5 text-muted-foreground">{r.type}</td>
-                <td className="px-5 py-3.5 text-muted-foreground">{r.region}</td>
-                <td className="px-5 py-3.5 text-right font-mono">{fmtUSD(r.monthlyCost)}</td>
-                <td className="px-5 py-3.5">
+                <td className="px-8 py-5 text-muted-foreground">{r.type}</td>
+                <td className="px-8 py-5 text-muted-foreground">{r.region}</td>
+                <td className="px-8 py-5 text-right font-mono">{fmtUSD(r.monthlyCost)}</td>
+                <td className="px-8 py-5">
                   <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs ${statusStyle[r.status]}`}>
                     <i className="size-1.5 rounded-full bg-current" />{r.status}
                   </span>
                 </td>
-                <td className="px-5 py-3.5">
+                <td className="px-8 py-5">
                   <div className="flex justify-end gap-1 opacity-60 transition-opacity group-hover:opacity-100">
                     {[{ i: Scale, l: "Scale" }, { i: Square, l: "Stop" }, { i: ScrollText, l: "View Logs" }].map(({ i: I, l }) => (
                       <button key={l} title={l} onClick={() => act(l, r.name)}
