@@ -35,12 +35,12 @@ function Index() {
       </div>
       <KpiCards />
       <section className="grid gap-5 xl:grid-cols-12">
-        <div className="xl:col-span-8"><CostTrend data={costTrends[range]} /></div>
-        <div className="xl:col-span-4"><BudgetForecast /></div>
-        <div className="xl:col-span-7"><InfrastructureStatus /></div>
-        <div className="xl:col-span-5"><SavingsWorkflow /></div>
-        <div className="xl:col-span-5"><Allocation /></div>
-        <div className="xl:col-span-7"><ResourceTable /></div>
+        <div className="min-w-0 xl:col-span-8"><CostTrend data={costTrends[range]} /></div>
+        <div className="min-w-0 xl:col-span-4"><BudgetForecast /></div>
+        <div className="min-w-0 xl:col-span-7"><InfrastructureStatus /></div>
+        <div className="min-w-0 xl:col-span-5"><SavingsWorkflow /></div>
+        <div className="min-w-0 xl:col-span-5"><Allocation /></div>
+        <div className="min-w-0 xl:col-span-7"><ResourceTable /></div>
       </section>
       <Toaster theme="dark" />
     </Shell>
