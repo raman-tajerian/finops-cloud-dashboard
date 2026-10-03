@@ -34,7 +34,7 @@ function Index() {
         <p className="max-w-sm text-sm leading-6 text-muted-foreground">Your cloud estate is healthy. Three opportunities need attention this week.</p>
       </div>
       <KpiCards />
-      <section className="grid gap-5 xl:grid-cols-12">
+      <section className="grid gap-6 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-8"><CostTrend data={costTrends[range]} /></div>
         <div className="min-w-0 xl:col-span-4"><BudgetForecast /></div>
         <div className="min-w-0 xl:col-span-7"><InfrastructureStatus /></div>
@@ -42,7 +42,7 @@ function Index() {
         <div className="min-w-0 xl:col-span-5"><Allocation /></div>
         <div className="min-w-0 xl:col-span-7"><ResourceTable /></div>
       </section>
-      <Toaster theme="dark" />
+      <Toaster theme="light" />
     </Shell>
   );
 }

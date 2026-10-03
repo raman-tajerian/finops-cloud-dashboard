@@ -27,9 +27,9 @@ function Ring({ value, tone = "success", size = 96 }: { value: number; tone?: "s
 export function KpiCards() {
   const total = kpis.resources.vms + kpis.resources.containers + kpis.resources.databases;
   return (
-    <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
       <article className="organic-card subtle-lift p-6 sm:col-span-2">
-        <div className="flex items-start justify-between"><Label>Monthly cloud spend</Label><span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-1 text-xs text-warning"><ArrowUpRight className="size-3" />{kpis.spendTrend}%</span></div>
+        <div className="flex items-start justify-between"><Label>Monthly cloud spend</Label><span className="inline-flex items-center gap-1 rounded-full bg-warning-soft px-2 py-1 text-xs text-warning"><ArrowUpRight className="size-3" />{kpis.spendTrend}%</span></div>
         <p className="metric-numbers mt-7 text-4xl font-medium sm:text-5xl">{fmtUSD(kpis.monthlySpend)}</p>
         <div className="mt-7 flex items-center gap-3 text-xs text-muted-foreground"><span className="size-2 rounded-full bg-success" />$51,270 remaining in Q4</div>
       </article>
@@ -76,7 +76,7 @@ export function BudgetForecast() {
   const percentage = Math.min(100, Math.round((forecast / budget) * 100));
   return (
     <article className="organic-card flex h-full min-h-[410px] flex-col p-6 md:p-8">
-      <div className="flex items-start justify-between"><div><Label>Budget & forecast</Label><h2 className="mt-2 text-xl font-medium">Q4 trajectory</h2></div><span className={`rounded-full px-2 py-1 text-xs ${percentage > 95 ? "bg-warning/10 text-warning" : "bg-success/10 text-success"}`}>{percentage}% projected</span></div>
+      <div className="flex items-start justify-between"><div><Label>Budget & forecast</Label><h2 className="mt-2 text-xl font-medium">Q4 trajectory</h2></div><span className={`rounded-full px-2 py-1 text-xs ${percentage > 95 ? "bg-warning-soft text-warning" : "bg-success-soft text-success"}`}>{percentage}% projected</span></div>
       <div className="mt-8 flex justify-center"><Ring value={percentage} tone={percentage > 95 ? "warning" : "success"} size={154} /></div>
       <div className="mt-6 grid grid-cols-2 gap-4 border-t border-border pt-5"><div><Label>Forecast</Label><p className="metric-numbers mt-2 text-xl font-medium">${forecast}k</p></div><div><Label>Budget</Label><p className="metric-numbers mt-2 text-xl font-medium">${budget}k</p></div></div>
       <div className="mt-auto pt-6"><div className="mb-3 flex justify-between text-xs text-muted-foreground"><span>Adjust scenario</span><span className="metric-numbers">${budget}k</span></div><Slider value={[budget]} min={260} max={360} step={5} onValueChange={(value) => setBudget(value[0] ?? 300)} aria-label="Quarterly budget" /></div>
@@ -100,7 +100,7 @@ export function InfrastructureStatus() {
   }, []);
   return (
     <article id="infrastructure" className="organic-card p-6 md:p-8">
-      <div className="flex flex-wrap items-start justify-between gap-4"><div><Label>Live infrastructure</Label><h2 className="mt-2 text-xl font-medium">Kubernetes health</h2></div><span className="inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-1.5 text-xs text-success"><span className="pulse-dot size-1.5 rounded-full bg-success" />Live · {tick + 1}s</span></div>
+      <div className="flex flex-wrap items-start justify-between gap-4"><div><Label>Live infrastructure</Label><h2 className="mt-2 text-xl font-medium">Kubernetes health</h2></div><span className="inline-flex items-center gap-2 rounded-full bg-success-soft px-3 py-1.5 text-xs text-success"><span className="pulse-dot size-1.5 rounded-full bg-success" />Live · {tick + 1}s</span></div>
       <div className="mt-7 grid gap-6 md:grid-cols-[1fr_1fr_1.3fr]">
         <div className="flex items-center gap-4 rounded-2xl bg-secondary p-4"><Ring value={cpu} size={78} /><div><Cpu className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">CPU utilization</p><p className="text-xs text-muted-foreground">Across 42 nodes</p></div></div>
         <div className="flex items-center gap-4 rounded-2xl bg-secondary p-4"><Ring value={memory} tone="warning" size={78} /><div><MemoryStick className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">Memory</p><p className="text-xs text-muted-foreground">9.8 TB allocated</p></div></div>
@@ -123,7 +123,7 @@ export function SavingsWorkflow() {
   return (
     <article id="savings" className="organic-card h-full p-6 md:p-8">
       <div className="flex items-start justify-between"><div><Label>Savings workflow</Label><h2 className="mt-2 text-xl font-medium">{fmtUSD(pending.reduce((sum, item) => sum + item.amount, 0))} ready</h2></div><Sparkles className="size-5 text-primary" /></div>
-      <div className="mt-6 space-y-3">{savingItems.map((item) => { const complete = done.includes(item.id); return <div key={item.id} className={`rounded-2xl border p-4 transition-colors ${complete ? "border-success/20 bg-success/5" : "border-border bg-secondary"}`}><div className="flex gap-3"><div className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full ${complete ? "bg-success text-primary-foreground" : "bg-card text-muted-foreground"}`}>{complete ? <Check className="size-3.5" /> : <CircleAlert className="size-3.5" />}</div><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-3"><p className={`text-sm font-medium ${complete ? "text-muted-foreground line-through" : ""}`}>{item.title}</p><span className="metric-numbers text-sm font-medium text-primary">{fmtUSD(item.amount)}</span></div><p className="mt-1 text-xs text-muted-foreground">{item.detail}</p>{!complete && <Button variant="ghost" size="sm" className="mt-2 h-7 px-0 text-xs text-foreground hover:bg-transparent" onClick={() => { setDone((current) => [...current, item.id]); toast.success(`${item.title} marked complete`); }}>Mark complete <ArrowDownRight /></Button>}</div></div></div>; })}</div>
+      <div className="mt-6 space-y-3">{savingItems.map((item) => { const complete = done.includes(item.id); return <div key={item.id} className={`rounded-2xl border p-4 transition-colors ${complete ? "border-success/20 bg-success-soft" : "border-border bg-secondary"}`}><div className="flex gap-3"><div className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full ${complete ? "bg-success text-primary-foreground" : "bg-card text-muted-foreground"}`}>{complete ? <Check className="size-3.5" /> : <CircleAlert className="size-3.5" />}</div><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-3"><p className={`text-sm font-medium ${complete ? "text-muted-foreground line-through" : ""}`}>{item.title}</p><span className="metric-numbers text-sm font-medium text-primary">{fmtUSD(item.amount)}</span></div><p className="mt-1 text-xs text-muted-foreground">{item.detail}</p>{!complete && <Button variant="ghost" size="sm" className="mt-2 h-7 px-0 text-xs text-foreground hover:bg-transparent" onClick={() => { setDone((current) => [...current, item.id]); toast.success(`${item.title} marked complete`); }}>Mark complete <ArrowDownRight /></Button>}</div></div></div>; })}</div>
       {done.length > 0 && <Button variant="outline" className="mt-4 w-full rounded-xl" onClick={() => setDone([])}>Reset workflow</Button>}
     </article>
   );
@@ -136,7 +136,7 @@ export function Allocation() {
   );
 }
 
-const statusStyle: Record<ResourceStatus, string> = { Running: "bg-success/10 text-success", Idle: "bg-muted text-muted-foreground", Warning: "bg-warning/10 text-warning" };
+const statusStyle: Record<ResourceStatus, string> = { Running: "bg-success-soft text-success", Idle: "bg-muted text-muted-foreground", Warning: "bg-warning-soft text-warning" };
 
 export function ResourceTable() {
   const [query, setQuery] = useState("");
