@@ -122,7 +122,7 @@ export function CostTrend({ data }: { data: CostPoint[] }) {
             <XAxis dataKey="label" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={20} />
             <YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false}
               tickFormatter={(v) => (v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${v}`)} />
-            <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => fmtUSD(v)} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v) => fmtUSD(Number(v))} />
             <Area type="monotone" dataKey="aws" name="AWS" stroke="var(--aws)" strokeWidth={2} fill="url(#gAws)" />
             <Area type="monotone" dataKey="azure" name="Azure" stroke="var(--azure)" strokeWidth={2} fill="url(#gAz)" />
           </AreaChart>
@@ -143,7 +143,7 @@ export function Allocation() {
             <Pie data={allocation} dataKey="value" innerRadius={58} outerRadius={80} paddingAngle={3} stroke="none">
               {allocation.map((a) => <Cell key={a.name} fill={a.color} />)}
             </Pie>
-            <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => fmtUSD(v)} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v) => fmtUSD(Number(v))} />
           </PieChart>
         </ResponsiveContainer>
         <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
