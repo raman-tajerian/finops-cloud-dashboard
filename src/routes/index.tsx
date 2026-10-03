@@ -1,24 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
+import { Shell } from "@/components/finops/Shell";
+import { AlertBanner, Allocation, CostTrend, KpiCards, ResourceTable } from "@/components/finops/Widgets";
+import { costTrends, type TimeRange } from "@/lib/finops-data";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "NimbusOps — Multi-Cloud FinOps Dashboard" },
+      { name: "description", content: "Track AWS and Azure spend, resources, savings and security in one dashboard." },
+      { property: "og:title", content: "NimbusOps — Multi-Cloud FinOps Dashboard" },
+      { property: "og:description", content: "Track AWS and Azure spend, resources, savings and security in one dashboard." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
+  const [range, setRange] = useState<TimeRange>("30d");
+  const [scanning, setScanning] = useState(false);
+  const scan = () => {
+    setScanning(true);
+    setTimeout(() => { setScanning(false); toast.success("Scan complete — 1,872 resources checked"); }, 2200);
+  };
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <Shell range={range} onRange={setRange} onScan={scan} scanning={scanning}>
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Multi-cloud spend and health across AWS & Azure</p>
+      </div>
+      <AlertBanner />
+      <KpiCards />
+      <section className="grid gap-4 lg:grid-cols-3">
+        <CostTrend data={costTrends[range]} />
+        <Allocation />
+      </section>
+      <ResourceTable />
+      <Toaster theme="dark" />
+    </Shell>
   );
 }
