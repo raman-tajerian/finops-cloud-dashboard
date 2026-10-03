@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { AlertTriangle, BellPlus, Bot, ChevronRight, Download, EyeOff, FileJson, FileSpreadsheet, FileText, Trash2, UserPlus, Wand2 } from "lucide-react";
+import { AlertTriangle, BellPlus, Bot, ChevronRight, Download, EyeOff, FileJson, FileSpreadsheet, FileText, UserPlus, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { fmtUSD } from "@/lib/finops-data";
 import { byRegion, byService, cluster, dailySpend, envShare, platformKpis, providerShare, rangeLabels, recommendations, spark, tickerSeed, type CloudId, type Env, type PlatformRange } from "@/lib/finops-platform-data";
@@ -281,7 +281,7 @@ export function AnomalyStrip({ onOpen }: { onOpen: (d: Detail) => void }) {
     <button onClick={() => onOpen({ title: a.title, description: "Anomaly detected against 30-day baseline.", rows: [["Change", `+${a.change}%`], ["Est. monthly impact", fmtUSD(a.impact)], ["Detected", a.since], ["Suggested action", "Enable CDN caching for media container"]] })} className="flex w-full items-center gap-3 rounded-2xl bg-destructive-soft px-4 py-2.5 text-left text-sm">
       <AlertTriangle className="size-4 shrink-0 text-destructive" />
       <span className="flex-1"><span className="font-medium text-destructive">Anomaly:</span> <span className="text-foreground">Unexpected +{a.change}% spike in Azure Blob Storage egress fees</span></span>
-      <Trash2 className="hidden" /><ChevronRight className="size-4 text-muted-foreground" />
+      <ChevronRight className="size-4 text-muted-foreground" />
     </button>
   );
 }
