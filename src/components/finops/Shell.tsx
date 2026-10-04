@@ -30,14 +30,14 @@ export function Shell({ children, range, onRange, onScan, scanning }: {
         </div>
         <nav className="mt-9 space-y-1">
           {nav.map(({ icon: Icon, label, active }) => (
-            <a key={label} href={`#${label.toLowerCase().replace(" ", "-")}`} className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
-              <Icon className={`size-4 ${active ? "text-primary" : ""}`} />{label}
+            <a key={label} href={`#${label.toLowerCase().replace(" ", "-")}`} className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-[transform,background-color,color] duration-200 hover:translate-x-0.5 ${active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}>
+              <Icon className={`size-4 transition-transform duration-200 group-hover:scale-110 ${active ? "text-primary" : ""}`} />{label}
             </a>
           ))}
         </nav>
         <div className="mt-auto rounded-2xl border border-border bg-secondary p-4">
           <div className="flex items-center justify-between text-xs"><span className="text-muted-foreground">Q4 budget</span><span className="metric-numbers font-medium">83%</span></div>
-          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full w-[83%] rounded-full bg-warning" /></div>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="progress-reveal h-full w-[83%] rounded-full bg-warning" /></div>
           <p className="metric-numbers mt-3 text-xs text-muted-foreground">$248.7k of $300k</p>
         </div>
       </aside>

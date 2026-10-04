@@ -33,13 +33,13 @@ function Index() {
   };
   return (
     <Shell range={range} onRange={setRange} onScan={scan} scanning={scanning}>
-      <AnomalyStrip onOpen={setDetail} />
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="reveal-up"><AnomalyStrip onOpen={setDetail} /></div>
+      <div className="reveal-up reveal-delay-1 flex flex-wrap items-end justify-between gap-4">
         <div><p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Cloud & FinOps platform · 1,872 resources</p><h1 className="mt-1 text-3xl font-semibold tracking-tight md:text-4xl">Good afternoon, Raman.</h1></div>
       </div>
-      <FilterBar filters={filters} onChange={setFilters} />
-      <DenseKpis scale={scale} onOpen={setDetail} />
-      <section className="grid gap-4 xl:grid-cols-12">
+      <div className="reveal-up reveal-delay-2"><FilterBar filters={filters} onChange={setFilters} /></div>
+      <div className="reveal-up reveal-delay-3"><DenseKpis scale={scale} onOpen={setDetail} /></div>
+      <section className="reveal-up reveal-delay-4 grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-8"><CostDistribution scale={scale} providers={filters.providers} /></div>
         <div className="min-w-0 xl:col-span-4"><K8sHealth onOpen={setDetail} /></div>
         <div className="min-w-0 xl:col-span-8"><SavingsFeed /></div>
