@@ -6,6 +6,7 @@ import { Shell } from "@/components/finops/Shell";
 import { BudgetForecast, ResourceTable } from "@/components/finops/Widgets";
 import { AnomalyStrip, CostDistribution, DenseKpis, DetailDrawer, FilterBar, K8sHealth, SavingsFeed, scaleOf, type Detail, type Filters } from "@/components/finops/Platform";
 import { AnomalyForecast, GreenOps, Tilt, Topology3D, WhatIfSimulator } from "@/components/finops/Insights";
+import { AnomalyAnalyst } from "@/components/finops/AnomalyAnalyst";
 import type { TimeRange } from "@/lib/finops-data";
 
 export const Route = createFileRoute("/")({
@@ -47,6 +48,7 @@ function Index() {
         <div className="min-w-0 xl:col-span-5"><Tilt><GreenOps scale={scale} /></Tilt></div>
         <div className="min-w-0 xl:col-span-7"><Tilt><AnomalyForecast scale={scale} /></Tilt></div>
         <div className="min-w-0 xl:col-span-5"><Tilt><WhatIfSimulator /></Tilt></div>
+        <div className="min-w-0 xl:col-span-12"><AnomalyAnalyst /></div>
         <div className="min-w-0 xl:col-span-8"><SavingsFeed /></div>
         <div className="min-w-0 xl:col-span-4"><BudgetForecast /></div>
         <div className="min-w-0 xl:col-span-12"><ResourceTable /></div>
