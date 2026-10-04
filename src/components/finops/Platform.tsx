@@ -48,9 +48,9 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
         <SelectContent>{(Object.keys(rangeLabels) as PlatformRange[]).map((r) => <SelectItem key={r} value={r}>{rangeLabels[r]}</SelectItem>)}</SelectContent>
       </Select>
       <div className="flex items-center gap-1 rounded-xl bg-secondary p-1">
-        <button onClick={() => onChange({ ...filters, providers: all })} className={`rounded-lg px-2.5 py-1 text-xs ${multi ? "bg-accent text-foreground" : "text-muted-foreground"}`}>Multi-Cloud</button>
+          <button onClick={() => onChange({ ...filters, providers: all })} className={`rounded-lg px-2.5 py-1 text-xs transition-[transform,background-color,color] duration-200 active:scale-95 ${multi ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"}`}>Multi-Cloud</button>
         {all.map((p) => (
-          <button key={p} onClick={() => toggle(p)} aria-pressed={filters.providers.includes(p)} className={`rounded-lg px-2.5 py-1 text-xs ${filters.providers.includes(p) && !multi ? "bg-accent text-foreground" : filters.providers.includes(p) ? "text-foreground" : "text-muted-foreground/60 line-through"}`}>{p}</button>
+          <button key={p} onClick={() => toggle(p)} aria-pressed={filters.providers.includes(p)} className={`rounded-lg px-2.5 py-1 text-xs transition-[transform,background-color,color] duration-200 active:scale-95 ${filters.providers.includes(p) && !multi ? "bg-accent text-foreground" : filters.providers.includes(p) ? "text-foreground hover:bg-accent/50" : "text-muted-foreground/60 line-through hover:text-muted-foreground"}`}>{p}</button>
         ))}
       </div>
       <Select value={filters.env} onValueChange={(v) => onChange({ ...filters, env: v as Env | "All" })}>
@@ -115,7 +115,7 @@ export function DetailDrawer({ detail, onClose }: { detail: Detail; onClose: () 
 
 function Spark({ seed, color }: { seed: number; color: string }) {
   const data = useMemo(() => spark(seed), [seed]);
-  return <div className="h-10 w-24"><ResponsiveContainer><LineChart data={data}><Line dataKey="v" stroke={color} strokeWidth={1.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer></div>;
+  return <div className="h-10 w-24"><ResponsiveContainer><LineChart data={data}><Line dataKey="v" stroke={color} strokeWidth={1.5} dot={false} animationDuration={700} animationEasing="ease-out" /></LineChart></ResponsiveContainer></div>;
 }
 
 /* ---------- KPI cards ---------- */
@@ -166,33 +166,33 @@ export function CostDistribution({ scale, providers }: { scale: number; provider
         <div><Label>Cost distribution</Label><p className="metric-numbers mt-1 text-2xl">{fmtUSD(total)}</p></div>
         <div className="flex rounded-xl bg-secondary p-1">
           {([["service", "By service"], ["region", "By region"], ["daily", "Daily trend"]] as [View, string][]).map(([v, l]) => (
-            <button key={v} onClick={() => setView(v)} className={`rounded-lg px-3 py-1 text-xs ${view === v ? "bg-accent text-foreground" : "text-muted-foreground"}`}>{l}</button>
+             <button key={v} onClick={() => setView(v)} className={`rounded-lg px-3 py-1 text-xs transition-[transform,background-color,color] duration-200 active:scale-95 ${view === v ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"}`}>{l}</button>
           ))}
         </div>
       </div>
       <div className="mt-6 h-80">
         {view === "service" && (
-          <div className="grid h-full gap-6 md:grid-cols-[1fr_220px]">
+          <div key="service" className="animate-in fade-in zoom-in-95 grid h-full gap-6 duration-300 md:grid-cols-[1fr_220px]">
             <ResponsiveContainer><PieChart><Pie data={services} dataKey="value" nameKey="name" innerRadius="62%" outerRadius="90%" paddingAngle={2} stroke="none">{services.map((_, i) => <Cell key={i} fill={chartColors[i] ?? "var(--chart-4)"} />)}</Pie><Tooltip contentStyle={tip} formatter={(v) => [`${fmtUSD(Number(v))} · ${pct(Number(v))}`, "Cost"]} /></PieChart></ResponsiveContainer>
             <ul className="hidden flex-col justify-center gap-3 md:flex">{services.map((s, i) => <li key={s.name} className="flex items-center gap-2 text-sm"><span className="size-2 rounded-full" style={{ background: chartColors[i] }} /><span className="flex-1 text-muted-foreground">{s.name}</span><span className="metric-numbers">{pct(s.value)}</span></li>)}</ul>
           </div>
         )}
         {view === "region" && (
-          <ResponsiveContainer><BarChart data={byRegion.map((r) => ({ region: r.region, AWS: r.AWS * scale, Azure: r.Azure * scale, GCP: r.GCP * scale }))}>
+          <div key="region" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><BarChart data={byRegion.map((r) => ({ region: r.region, AWS: r.AWS * scale, Azure: r.Azure * scale, GCP: r.GCP * scale }))}>
             <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="region" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${Math.round(Number(v) / 1000)}k`} />
             <Tooltip contentStyle={tip} cursor={{ fill: "var(--secondary)" }} formatter={(v, n) => [fmtUSD(Number(v)), String(n)]} />
             {providers.includes("AWS") && <Bar dataKey="AWS" stackId="a" fill="var(--aws)" />}
             {providers.includes("Azure") && <Bar dataKey="Azure" stackId="a" fill="var(--azure)" />}
             {providers.includes("GCP") && <Bar dataKey="GCP" stackId="a" fill="var(--gcp)" radius={[6, 6, 0, 0]} />}
-          </BarChart></ResponsiveContainer>
+          </BarChart></ResponsiveContainer></div>
         )}
         {view === "daily" && (
-          <ResponsiveContainer><AreaChart data={daily}>
+          <div key="daily" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><AreaChart data={daily}>
             <defs><linearGradient id="dg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="var(--chart-1)" stopOpacity={0.35} /><stop offset="1" stopColor="var(--chart-1)" stopOpacity={0} /></linearGradient></defs>
             <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="day" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} interval={4} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(Number(v) / 1000).toFixed(1)}k`} />
             <Tooltip contentStyle={tip} formatter={(v) => [fmtUSD(Number(v)), "Spend"]} />
             <Area dataKey="spend" stroke="var(--chart-1)" strokeWidth={2} fill="url(#dg)" />
-          </AreaChart></ResponsiveContainer>
+          </AreaChart></ResponsiveContainer></div>
         )}
       </div>
     </article>
@@ -213,12 +213,12 @@ export function SavingsFeed() {
         <div><Label>Optimization recommendations</Label><p className="mt-1 text-sm text-muted-foreground">Executing all open actions saves <span className="metric-numbers text-foreground">{fmtUSD(pending)}/month</span></p></div>
         <div className="text-right"><Label>Realized</Label><p className="metric-numbers mt-1 text-xl text-success">{fmtUSD(realized)}</p></div>
       </div>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-success transition-all" style={{ width: `${(realized / 18_400) * 100}%` }} /></div>
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="progress-reveal h-full rounded-full bg-success transition-all duration-700" style={{ width: `${(realized / 18_400) * 100}%` }} /></div>
       <ul className="mt-5 divide-y divide-border">
         {recommendations.map((r) => {
           const st = state[r.id] ?? "open";
           return (
-            <li key={r.id} className={`flex flex-col gap-3 py-4 lg:flex-row lg:items-center ${st === "ignored" ? "opacity-40" : ""}`}>
+             <li key={r.id} className={`flex flex-col gap-3 py-4 transition-[opacity,transform] duration-300 lg:flex-row lg:items-center ${st === "ignored" ? "translate-x-1 opacity-40" : ""}`}>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-medium">{r.title}</p><Pill tone={r.impact === "High Impact" ? "warning" : "success"}>{r.impact}</Pill>{st === "assigned" && <Pill tone="muted">Assigned · {r.team}</Pill>}{st === "done" && <Pill tone="success">Remediated</Pill>}</div>
                 <p className="mt-1 text-xs text-muted-foreground">{r.detail} · <span className="metric-numbers">{fmtUSD(r.savings)}/mo</span></p>
@@ -262,13 +262,13 @@ export function K8sHealth({ onOpen }: { onOpen: (d: Detail) => void }) {
       <div className="mt-6 space-y-4">
         {bars.map(([l, v, c, t]) => (
           <div key={l}><div className="flex justify-between text-xs"><span className="text-muted-foreground">{l}</span><span className="metric-numbers">{t}</span></div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full transition-all duration-700" style={{ width: `${v}%`, background: c }} /></div></div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div className="progress-reveal h-full rounded-full transition-all duration-700" style={{ width: `${v}%`, background: c }} /></div></div>
         ))}
       </div>
       <div className="mt-6 border-t border-border pt-4">
         <div className="flex items-center gap-2"><Bot className="size-3.5 text-muted-foreground" /><Label>Live automation</Label></div>
         <ul className="mt-3 space-y-2.5">
-          {ticker.map((x, i) => <li key={`${x.t}-${i}-${x.ago}`} className="flex justify-between gap-3 text-xs"><span className={i === 0 ? "text-foreground" : "text-muted-foreground"}>{x.t}</span><span className="metric-numbers shrink-0 text-muted-foreground">{x.ago === 0 ? "now" : `${x.ago}m ago`}</span></li>)}
+          {ticker.map((x, i) => <li key={`${x.t}-${i}-${x.ago}`} className={`flex justify-between gap-3 text-xs ${i === 0 ? "animate-in fade-in slide-in-from-top-1 duration-300" : ""}`}><span className={i === 0 ? "text-foreground" : "text-muted-foreground"}>{x.t}</span><span className="metric-numbers shrink-0 text-muted-foreground">{x.ago === 0 ? "now" : `${x.ago}m ago`}</span></li>)}
         </ul>
       </div>
     </article>
@@ -278,10 +278,10 @@ export function K8sHealth({ onOpen }: { onOpen: (d: Detail) => void }) {
 export function AnomalyStrip({ onOpen }: { onOpen: (d: Detail) => void }) {
   const a = platformKpis.anomalies[0]!;
   return (
-    <button onClick={() => onOpen({ title: a.title, description: "Anomaly detected against 30-day baseline.", rows: [["Change", `+${a.change}%`], ["Est. monthly impact", fmtUSD(a.impact)], ["Detected", a.since], ["Suggested action", "Enable CDN caching for media container"]] })} className="flex w-full items-center gap-3 rounded-2xl bg-destructive-soft px-4 py-2.5 text-left text-sm">
+    <button onClick={() => onOpen({ title: a.title, description: "Anomaly detected against 30-day baseline.", rows: [["Change", `+${a.change}%`], ["Est. monthly impact", fmtUSD(a.impact)], ["Detected", a.since], ["Suggested action", "Enable CDN caching for media container"]] })} className="group flex w-full items-center gap-3 rounded-2xl bg-destructive-soft px-4 py-2.5 text-left text-sm transition-[transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-destructive-soft/80 active:scale-[0.99]">
       <AlertTriangle className="size-4 shrink-0 text-destructive" />
       <span className="flex-1"><span className="font-medium text-destructive">Anomaly:</span> <span className="text-foreground">Unexpected +{a.change}% spike in Azure Blob Storage egress fees</span></span>
-      <ChevronRight className="size-4 text-muted-foreground" />
+      <ChevronRight className="size-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1" />
     </button>
   );
 }

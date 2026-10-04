@@ -102,6 +102,11 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-card);
+  transition: transform 220ms cubic-bezier(.2,.8,.2,1), border-color 180ms ease, background-color 180ms ease;
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--input);
+  }
 }
 
 @utility metric-numbers {
@@ -111,8 +116,29 @@
 }
 
 @utility subtle-lift {
-  transition: border-color 180ms ease;
-  &:hover { border-color: var(--input); }
+  transition: transform 220ms cubic-bezier(.2,.8,.2,1), border-color 180ms ease, background-color 180ms ease;
+  &:hover { transform: translateY(-2px); border-color: var(--input); }
+  &:active { transform: scale(.985); }
+}
+
+@utility reveal-up {
+  animation: reveal-up 560ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+@utility reveal-delay-1 { animation-delay: 70ms; }
+@utility reveal-delay-2 { animation-delay: 140ms; }
+@utility reveal-delay-3 { animation-delay: 210ms; }
+@utility reveal-delay-4 { animation-delay: 280ms; }
+
+@utility interactive-surface {
+  transition: transform 200ms cubic-bezier(.2,.8,.2,1), background-color 180ms ease, border-color 180ms ease;
+  &:hover { transform: translateY(-1px); border-color: var(--input); }
+  &:active { transform: scale(.985); }
+}
+
+@utility progress-reveal {
+  transform-origin: left;
+  animation: progress-reveal 700ms cubic-bezier(.2,.8,.2,1) both;
 }
 
 @utility pulse-dot {
@@ -128,4 +154,6 @@
 }
 
 @keyframes quiet-pulse { 0%, 45% { opacity: .6; transform: scale(.7); } 100% { opacity: 0; transform: scale(1.8); } }
+@keyframes reveal-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes progress-reveal { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
