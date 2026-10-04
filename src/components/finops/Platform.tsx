@@ -11,6 +11,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { CountUp, Tilt } from "./Insights";
+import { unitExtra } from "@/lib/finops-insights-data";
 
 export interface Filters { range: PlatformRange; providers: CloudId[]; env: Env | "All" }
 export const scaleOf = (f: Filters) => f.providers.reduce((s, p) => s + providerShare[p], 0) * (f.env === "All" ? 1 : envShare[f.env]);
@@ -123,30 +125,30 @@ export function DenseKpis({ scale, onOpen }: { scale: number; onOpen: (d: Detail
   const k = platformKpis;
   const s = (n: number) => fmtUSD(n * scale);
   const items = [
-    { label: "Total monthly spend", value: s(k.spend.total), pill: <Pill tone="warning">+{k.spend.mom}% MoM</Pill>, color: "var(--chart-1)", seed: 1,
+    { label: "Total monthly spend", n: k.spend.total * scale, f: (n: number) => fmtUSD(n), value: "", pill: <Pill tone="warning">+{k.spend.mom}% MoM</Pill>, color: "var(--chart-1)", seed: 1,
       subs: [["Daily burn", `${s(k.spend.burn)}/day`], ["EOM projection", s(k.spend.projected)]],
       detail: { title: "Total monthly spend", description: "Month-to-date spend across selected clouds.", rows: [["MTD spend", s(k.spend.total)], ["Month over month", `+${k.spend.mom}%`], ["Daily burn rate", s(k.spend.burn)], ["Projected end of month", s(k.spend.projected)], ["Budget remaining", s(300_000 - k.spend.projected)]] } },
-    { label: "Idle resource waste", value: `${s(k.waste.total)}/mo`, pill: <Pill tone="warning">34 resources</Pill>, color: "var(--chart-3)", seed: 2,
+    { label: "Idle resource waste", n: k.waste.total * scale, f: (n: number) => `${fmtUSD(n)}/mo`, value: "", pill: <Pill tone="warning">34 resources</Pill>, color: "var(--chart-3)", seed: 2,
       subs: [["Unattached EBS", `${k.waste.ebs}`], ["Idle RDS · Oversized EC2", `${k.waste.rds} · ${k.waste.ec2}`]],
       detail: { title: "Idle resource waste", description: "Resources costing money without doing work.", rows: [["Unattached EBS volumes", `${k.waste.ebs}`], ["Idle RDS instances", `${k.waste.rds}`], ["Oversized EC2 nodes", `${k.waste.ec2}`], ["Monthly waste", s(k.waste.total)]] } },
-    { label: "Cost anomalies", value: `${k.anomalies.length} active`, pill: <Pill tone="destructive">Critical</Pill>, color: "var(--destructive)", seed: 3,
+    { label: "Cost anomalies", n: k.anomalies.length, f: (n: number) => `${Math.round(n)} active`, value: "", pill: <Pill tone="destructive">Critical</Pill>, color: "var(--destructive)", seed: 3,
       subs: [["Top spike", `+${k.anomalies[0]!.change}% Blob egress`], ["Est. impact", s(k.anomalies.reduce((a, b) => a + b.impact, 0))]],
       detail: { title: "Cost anomalies", description: "Detected spend deviations from the 30-day baseline.", rows: k.anomalies.flatMap((a) => [[a.title, `+${a.change}%`], [`Impact · since ${a.since}`, fmtUSD(a.impact)]] as [string, string][]) } },
-    { label: "Unit economics", value: `$${k.unit.perUser.toFixed(3)}`, pill: <Pill tone="success">per active user</Pill>, color: "var(--chart-2)", seed: 4,
-      subs: [["Per API request", `$${k.unit.perRequest.toFixed(5)}`], ["Active users", (k.unit.activeUsers / 1e6).toFixed(2) + "M"]],
-      detail: { title: "Unit economics", description: "Cloud cost normalized by business volume.", rows: [["Cost per active user", `$${k.unit.perUser}`], ["Cost per API request", `$${k.unit.perRequest}`], ["Active users (30d)", k.unit.activeUsers.toLocaleString("en-US")], ["API requests (30d)", k.unit.requests.toLocaleString("en-US")]] } },
+    { label: "Unit economics", n: k.unit.perUser * Math.max(0.6, scale), f: (n: number) => `$${n.toFixed(3)}`, value: "", pill: <Pill tone="success">per active user</Pill>, color: "var(--chart-2)", seed: 4,
+      subs: [["Per API request", `$${k.unit.perRequest.toFixed(5)}`], ["Per deployment", `$${unitExtra.perDeployment.toFixed(2)}`], ["Per active session", `$${unitExtra.perSession.toFixed(3)}`], ["Active users", (k.unit.activeUsers / 1e6).toFixed(2) + "M"]],
+      detail: { title: "Unit economics", description: "Cloud cost normalized by business volume.", rows: [["Cost per active user", `$${k.unit.perUser}`], ["Cost per API request", `$${k.unit.perRequest}`], ["Cost per deployment", `$${unitExtra.perDeployment}`], ["Cost per active session", `$${unitExtra.perSession}`], ["Active users (30d)", k.unit.activeUsers.toLocaleString("en-US")], ["API requests (30d)", k.unit.requests.toLocaleString("en-US")]] } },
   ];
   return (
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {items.map((it) => (
-        <button key={it.label} onClick={() => onOpen(it.detail as Detail)} className={`${card} subtle-lift group text-left`}>
+        <Tilt key={it.label}><button onClick={() => onOpen(it.detail as Detail)} className={`${card} subtle-lift group h-full w-full text-left`}>
           <div className="flex items-center justify-between"><Label>{it.label}</Label><ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></div>
-          <div className="mt-3 flex items-end justify-between gap-2"><p className="metric-numbers whitespace-nowrap text-2xl 2xl:text-3xl">{it.value}</p><Spark seed={it.seed} color={it.color} /></div>
+          <div className="mt-3 flex items-end justify-between gap-2"><p className="metric-numbers whitespace-nowrap text-2xl 2xl:text-3xl"><CountUp value={it.n} format={it.f} /></p><Spark seed={it.seed} color={it.color} /></div>
           <div className="mt-2">{it.pill}</div>
           <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4">
             {it.subs.map(([a, b]) => <div key={a}><dt className="text-[11px] text-muted-foreground">{a}</dt><dd className="metric-numbers mt-0.5 text-sm">{b}</dd></div>)}
           </dl>
-        </button>
+        </button></Tilt>
       ))}
     </section>
   );
@@ -206,6 +208,7 @@ export function SavingsFeed() {
   const active = recommendations.filter((r) => (state[r.id] ?? "open") !== "ignored" && state[r.id] !== "done");
   const realized = recommendations.filter((r) => state[r.id] === "done").reduce((a, b) => a + b.savings, 0);
   const pending = active.reduce((a, b) => a + b.savings, 0);
+  const [confirm, setConfirm] = useState<(typeof recommendations)[number] | null>(null);
   const remediate = (id: string) => { setState((s) => ({ ...s, [id]: "remediating" })); window.setTimeout(() => { setState((s) => ({ ...s, [id]: "done" })); toast.success("Remediation applied"); }, 1200); };
   return (
     <article className={card}>
@@ -225,7 +228,7 @@ export function SavingsFeed() {
               </div>
               {st !== "done" && st !== "ignored" && (
                 <div className="flex shrink-0 gap-1.5">
-                  <Button size="sm" disabled={st === "remediating"} onClick={() => remediate(r.id)}><Wand2 />{st === "remediating" ? "Applying…" : "Auto-remediate"}</Button>
+                  <Button size="sm" disabled={st === "remediating"} onClick={() => setConfirm(r)}><Wand2 />{st === "remediating" ? "Applying…" : "Remediate waste"}</Button>
                   <Button size="sm" variant="secondary" disabled={st === "assigned"} onClick={() => { setState((s) => ({ ...s, [r.id]: "assigned" })); toast(`Assigned to ${r.team} team`); }}><UserPlus />Assign</Button>
                   <Button size="icon" variant="ghost" className="size-8" aria-label="Ignore" onClick={() => setState((s) => ({ ...s, [r.id]: "ignored" }))}><EyeOff /></Button>
                 </div>
@@ -235,6 +238,29 @@ export function SavingsFeed() {
           );
         })}
       </ul>
+      <Sheet open={!!confirm} onOpenChange={(o) => !o && setConfirm(null)}>
+        <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
+          {confirm && (<>
+            <SheetHeader><SheetTitle>Confirm remediation</SheetTitle><SheetDescription>{confirm.title}</SheetDescription></SheetHeader>
+            <div className="space-y-5 px-4 pb-6">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-success-soft p-4"><Label>This action</Label><p className="metric-numbers mt-1 text-xl text-success">{fmtUSD(confirm.savings)}/mo</p></div>
+                <div className="rounded-xl bg-secondary p-4"><Label>All open actions</Label><p className="metric-numbers mt-1 text-xl">$18,400/mo</p></div>
+              </div>
+              <div><Label>CLI preview</Label><pre className="mt-2 overflow-x-auto rounded-xl border border-border bg-background p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">{`$ nimbus remediate --id ${confirm.id} \\
+    --team ${confirm.team.toLowerCase()} --dry-run=false
+✓ plan: ${confirm.detail}`}</pre></div>
+              <div><Label>Terraform preview</Label><pre className="mt-2 overflow-x-auto rounded-xl border border-border bg-background p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">{`resource "nimbus_optimization" "${confirm.id}" {
+  action      = "apply"
+  owner_team  = "${confirm.team}"
+  max_savings = ${confirm.savings}
+  # ${confirm.title}
+}`}</pre></div>
+              <div className="flex gap-2"><Button className="flex-1" onClick={() => { remediate(confirm.id); setConfirm(null); }}><Wand2 />Apply remediation</Button><Button variant="secondary" onClick={() => setConfirm(null)}>Cancel</Button></div>
+            </div>
+          </>)}
+        </SheetContent>
+      </Sheet>
     </article>
   );
 }

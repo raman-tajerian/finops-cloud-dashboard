@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Shell } from "@/components/finops/Shell";
 import { BudgetForecast, ResourceTable } from "@/components/finops/Widgets";
 import { AnomalyStrip, CostDistribution, DenseKpis, DetailDrawer, FilterBar, K8sHealth, SavingsFeed, scaleOf, type Detail, type Filters } from "@/components/finops/Platform";
+import { AnomalyForecast, GreenOps, Tilt, Topology3D, WhatIfSimulator } from "@/components/finops/Insights";
 import type { TimeRange } from "@/lib/finops-data";
 
 export const Route = createFileRoute("/")({
@@ -42,6 +43,10 @@ function Index() {
       <section className="reveal-up reveal-delay-4 grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-8"><CostDistribution scale={scale} providers={filters.providers} /></div>
         <div className="min-w-0 xl:col-span-4"><K8sHealth onOpen={setDetail} /></div>
+        <div className="min-w-0 xl:col-span-7"><Tilt><Topology3D /></Tilt></div>
+        <div className="min-w-0 xl:col-span-5"><Tilt><GreenOps scale={scale} /></Tilt></div>
+        <div className="min-w-0 xl:col-span-7"><Tilt><AnomalyForecast scale={scale} /></Tilt></div>
+        <div className="min-w-0 xl:col-span-5"><Tilt><WhatIfSimulator /></Tilt></div>
         <div className="min-w-0 xl:col-span-8"><SavingsFeed /></div>
         <div className="min-w-0 xl:col-span-4"><BudgetForecast /></div>
         <div className="min-w-0 xl:col-span-12"><ResourceTable /></div>
