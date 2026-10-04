@@ -14,7 +14,7 @@ export async function handleAnomalyAnalysis(request: Request) {
   if (!parsed.success) return Response.json({ error: "Invalid request" }, { status: 400 });
   const anomaly = platformKpis.anomalies.find((a) => a.id === parsed.data.anomalyId);
   if (!anomaly) return Response.json({ error: "Unknown anomaly" }, { status: 404 });
-  const apiKey = process.env.LOVABLE_API_KEY;
+  const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) return Response.json({ error: "AI is not configured" }, { status: 401 });
 
   let runId = request.headers.get(RUN)?.trim() || undefined;
