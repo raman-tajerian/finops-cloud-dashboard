@@ -3,7 +3,6 @@ import { animate, motion, useMotionValue, useReducedMotion, useSpring, useTransf
 import { Area, ComposedChart, CartesianGrid, Line, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Calculator, Leaf, Move3d, TrendingUp } from "lucide-react";
 import { fmtUSD } from "@/lib/finops-data";
-import { simulateSavings } from "@/lib/finops-insights-data";
 import { useDashboardData } from "@/lib/queries";
 import { DataTableView, TableToggle } from "./States";
 import type { TopoNodeDto as TopoNode } from "@/types/finops";
@@ -175,39 +174,6 @@ export function AnomalyForecast() {
           </ComposedChart>
         </ResponsiveContainer>}
       </div>
-    </article>
-  );
-}
-
-/* ---------- What-if simulator ---------- */
-export function WhatIfSimulator() {
-  const [ri, setRi] = useState(40), [mig, setMig] = useState(20), [rs, setRs] = useState(10);
-  const r = simulateSavings(ri, mig, rs);
-  const rows: [string, number, (v: number) => void, number][] = [["Shift workload to Reserved Instances", ri, setRi, r.ri], ["Migrate US-East → EU-North", mig, setMig, r.migrate], ["Rightsize oversized compute", rs, setRs, r.rightsize]];
-  const body = (
-    <div className="space-y-6">
-      {rows.map(([label, v, set, save]) => (
-        <div key={label}>
-          <div className="flex items-center justify-between text-sm"><span>{label}</span><span className="metric-numbers text-muted-foreground">{v}% · <span className="text-success">−{fmtUSD(save)}</span></span></div>
-          <Slider className="mt-3" value={[v]} max={100} step={5} onValueChange={([n]) => set(n ?? 0)} aria-label={label} />
-        </div>
-      ))}
-      <div className="grid grid-cols-2 gap-4 border-t border-border pt-5">
-        <div><Label>Projected savings</Label><p className="metric-numbers mt-1 text-2xl text-success"><CountUp value={r.total} format={(n) => fmtUSD(n)} />/mo</p></div>
-        <div><Label>New monthly run-rate</Label><p className="metric-numbers mt-1 text-2xl"><CountUp value={r.projected} format={(n) => fmtUSD(n)} /></p></div>
-      </div>
-    </div>
-  );
-  return (
-    <article className="organic-card h-full p-6">
-      <div className="flex items-start justify-between gap-3">
-        <div><Label>What-if scenario simulator</Label><p className="mt-1 text-[13px] text-muted-foreground">Model commitments and migrations in real time</p></div>
-        <Dialog>
-          <DialogTrigger asChild><Button size="sm" variant="secondary"><Calculator />Expand</Button></DialogTrigger>
-          <DialogContent className="sm:max-w-lg"><DialogHeader><DialogTitle>What-if scenario simulator</DialogTitle><DialogDescription>Based on current $248,730 monthly spend.</DialogDescription></DialogHeader>{body}</DialogContent>
-        </Dialog>
-      </div>
-      <div className="mt-5">{body}</div>
     </article>
   );
 }

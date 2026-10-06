@@ -320,7 +320,7 @@ export function K8sHealth({ onOpen }: { onOpen: (d: Detail) => void }) {
       setCpu((v) => Math.min(92, Math.max(60, v + Math.round((Math.random() - 0.5) * 4))));
       setMem((v) => Math.min(85, Math.max(50, v + Math.round((Math.random() - 0.5) * 3))));
       setTicker((list) => [{ t: tickerSeed[Math.floor(Math.random() * tickerSeed.length)]!, ago: 0 }, ...list.map((x) => ({ ...x, ago: x.ago + 1 }))].slice(0, 5));
-    }, 6000);
+    }, 8000);
     return () => window.clearInterval(id);
   }, [tickerSeed]);
   const bars = [["CPU allocation", cpu, cpu > 85 ? "var(--warning)" : "var(--chart-1)", `${cpu}%`], ["Memory utilization", mem, "var(--chart-2)", `${mem}%`], ["Pod health", (cluster.podsHealthy / cluster.podsTotal) * 100, "var(--success)", `${cluster.podsHealthy}/${cluster.podsTotal}`]] as const;
@@ -328,7 +328,7 @@ export function K8sHealth({ onOpen }: { onOpen: (d: Detail) => void }) {
     <article className={`${card} flex h-full flex-col`}>
       <button className="flex w-full items-start justify-between text-left" onClick={() => onOpen({ title: cluster.name, description: "Kubernetes cluster details", rows: [["Region", cluster.region], ["Version", cluster.version], ["Nodes", `${cluster.nodes}`], ["CPU allocation", `${cpu}%`], ["Memory utilization", `${mem}%`], ["Pods healthy", `${cluster.podsHealthy}/${cluster.podsTotal}`], ["Pods pending", "2 (ImagePullBackOff)"]] })}>
         <div><Label>Kubernetes cluster</Label><p className="mt-1 font-medium">{cluster.name}</p><p className="metric-numbers text-xs text-muted-foreground">{cluster.region} · {cluster.version} · {cluster.nodes} nodes</p></div>
-        <Pill tone="success"><span className="pulse-dot mr-1.5 size-1.5 rounded-full bg-success text-success" />Healthy</Pill>
+        <div className="flex shrink-0 items-center gap-2"><span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">Demo telemetry</span><Pill tone="success"><span className="pulse-dot mr-1.5 size-1.5 rounded-full bg-success text-success" />Healthy</Pill></div>
       </button>
       <div className="mt-6 space-y-4">
         {bars.map(([l, v, c, t]) => (

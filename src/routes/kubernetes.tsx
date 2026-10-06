@@ -4,6 +4,7 @@ import { DataGate } from "@/lib/queries";
 import { K8sHealth } from "@/components/finops/Platform";
 import { Topology3D } from "@/components/finops/Insights";
 import { PageHeader } from "@/components/finops/States";
+import { KubernetesWorkspace } from "@/components/finops/Operations";
 
 export const Route = createFileRoute("/kubernetes")({
   head: () => ({
@@ -24,6 +25,7 @@ function KubernetesPage() {
     <>
       <PageHeader title="Kubernetes" description="Cluster health, utilization and live automation events" />
       <GlobalFilters />
+      <KubernetesWorkspace />
       <div className="grid gap-6 xl:grid-cols-2"><DataGate h="h-72"><K8sHealth onOpen={() => {}} /></DataGate><DataGate h="h-72"><Topology3D /></DataGate></div>
     </>
   );
