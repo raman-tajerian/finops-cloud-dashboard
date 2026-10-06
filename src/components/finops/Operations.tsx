@@ -113,7 +113,7 @@ function BudgetCard({ d }: { d: NonNullable<ReturnType<typeof useBudget>["data"]
   const [budget, setBudget] = useState(d.defaultBudget);
   useEffect(() => setBudget(d.defaultBudget), [d.defaultBudget]);
   const pct = budget > 0 ? (d.forecastEom / budget) * 100 : 0;
-  const tone = pct >= 100 ? "critical" : pct >= 80 ? "warning" : "success";
+  const tone = budgetTone(pct);
   return (
     <article className="organic-card flex h-full flex-col p-6 md:p-8">
       <div className="flex items-start justify-between gap-3"><Title sub={`${d.period} · day ${d.dayOfMonth} of ${d.monthDays}`}>Budget & forecast</Title><StatusBadge tone={tone}>{pct.toFixed(0)}% projected</StatusBadge></div>
