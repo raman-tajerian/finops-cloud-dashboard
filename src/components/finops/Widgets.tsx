@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 
-const Label = ({ children }: { children: React.ReactNode }) => <p className="font-mono text-[10px] text-muted-foreground">{children}</p>;
+const Label = ({ children }: { children: React.ReactNode }) => <p className="text-[15px] font-medium leading-snug text-foreground">{children}</p>;
 const tooltipStyle = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 14, fontSize: 12, color: "var(--foreground)" };
 
 function Ring({ value, tone = "success", size = 96 }: { value: number; tone?: "success" | "warning"; size?: number }) {
@@ -49,7 +49,7 @@ export function CostTrend({ data }: { data: CostPoint[] }) {
   return (
     <article className="organic-card h-full min-h-[410px] p-6 md:p-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div><Label>Cloud spend</Label><h2 className="mt-2 text-xl font-medium">Cost velocity</h2><p className="mt-1 text-sm text-muted-foreground">Actual spend by provider</p></div>
+        <div><Label>Cloud spend</Label><h2 className="mt-2 text-xl font-medium">Cost velocity</h2><p className="mt-1 text-[13px] text-muted-foreground">Actual spend by provider</p></div>
         <div className="flex gap-4 text-xs text-muted-foreground"><span className="flex items-center gap-2"><i className="size-2 rounded-full bg-aws" />AWS</span><span className="flex items-center gap-2"><i className="size-2 rounded-full bg-azure" />Azure</span></div>
       </div>
       <div className="mt-8 h-[290px]">

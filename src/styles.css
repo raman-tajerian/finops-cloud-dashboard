@@ -5,8 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Inter", "Helvetica Neue", system-ui, sans-serif;
-  --font-mono: "Inter", system-ui, sans-serif;
+  --font-sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Instrument Serif", Georgia, serif;
+  --font-mono: "Geist", system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 6px);
   --radius-md: calc(var(--radius) - 3px);
   --radius-lg: var(--radius);
@@ -103,7 +104,11 @@ table thead { position: sticky; top: 0; z-index: 1; backdrop-filter: blur(8px); 
 table td, table th { border-left: 0; border-right: 0; }
 table tbody tr { border-bottom: 1px solid var(--border); }
 table tbody tr:hover { background: var(--background); }
-h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+html { scroll-padding-top: 64px; }
+* { scrollbar-width: thin; scrollbar-color: #D9CDBB transparent; }
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: #D9CDBB; border-radius: 9999px; }
 
 @layer base {
   * { border-color: var(--color-border); }

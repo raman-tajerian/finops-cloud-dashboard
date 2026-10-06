@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Area, ComposedChart, CartesianGrid, Line, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ArrowDownRight, ArrowUpRight, ChevronRight } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, ChevronRight, Minus } from "lucide-react";
 import { fmtUSD } from "@/lib/finops-data";
 import { useDashboardData } from "@/lib/queries";
 import { DataTableView, TableToggle } from "./States";
@@ -9,7 +9,7 @@ import { CountUp } from "./Insights";
 import { Spark } from "./Platform";
 import type { KpiValue } from "@/types/finops";
 
-const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] text-muted-foreground">{children}</p>;
+const Label = ({ children }: { children: ReactNode }) => <p className="text-[15px] font-medium leading-snug text-foreground">{children}</p>;
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
 type To = "/cost-explorer" | "/recommendations" | "/resources" | "/budgets";
 
@@ -38,14 +38,14 @@ export function OverviewKpis() {
       {items.map((it) => {
         const d = pctDelta(it.k), up = d > 0, good = it.goodWhenUp ? up : !up;
         return (
-          <Link key={it.label} to={it.to} className="organic-card subtle-lift group block p-5">
-            <div className="flex items-center justify-between gap-2"><Label>{it.label}</Label><ChevronRight className="size-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></div>
+          <Link key={it.label} to={it.to} className="organic-card subtle-lift group flex h-full flex-col p-5">
+            <div className="flex items-center justify-between gap-2"><p className="truncate text-[13px] text-muted-foreground">{it.label}</p><ChevronRight className="size-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></div>
             <div className="mt-2 flex items-end justify-between gap-2">
-              <p className="metric-numbers whitespace-nowrap text-2xl" aria-live="polite"><CountUp value={it.k.value} format={it.f} /></p>
+              <p className="font-display whitespace-nowrap text-[32px] leading-none tracking-tight tabular-nums" aria-live="polite"><CountUp value={it.k.value} format={it.f} /></p>
               <Spark data={it.k.spark} color={it.color} className="h-8 w-20" />
             </div>
-            <p className={`mt-2 inline-flex items-center gap-1 text-[11px] ${Math.abs(d) < 0.05 ? "text-muted-foreground" : good ? "text-success" : "text-warning"}`}>
-              {up ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}{up ? "+" : ""}{d.toFixed(1)}% <span className="text-muted-foreground">vs previous · {it.f(it.k.previous)}</span>
+            <p title={`Previous period: ${it.f(it.k.previous)}`} className={`mt-auto flex items-center gap-1 whitespace-nowrap pt-3 text-xs tabular-nums ${Math.abs(d) < 0.05 ? "text-muted-foreground" : good ? "text-success" : "text-warning"}`}>
+              {Math.abs(d) < 0.05 ? <Minus className="size-3 shrink-0" /> : up ? <ArrowUpRight className="size-3 shrink-0" /> : <ArrowDownRight className="size-3 shrink-0" />}<span>{up ? "+" : ""}{d.toFixed(1)}%</span><span className="text-muted-foreground">vs prev</span>
             </p>
           </Link>
         );
@@ -64,7 +64,7 @@ export function CostTrendCard() {
   return (
     <article className="organic-card h-full p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div><Label>Cost trend by provider</Label><p className="mt-1 text-sm text-muted-foreground">Daily spend, dashed forecast with 95% band · {markers.length} anomaly marker{markers.length === 1 ? "" : "s"}</p></div>
+        <div><Label>Cost trend by provider</Label><p className="mt-1 text-[13px] text-muted-foreground">Daily spend, dashed forecast with 95% band · {markers.length} anomaly marker{markers.length === 1 ? "" : "s"}</p></div>
         <div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><DrillLink to="/cost-explorer">Explore</DrillLink></div>
       </div>
       <div className="mt-4 h-72">
@@ -107,7 +107,7 @@ export function TopMovers() {
   );
   return (
     <article className="organic-card h-full p-6">
-      <div className="flex items-start justify-between gap-3"><div><Label>Top movers</Label><p className="mt-1 text-sm text-muted-foreground">Largest changes vs previous period</p></div><DrillLink to="/resources">Resources</DrillLink></div>
+      <div className="flex items-start justify-between gap-3"><div><Label>Top movers</Label><p className="mt-1 text-[13px] text-muted-foreground">Largest changes vs previous period</p></div><DrillLink to="/resources">Resources</DrillLink></div>
       <div className="mt-4 grid gap-5"><List title="Increases" items={up} inc /><List title="Decreases" items={down} inc={false} /></div>
     </article>
   );

@@ -21,7 +21,7 @@ import { CountUp, Tilt } from "./Insights";
 
 export type { Filters };
 
-const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] text-muted-foreground">{children}</p>;
+const Label = ({ children }: { children: ReactNode }) => <p className="text-[15px] font-medium leading-snug text-foreground">{children}</p>;
 const Pill = ({ tone, children }: { tone: "success" | "warning" | "destructive" | "muted"; children: ReactNode }) => {
   const c = { success: "bg-success-soft text-success", warning: "bg-warning-soft text-warning", destructive: "bg-destructive-soft text-destructive", muted: "bg-secondary text-muted-foreground" }[tone];
   return <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${c}`}>{children}</span>;
@@ -49,7 +49,7 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
     toast.success(`${kind} report exported`);
   };
   return (
-    <div className="organic-card flex flex-wrap items-center gap-3 p-3 xl:flex-nowrap [&>*]:shrink-0">
+    <div className="organic-card flex min-w-0 max-w-full flex-wrap items-center gap-3 p-3">
       <Select value={filters.range} onValueChange={(v) => { onChange({ ...filters, range: v as PlatformRange }); if (v === "custom") toast("Custom range: Sep 4 – Oct 3, 2026"); }}>
         <SelectTrigger className="h-9 w-[150px] rounded-xl" aria-label="Date range"><SelectValue /></SelectTrigger>
         <SelectContent>{(Object.keys(rangeLabels) as PlatformRange[]).map((r) => <SelectItem key={r} value={r}>{rangeLabels[r]}</SelectItem>)}</SelectContent>
@@ -65,7 +65,7 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
         <SelectContent>{["All", "Production", "Staging", "Development"].map((e) => <SelectItem key={e} value={e}>{e === "All" ? "All environments" : e}</SelectItem>)}</SelectContent>
       </Select>
       <Popover>
-        <PopoverTrigger asChild><Button variant="secondary" className="h-9 shrink-0 rounded-xl"><SlidersHorizontal />More filters{filters.team !== "All" && <span className="rounded-full bg-accent px-1.5 text-[10px]">1</span>}</Button></PopoverTrigger>
+        <PopoverTrigger asChild><Button variant="outline" className="h-9 shrink-0 rounded-xl border-border bg-card shadow-none"><SlidersHorizontal />More filters{filters.team !== "All" && <span className="rounded-full bg-accent px-1.5 text-[10px]">1</span>}</Button></PopoverTrigger>
         <PopoverContent align="start" className="w-64 space-y-3">
           <Label>Team</Label>
           <Select value={filters.team} onValueChange={(v) => onChange({ ...filters, team: v as Team | "All" })}>
@@ -74,7 +74,7 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
           </Select>
         </PopoverContent>
       </Popover>
-      <div className="ml-auto flex gap-2">
+      <div className="ml-auto flex shrink-0 gap-2">
         <BudgetAlertDialog />
         <DropdownMenu>
           <DropdownMenuTrigger asChild><Button variant="secondary" className="rounded-xl"><Download /><span className="hidden 2xl:inline">Export report</span><span className="2xl:hidden">Export</span></Button></DropdownMenuTrigger>
@@ -254,7 +254,7 @@ export function SavingsFeed() {
   return (
     <article className={card}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div><Label>Optimization recommendations</Label><p className="mt-1 text-sm text-muted-foreground">Executing all open actions saves <span className="metric-numbers text-foreground">{fmtUSD(pending)}/month</span></p></div>
+        <div><Label>Optimization recommendations</Label><p className="mt-1 text-[13px] text-muted-foreground">Executing all open actions saves <span className="metric-numbers text-foreground">{fmtUSD(pending)}/month</span></p></div>
         <div className="text-right"><Label>Realized</Label><p className="metric-numbers mt-1 text-xl text-success">{fmtUSD(realized)}</p></div>
       </div>
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="progress-reveal h-full rounded-full bg-success transition-all duration-700" style={{ width: `${(realized / 18_400) * 100}%` }} /></div>

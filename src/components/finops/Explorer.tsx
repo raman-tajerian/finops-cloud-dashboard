@@ -19,7 +19,7 @@ export const groupLabels: Record<GroupBy, string> = { service: "Service", provid
 const palette: string[] = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--aws)", "var(--azure)", "var(--gcp)", "var(--muted-foreground)"];
 const col = (i: number) => palette[i % palette.length] ?? "var(--chart-1)";
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
-const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] text-muted-foreground">{children}</p>;
+const Label = ({ children }: { children: ReactNode }) => <p className="text-[15px] font-medium leading-snug text-foreground">{children}</p>;
 const Seg = <T extends string>({ value, options, onChange, label }: { value: T; options: [T, string][]; onChange: (v: T) => void; label: string }) => (
   <div role="group" aria-label={label} className="flex flex-wrap rounded-xl bg-secondary p-1">
     {options.map(([v, l]) => <button key={v} aria-pressed={value === v} onClick={() => onChange(v)} className={`min-h-8 rounded-lg px-3 text-xs transition-colors active:scale-95 ${value === v ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"}`}>{l}</button>)}

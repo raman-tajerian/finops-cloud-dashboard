@@ -27,7 +27,7 @@ const columns: { k: SortKey; label: string; num?: boolean }[] = [
 const sortKeys = columns.map((c) => c.k);
 const tone = { Running: "success", Warning: "warning", Idle: "idle" } as const;
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
-const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] text-muted-foreground">{children}</p>;
+const Label = ({ children }: { children: ReactNode }) => <p className="text-[15px] font-medium leading-snug text-foreground">{children}</p>;
 
 /** Clamp raw URL values into safe table state. */
 export function normalizeTable(s: TableSearch) {
