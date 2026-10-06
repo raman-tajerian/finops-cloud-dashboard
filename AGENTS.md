@@ -12,3 +12,5 @@
 - Keep FinOps feature data local and typed so it can later be replaced by the planned C# API without changing presentation components.
 - Treat the dashboard as a single responsive bento workspace; operational widgets own their temporary interactive state.
 - AI features stream from server routes under src/routes/api with prompts and keys in *.server.ts — keeps secrets server-side.
+- Shared app chrome (Shell, sidebar, command palette) lives in __root around <Outlet />; nav config in src/lib/nav.ts drives sidebar, breadcrumbs and palette.
+- Data access goes through src/lib/api.ts (mock unless VITE_API_BASE_URL) with contracts in src/types — keeps the C# API swap one-file.
