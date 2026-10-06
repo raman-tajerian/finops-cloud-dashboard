@@ -1,6 +1,7 @@
 // Pure aggregation over the master dataset. Every number on screen comes from here.
 import type { Filters } from "@/lib/filters";
 import type {
+  ResourceDetailDto, ResourceRow, ResourcesDto,
   Anomaly, CarbonRegionDto, CostByDimension, DashboardDto, ExploreDto, GroupBy, KpiValue, MasterResource, Mover,
   ProviderDaily, RecommendationDto, RegionCost, ResourceDto, TopoNodeDto,
 } from "@/types/finops";
@@ -53,8 +54,10 @@ export function detectAnomalies(rs: MasterResource[], offset = 0): (Anomaly & { 
 }
 
 /* ---------- Waste & recommendations ---------- */
-const isOversized = (r: MasterResource) => r.status === "Running" && r.cpuAvg < 25 && ["Compute", "Database", "Kubernetes"].includes(r.category);
+export const isOversized = (r: MasterResource) => r.status === "Running" && r.cpuAvg < 25 && ["Compute", "Database", "Kubernetes"].includes(r.category);
 export const RIGHTSIZE_SAVING = 0.4;
+/** Monthly saving for one resource — the single rule used by recommendations and the resource drawer. */
+export const rightsizeSaving = (r: MasterResource) => (r.status === "Idle" ? r.monthlyCost : isOversized(r) ? r.monthlyCost * RIGHTSIZE_SAVING : 0);
 const last30 = (r: MasterResource, offset = 0) => r.daily.slice(H - 30 - offset, H - offset).reduce((a, b) => a + b, 0);
 
 export function buildRecommendations(rs: MasterResource[]): RecommendationDto[] {
@@ -66,7 +69,7 @@ export function buildRecommendations(rs: MasterResource[]): RecommendationDto[] 
   return [...groups].map(([k, items]) => {
     const [kind, service, team] = k.split("|") as [string, string, string];
     const idle = kind === "idle";
-    const savings = Math.round(items.reduce((a, r) => a + r.monthlyCost * (idle ? 1 : RIGHTSIZE_SAVING), 0));
+    const savings = Math.round(items.reduce((a, r) => a + rightsizeSaving(r), 0));
     const n = items.length;
     return {
       id: `rec-${kind}-${service}-${team}`.toLowerCase().replace(/\s+/g, "-"),
@@ -210,4 +213,35 @@ export function buildExplore(all: MasterResource[], f: Filters, g: GroupBy): Exp
     return { name: c.name, current: c.value, previous: p, changePct: p ? ((c.value - p) / p) * 100 : 0, share: total ? (c.value / total) * 100 : 0, spark: sample(series.map((s) => s[c.name] as number), 20) };
   });
   return { groupBy: g, keys, series, rows, total, previousTotal };
+}
+
+/* ---------- Resources ---------- */
+export function buildResources(all: MasterResource[], f: Filters): ResourcesDto {
+  const rs = filterResources(all, f), w = windowOf(f.range);
+  const items: ResourceRow[] = rs.map((r) => ({ id: r.id, name: r.name, provider: r.provider, service: r.service, sku: r.sku, region: r.region, environment: r.environment, team: r.team, monthlyCost: r.monthlyCost, cpuAvg: r.cpuAvg, memAvg: r.memAvg, status: r.status }));
+  return { items, count: items.length, monthlyTotal: rs.reduce((a, r) => a + r.monthlyCost, 0), periodTotal: totalOf(rs, w) };
+}
+
+export function buildResourceDetail(all: MasterResource[], id: string): ResourceDetailDto | null {
+  const r = all.find((x) => x.id === id);
+  if (!r) return null;
+  const days = r.daily.slice(-90);
+  const offset = H - days.length;
+  const cost = days.map((v, k) => ({ day: dayLabel(offset + k), cost: v }));
+  // Deterministic utilisation series around the averages.
+  const util = days.map((_, k) => ({ day: dayLabel(offset + k), cpu: Math.max(0, Math.min(100, r.cpuAvg + 6 * Math.sin(k / 4 + r.cpuAvg))), mem: Math.max(0, Math.min(100, r.memAvg + 4 * Math.cos(k / 5 + r.memAvg))) }));
+  const activity: ResourceDetailDto["activity"] = [];
+  const base = days.slice(0, 14).reduce((a, b) => a + b, 0) / 14;
+  days.forEach((v, k) => { if (k > 0 && v > base * 1.4 && (days[k - 1] ?? 0) <= base * 1.4) activity.push({ day: dayLabel(offset + k), text: `Cost spike: ${Math.round((v / base - 1) * 100)}% above baseline`, tone: "warning" }); });
+  const an = detectAnomalies([r])[0];
+  if (an) activity.push({ day: dayLabel(an.index), text: `Anomaly detected (+${an.change}%)`, tone: "critical" });
+  if (r.status === "Idle") activity.push({ day: dayLabel(H - 14), text: `Marked idle: CPU avg ${r.cpuAvg}% for 14 days`, tone: "idle" });
+  activity.push({ day: dayLabel(offset), text: `Tracked since ${dayLabel(0)} · ${r.environment}`, tone: "success" });
+  const saving = rightsizeSaving(r);
+  return {
+    resource: buildResources([r], { range: "custom", providers: [r.provider], env: "All", team: "All" }).items[0]!,
+    tags: { ...r.tags, team: r.team, environment: r.environment },
+    cost, util, activity: activity.slice(-12).reverse(),
+    rightsizing: r.cpuAvg < 25 ? { saving, action: r.status === "Idle" ? "Remove or stop this idle resource" : saving > 0 ? `Drop one size from ${r.sku}` : "No automated rule for this service — review manually" } : null,
+  };
 }
