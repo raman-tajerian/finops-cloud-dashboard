@@ -147,15 +147,16 @@ export function GreenOps() {
 
 /* ---------- Anomaly forecast with prediction band ---------- */
 export function AnomalyForecast() {
-  const data = useDashboardData().forecast;
+  const { forecast: data, trend, kpis } = useDashboardData();
   const [asTable, setAsTable] = useState(false);
-  const spike = data[18]!;
+  const top = kpis.anomalies[0];
+  const spike = data.find((_, i) => trend[i]?.anomaly === top?.title);
   return (
     <article className="organic-card h-full p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><Label>Anomaly detection · spend forecast</Label><p className="mt-1 text-sm text-muted-foreground">Daily spend vs. 90% confidence band</p></div>
         <motion.span initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="inline-flex items-center gap-1.5 rounded-full bg-destructive-soft px-2.5 py-1 text-[11px] font-medium text-destructive">
-          <span className="size-1.5 animate-pulse rounded-full bg-destructive" /><TrendingUp className="size-3" />+240% spike in Azure Blob Storage Egress
+          <span className="size-1.5 animate-pulse rounded-full bg-destructive" /><TrendingUp className="size-3" />{top ? `+${top.change}% spike in ${top.title}` : "No active anomalies"}
         </motion.span>
         <TableToggle on={asTable} onChange={setAsTable} />
       </div>
@@ -170,7 +171,7 @@ export function AnomalyForecast() {
             <Area dataKey="band" name="Confidence" stroke="none" fill="var(--chart-1)" fillOpacity={0.14} animationDuration={900} />
             <Line dataKey="forecast" name="Forecast" stroke="var(--muted-foreground)" strokeDasharray="4 4" dot={false} strokeWidth={1.2} animationDuration={900} />
             <Line dataKey="actual" name="Actual" stroke="var(--chart-2)" dot={false} strokeWidth={2} connectNulls={false} animationDuration={1100} />
-            <ReferenceDot x={spike.day} y={spike.actual ?? 0} r={5} fill="var(--destructive)" stroke="var(--card)" strokeWidth={2} />
+            {spike && <ReferenceDot x={spike.day} y={spike.actual ?? 0} r={5} fill="var(--destructive)" stroke="var(--card)" strokeWidth={2} />}
           </ComposedChart>
         </ResponsiveContainer>}
       </div>

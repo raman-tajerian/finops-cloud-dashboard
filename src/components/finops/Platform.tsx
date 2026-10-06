@@ -3,7 +3,7 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, P
 import { AlertTriangle, BellPlus, Bot, ChevronRight, Download, EyeOff, FileJson, FileSpreadsheet, FileText, UserPlus, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { fmtUSD } from "@/lib/finops-data";
-import { rangeLabels, spark, type CloudId, type Env, type PlatformRange } from "@/lib/finops-platform-data";
+import { rangeLabels, type CloudId, type Env, type PlatformRange } from "@/lib/finops-platform-data";
 import { useDashboard, useDashboardData } from "@/lib/queries";
 import { allProviders, teams, type Filters, type Team } from "@/lib/filters";
 import { DataTableView, TableToggle } from "./States";
@@ -122,37 +122,37 @@ export function DetailDrawer({ detail, onClose }: { detail: Detail; onClose: () 
   );
 }
 
-function Spark({ seed, color }: { seed: number; color: string }) {
-  const data = useMemo(() => spark(seed), [seed]);
-  return <div className="h-10 w-24"><ResponsiveContainer><LineChart data={data}><Line dataKey="v" stroke={color} strokeWidth={1.5} dot={false} animationDuration={700} animationEasing="ease-out" /></LineChart></ResponsiveContainer></div>;
+export function Spark({ data: raw, color, className = "h-10 w-24" }: { data: number[]; color: string; className?: string }) {
+  const data = useMemo(() => raw.map((v, i) => ({ i, v })), [raw]);
+  return <div className={className} aria-hidden><ResponsiveContainer><LineChart data={data}><Line dataKey="v" stroke={color} strokeWidth={1.5} dot={false} animationDuration={700} animationEasing="ease-out" /></LineChart></ResponsiveContainer></div>;
 }
 
 /* ---------- KPI cards ---------- */
 export function DenseKpis({ onOpen }: { onOpen: (d: Detail) => void }) {
-  const k = useDashboardData().kpis;
+  const dd = useDashboardData(), k = dd.kpis, o = dd.overview;
   const unitExtra = k.unit;
   const top = k.anomalies[0];
   const s = (n: number) => fmtUSD(n);
   const items = [
-    { label: "Total monthly spend", n: k.spend.total, f: (n: number) => fmtUSD(n), value: "", pill: <Pill tone="warning">+{k.spend.mom}% MoM</Pill>, color: "var(--chart-1)", seed: 1,
+    { label: "Total spend", n: k.spend.total, f: (n: number) => fmtUSD(n), value: "", pill: <Pill tone={k.spend.mom > 0 ? "warning" : "success"}>{k.spend.mom > 0 ? "+" : ""}{k.spend.mom}% vs prev.</Pill>, color: "var(--chart-1)", spark: o.totalSpend.spark,
       subs: [["Daily burn", `${s(k.spend.burn)}/day`], ["EOM projection", s(k.spend.projected)]],
-      detail: { title: "Total monthly spend", description: "Month-to-date spend across selected clouds.", rows: [["MTD spend", s(k.spend.total)], ["Month over month", `+${k.spend.mom}%`], ["Daily burn rate", s(k.spend.burn)], ["Projected end of month", s(k.spend.projected)], ["Budget remaining", s(300_000 - k.spend.projected)]] } },
-    { label: "Idle resource waste", n: k.waste.total, f: (n: number) => `${fmtUSD(n)}/mo`, value: "", pill: <Pill tone="warning">34 resources</Pill>, color: "var(--chart-3)", seed: 2,
-      subs: [["Unattached EBS", `${k.waste.ebs}`], ["Idle RDS · Oversized EC2", `${k.waste.rds} · ${k.waste.ec2}`]],
-      detail: { title: "Idle resource waste", description: "Resources costing money without doing work.", rows: [["Unattached EBS volumes", `${k.waste.ebs}`], ["Idle RDS instances", `${k.waste.rds}`], ["Oversized EC2 nodes", `${k.waste.ec2}`], ["Monthly waste", s(k.waste.total)]] } },
-    { label: "Cost anomalies", n: k.anomalies.length, f: (n: number) => `${Math.round(n)} active`, value: "", pill: top ? <Pill tone="destructive">Critical</Pill> : <Pill tone="success">None</Pill>, color: "var(--destructive)", seed: 3,
+      detail: { title: "Total monthly spend", description: "Month-to-date spend across selected clouds.", rows: [["MTD spend", s(k.spend.total)], ["Vs previous period", `${k.spend.mom > 0 ? "+" : ""}${k.spend.mom}%`], ["Daily burn rate", s(k.spend.burn)], ["Projected end of month", s(k.spend.projected)], ["Budget remaining", s(300_000 - k.spend.projected)]] } },
+    { label: "Idle resource waste", n: k.waste.total, f: (n: number) => `${fmtUSD(n)}/mo`, value: "", pill: <Pill tone="warning">{o.idleCount} idle resources</Pill>, color: "var(--chart-3)", spark: o.idleWaste.spark,
+      subs: [["Idle storage", `${k.waste.ebs}`], ["Idle DBs · Oversized", `${k.waste.rds} · ${k.waste.ec2}`]],
+      detail: { title: "Idle resource waste", description: "Resources costing money without doing work.", rows: [["Idle resources", `${o.idleCount}`], ["Idle storage", `${k.waste.ebs}`], ["Idle databases", `${k.waste.rds}`], ["Oversized compute (CPU < 25%)", `${k.waste.ec2}`], ["Monthly waste", s(k.waste.total)]] } },
+    { label: "Cost anomalies", n: k.anomalies.length, f: (n: number) => `${Math.round(n)} active`, value: "", pill: top ? <Pill tone="destructive">Critical</Pill> : <Pill tone="success">None</Pill>, color: "var(--destructive)", spark: o.anomalies.spark,
       subs: [["Top spike", top ? `+${top.change}% ${top.provider}` : "—"], ["Est. impact", s(k.anomalies.reduce((a, b) => a + b.impact, 0))]],
       detail: { title: "Cost anomalies", description: "Detected spend deviations from the 30-day baseline.", rows: k.anomalies.flatMap((a) => [[a.title, `+${a.change}%`], [`Impact · since ${a.since}`, fmtUSD(a.impact)]] as [string, string][]) } },
-    { label: "Unit economics", n: k.unit.perUser, f: (n: number) => `$${n.toFixed(3)}`, value: "", pill: <Pill tone="success">per active user</Pill>, color: "var(--chart-2)", seed: 4,
+    { label: "Unit economics", n: k.unit.perUser, f: (n: number) => `$${n.toFixed(3)}`, value: "", pill: <Pill tone="success">per active user</Pill>, color: "var(--chart-2)", spark: o.costPerUser.spark,
       subs: [["Per API request", `$${k.unit.perRequest.toFixed(5)}`], ["Per deployment", `$${unitExtra.perDeployment.toFixed(2)}`], ["Per active session", `$${unitExtra.perSession.toFixed(3)}`], ["Active users", (k.unit.activeUsers / 1e6).toFixed(2) + "M"]],
-      detail: { title: "Unit economics", description: "Cloud cost normalized by business volume.", rows: [["Cost per active user", `$${k.unit.perUser}`], ["Cost per API request", `$${k.unit.perRequest}`], ["Cost per deployment", `$${unitExtra.perDeployment}`], ["Cost per active session", `$${unitExtra.perSession}`], ["Active users (30d)", k.unit.activeUsers.toLocaleString("en-US")], ["API requests (30d)", k.unit.requests.toLocaleString("en-US")]] } },
+      detail: { title: "Unit economics", description: "Cloud cost normalized by business volume.", rows: [["Cost per active user", `$${k.unit.perUser.toFixed(4)}`], ["Cost per API request", `$${k.unit.perRequest.toFixed(6)}`], ["Cost per deployment", `$${unitExtra.perDeployment.toFixed(2)}`], ["Cost per active session", `$${unitExtra.perSession.toFixed(4)}`], ["Active users (30d)", k.unit.activeUsers.toLocaleString("en-US")], ["API requests (30d)", k.unit.requests.toLocaleString("en-US")]] } },
   ];
   return (
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {items.map((it) => (
         <Tilt key={it.label}><button onClick={() => onOpen(it.detail as Detail)} className={`${card} subtle-lift group h-full w-full text-left`}>
           <div className="flex items-center justify-between"><Label>{it.label}</Label><ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></div>
-          <div className="mt-3 flex items-end justify-between gap-2"><p className="metric-numbers whitespace-nowrap text-2xl 2xl:text-3xl"><CountUp value={it.n} format={it.f} /></p><Spark seed={it.seed} color={it.color} /></div>
+          <div className="mt-3 flex items-end justify-between gap-2"><p className="metric-numbers whitespace-nowrap text-2xl 2xl:text-3xl"><CountUp value={it.n} format={it.f} /></p><Spark data={it.spark} color={it.color} /></div>
           <div className="mt-2">{it.pill}</div>
           <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4">
             {it.subs.map(([a, b]) => <div key={a}><dt className="text-[11px] text-muted-foreground">{a}</dt><dd className="metric-numbers mt-0.5 text-sm">{b}</dd></div>)}

@@ -6,7 +6,7 @@ export const DATA_END_DATE = new Date(Date.UTC(2026, 9, 25));
 export const HISTORY_DAYS = 184;
 
 /** Business volumes (not costs) used for unit economics, per 30 days. */
-export const businessVolume = { activeUsers: 5_920_000, apiRequests: 2_070_000_000, deployments: 4_800, sessions: 13_600_000 };
+export const businessVolume = { activeUsers: 5_920_000, apiRequests: 2_070_000_000, deployments: 125_000, sessions: 13_600_000 };
 
 function mulberry32(seed: number) {
   return () => {
