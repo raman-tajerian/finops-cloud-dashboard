@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { AlertTriangle, BellPlus, Bot, ChevronRight, Download, EyeOff, FileJson, FileSpreadsheet, FileText, UserPlus, Wand2 } from "lucide-react";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis } from "recharts";
+import { SlidersHorizontal, AlertTriangle, BellPlus, Bot, ChevronRight, Download, EyeOff, FileJson, FileSpreadsheet, FileText, UserPlus, Wand2 } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 import { fmtUSD } from "@/lib/finops-data";
-import { rangeLabels, spark, type CloudId, type Env, type PlatformRange } from "@/lib/finops-platform-data";
+import { rangeLabels, type CloudId, type Env, type PlatformRange } from "@/lib/finops-platform-data";
 import { useDashboard, useDashboardData } from "@/lib/queries";
 import { allProviders, teams, type Filters, type Team } from "@/lib/filters";
 import { DataTableView, TableToggle } from "./States";
@@ -14,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { CountUp, Tilt } from "./Insights";
 
@@ -47,9 +49,9 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
     toast.success(`${kind} report exported`);
   };
   return (
-    <div className="organic-card flex flex-wrap items-center gap-3 p-3">
+    <div className="organic-card flex flex-wrap items-center gap-3 p-3 lg:flex-nowrap [&>*]:shrink-0">
       <Select value={filters.range} onValueChange={(v) => { onChange({ ...filters, range: v as PlatformRange }); if (v === "custom") toast("Custom range: Sep 4 – Oct 3, 2026"); }}>
-        <SelectTrigger className="h-9 w-[170px] rounded-xl"><SelectValue /></SelectTrigger>
+        <SelectTrigger className="h-9 w-[150px] rounded-xl" aria-label="Date range"><SelectValue /></SelectTrigger>
         <SelectContent>{(Object.keys(rangeLabels) as PlatformRange[]).map((r) => <SelectItem key={r} value={r}>{rangeLabels[r]}</SelectItem>)}</SelectContent>
       </Select>
       <div className="flex items-center gap-1 rounded-xl bg-secondary p-1">
@@ -59,17 +61,23 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
         ))}
       </div>
       <Select value={filters.env} onValueChange={(v) => onChange({ ...filters, env: v as Env | "All" })}>
-        <SelectTrigger className="h-9 w-[160px] rounded-xl"><SelectValue /></SelectTrigger>
+        <SelectTrigger className="h-9 w-[150px] rounded-xl" aria-label="Environment"><SelectValue /></SelectTrigger>
         <SelectContent>{["All", "Production", "Staging", "Development"].map((e) => <SelectItem key={e} value={e}>{e === "All" ? "All environments" : e}</SelectItem>)}</SelectContent>
       </Select>
-      <Select value={filters.team} onValueChange={(v) => onChange({ ...filters, team: v as Team | "All" })}>
-        <SelectTrigger className="h-9 w-[140px] rounded-xl" aria-label="Team"><SelectValue /></SelectTrigger>
-        <SelectContent>{["All", ...teams].map((t) => <SelectItem key={t} value={t}>{t === "All" ? "All teams" : t}</SelectItem>)}</SelectContent>
-      </Select>
+      <Popover>
+        <PopoverTrigger asChild><Button variant="secondary" className="h-9 shrink-0 rounded-xl"><SlidersHorizontal />More filters{filters.team !== "All" && <span className="rounded-full bg-accent px-1.5 text-[10px]">1</span>}</Button></PopoverTrigger>
+        <PopoverContent align="start" className="w-64 space-y-3">
+          <Label>Team</Label>
+          <Select value={filters.team} onValueChange={(v) => onChange({ ...filters, team: v as Team | "All" })}>
+            <SelectTrigger className="h-9 w-full rounded-xl" aria-label="Team"><SelectValue /></SelectTrigger>
+            <SelectContent>{["All", ...teams].map((t) => <SelectItem key={t} value={t}>{t === "All" ? "All teams" : t}</SelectItem>)}</SelectContent>
+          </Select>
+        </PopoverContent>
+      </Popover>
       <div className="ml-auto flex gap-2">
         <BudgetAlertDialog />
         <DropdownMenu>
-          <DropdownMenuTrigger asChild><Button variant="secondary" className="rounded-xl"><Download />Export report</Button></DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild><Button variant="secondary" className="rounded-xl"><Download /><span className="hidden 2xl:inline">Export report</span><span className="2xl:hidden">Export</span></Button></DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => exportAs("PDF")}><FileText />PDF</DropdownMenuItem>
             <DropdownMenuItem onClick={() => exportAs("CSV")}><FileSpreadsheet />CSV</DropdownMenuItem>
@@ -88,7 +96,7 @@ function BudgetAlertDialog() {
   const [threshold, setThreshold] = useState(80);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button className="rounded-xl"><BellPlus />Create budget alert</Button></DialogTrigger>
+      <DialogTrigger asChild><Button className="rounded-xl"><BellPlus /><span className="hidden 2xl:inline">Create budget alert</span><span className="2xl:hidden">Budget alert</span></Button></DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>Create budget alert</DialogTitle><DialogDescription>Get notified when spend crosses a threshold.</DialogDescription></DialogHeader>
         <div className="space-y-4">
@@ -122,37 +130,37 @@ export function DetailDrawer({ detail, onClose }: { detail: Detail; onClose: () 
   );
 }
 
-function Spark({ seed, color }: { seed: number; color: string }) {
-  const data = useMemo(() => spark(seed), [seed]);
-  return <div className="h-10 w-24"><ResponsiveContainer><LineChart data={data}><Line dataKey="v" stroke={color} strokeWidth={1.5} dot={false} animationDuration={700} animationEasing="ease-out" /></LineChart></ResponsiveContainer></div>;
+export function Spark({ data: raw, color, className = "h-10 w-24" }: { data: number[]; color: string; className?: string }) {
+  const data = useMemo(() => raw.map((v, i) => ({ i, v })), [raw]);
+  return <div className={className} aria-hidden><ResponsiveContainer><LineChart data={data}><Line dataKey="v" stroke={color} strokeWidth={1.5} dot={false} animationDuration={700} animationEasing="ease-out" /></LineChart></ResponsiveContainer></div>;
 }
 
 /* ---------- KPI cards ---------- */
 export function DenseKpis({ onOpen }: { onOpen: (d: Detail) => void }) {
-  const k = useDashboardData().kpis;
+  const dd = useDashboardData(), k = dd.kpis, o = dd.overview;
   const unitExtra = k.unit;
   const top = k.anomalies[0];
   const s = (n: number) => fmtUSD(n);
   const items = [
-    { label: "Total monthly spend", n: k.spend.total, f: (n: number) => fmtUSD(n), value: "", pill: <Pill tone="warning">+{k.spend.mom}% MoM</Pill>, color: "var(--chart-1)", seed: 1,
+    { label: "Total spend", n: k.spend.total, f: (n: number) => fmtUSD(n), value: "", pill: <Pill tone={k.spend.mom > 0 ? "warning" : "success"}>{k.spend.mom > 0 ? "+" : ""}{k.spend.mom}% vs prev.</Pill>, color: "var(--chart-1)", spark: o.totalSpend.spark,
       subs: [["Daily burn", `${s(k.spend.burn)}/day`], ["EOM projection", s(k.spend.projected)]],
-      detail: { title: "Total monthly spend", description: "Month-to-date spend across selected clouds.", rows: [["MTD spend", s(k.spend.total)], ["Month over month", `+${k.spend.mom}%`], ["Daily burn rate", s(k.spend.burn)], ["Projected end of month", s(k.spend.projected)], ["Budget remaining", s(300_000 - k.spend.projected)]] } },
-    { label: "Idle resource waste", n: k.waste.total, f: (n: number) => `${fmtUSD(n)}/mo`, value: "", pill: <Pill tone="warning">34 resources</Pill>, color: "var(--chart-3)", seed: 2,
-      subs: [["Unattached EBS", `${k.waste.ebs}`], ["Idle RDS · Oversized EC2", `${k.waste.rds} · ${k.waste.ec2}`]],
-      detail: { title: "Idle resource waste", description: "Resources costing money without doing work.", rows: [["Unattached EBS volumes", `${k.waste.ebs}`], ["Idle RDS instances", `${k.waste.rds}`], ["Oversized EC2 nodes", `${k.waste.ec2}`], ["Monthly waste", s(k.waste.total)]] } },
-    { label: "Cost anomalies", n: k.anomalies.length, f: (n: number) => `${Math.round(n)} active`, value: "", pill: top ? <Pill tone="destructive">Critical</Pill> : <Pill tone="success">None</Pill>, color: "var(--destructive)", seed: 3,
+      detail: { title: "Total monthly spend", description: "Month-to-date spend across selected clouds.", rows: [["MTD spend", s(k.spend.total)], ["Vs previous period", `${k.spend.mom > 0 ? "+" : ""}${k.spend.mom}%`], ["Daily burn rate", s(k.spend.burn)], ["Projected end of month", s(k.spend.projected)], ["Budget remaining", s(300_000 - k.spend.projected)]] } },
+    { label: "Idle resource waste", n: k.waste.total, f: (n: number) => `${fmtUSD(n)}/mo`, value: "", pill: <Pill tone="warning">{o.idleCount} idle resources</Pill>, color: "var(--chart-3)", spark: o.idleWaste.spark,
+      subs: [["Idle storage", `${k.waste.ebs}`], ["Idle DBs · Oversized", `${k.waste.rds} · ${k.waste.ec2}`]],
+      detail: { title: "Idle resource waste", description: "Resources costing money without doing work.", rows: [["Idle resources", `${o.idleCount}`], ["Idle storage", `${k.waste.ebs}`], ["Idle databases", `${k.waste.rds}`], ["Oversized compute (CPU < 25%)", `${k.waste.ec2}`], ["Monthly waste", s(k.waste.total)]] } },
+    { label: "Cost anomalies", n: k.anomalies.length, f: (n: number) => `${Math.round(n)} active`, value: "", pill: top ? <Pill tone="destructive">Critical</Pill> : <Pill tone="success">None</Pill>, color: "var(--destructive)", spark: o.anomalies.spark,
       subs: [["Top spike", top ? `+${top.change}% ${top.provider}` : "—"], ["Est. impact", s(k.anomalies.reduce((a, b) => a + b.impact, 0))]],
       detail: { title: "Cost anomalies", description: "Detected spend deviations from the 30-day baseline.", rows: k.anomalies.flatMap((a) => [[a.title, `+${a.change}%`], [`Impact · since ${a.since}`, fmtUSD(a.impact)]] as [string, string][]) } },
-    { label: "Unit economics", n: k.unit.perUser, f: (n: number) => `$${n.toFixed(3)}`, value: "", pill: <Pill tone="success">per active user</Pill>, color: "var(--chart-2)", seed: 4,
+    { label: "Unit economics", n: k.unit.perUser, f: (n: number) => `$${n.toFixed(3)}`, value: "", pill: <Pill tone="success">per active user</Pill>, color: "var(--chart-2)", spark: o.costPerUser.spark,
       subs: [["Per API request", `$${k.unit.perRequest.toFixed(5)}`], ["Per deployment", `$${unitExtra.perDeployment.toFixed(2)}`], ["Per active session", `$${unitExtra.perSession.toFixed(3)}`], ["Active users", (k.unit.activeUsers / 1e6).toFixed(2) + "M"]],
-      detail: { title: "Unit economics", description: "Cloud cost normalized by business volume.", rows: [["Cost per active user", `$${k.unit.perUser}`], ["Cost per API request", `$${k.unit.perRequest}`], ["Cost per deployment", `$${unitExtra.perDeployment}`], ["Cost per active session", `$${unitExtra.perSession}`], ["Active users (30d)", k.unit.activeUsers.toLocaleString("en-US")], ["API requests (30d)", k.unit.requests.toLocaleString("en-US")]] } },
+      detail: { title: "Unit economics", description: "Cloud cost normalized by business volume.", rows: [["Cost per active user", `$${k.unit.perUser.toFixed(4)}`], ["Cost per API request", `$${k.unit.perRequest.toFixed(6)}`], ["Cost per deployment", `$${unitExtra.perDeployment.toFixed(2)}`], ["Cost per active session", `$${unitExtra.perSession.toFixed(4)}`], ["Active users (30d)", k.unit.activeUsers.toLocaleString("en-US")], ["API requests (30d)", k.unit.requests.toLocaleString("en-US")]] } },
   ];
   return (
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {items.map((it) => (
         <Tilt key={it.label}><button onClick={() => onOpen(it.detail as Detail)} className={`${card} subtle-lift group h-full w-full text-left`}>
           <div className="flex items-center justify-between"><Label>{it.label}</Label><ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></div>
-          <div className="mt-3 flex items-end justify-between gap-2"><p className="metric-numbers whitespace-nowrap text-2xl 2xl:text-3xl"><CountUp value={it.n} format={it.f} /></p><Spark seed={it.seed} color={it.color} /></div>
+          <div className="mt-3 flex items-end justify-between gap-2"><p className="metric-numbers whitespace-nowrap text-2xl 2xl:text-3xl"><CountUp value={it.n} format={it.f} /></p><Spark data={it.spark} color={it.color} /></div>
           <div className="mt-2">{it.pill}</div>
           <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4">
             {it.subs.map(([a, b]) => <div key={a}><dt className="text-[11px] text-muted-foreground">{a}</dt><dd className="metric-numbers mt-0.5 text-sm">{b}</dd></div>)}
@@ -164,7 +172,7 @@ export function DenseKpis({ onOpen }: { onOpen: (d: Detail) => void }) {
 }
 
 /* ---------- Cost distribution ---------- */
-type View = "service" | "region" | "daily";
+type View = "service" | "region" | "team" | "daily";
 export function CostDistribution() {
   const [view, setView] = useState<View>("service");
   const [asTable, setAsTable] = useState(false);
@@ -174,13 +182,13 @@ export function CostDistribution() {
   const total = services.reduce((a, b) => a + b.value, 0);
   const daily = d.daily;
   const pct = (v: number) => `${((v / total) * 100).toFixed(1)}%`;
-  const table = view === "service" ? { columns: ["Service", "Cost", "Share"], rows: services.map((s) => [s.name, fmtUSD(s.value), pct(s.value)]) } : view === "region" ? { columns: ["Region", ...providers], rows: d.regions.map((r) => [r.region, ...providers.map((p) => fmtUSD(r[p]))]) } : { columns: ["Day", "Spend"], rows: daily.map((x) => [x.day, fmtUSD(x.spend)]) };
+  const table = view === "service" ? { columns: ["Service", "Cost", "Share"], rows: services.map((s) => [s.name, fmtUSD(s.value), pct(s.value)]) } : view === "region" ? { columns: ["Region", ...providers], rows: d.regions.map((r) => [r.region, ...providers.map((p) => fmtUSD(r[p]))]) } : view === "team" ? { columns: ["Team", "Cost", "Share"], rows: d.teams.map((s) => [s.name, fmtUSD(s.value), pct(s.value)]) } : { columns: ["Day", "Spend"], rows: daily.map((x) => [x.day, fmtUSD(x.spend)]) };
   return (
     <article className={card}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div><Label>Cost distribution</Label><p className="metric-numbers mt-1 text-2xl">{fmtUSD(total)}</p></div>
-        <div className="flex items-center gap-2"><TableToggle on={asTable} onChange={setAsTable} /><div className="flex rounded-xl bg-secondary p-1">
-          {([["service", "By service"], ["region", "By region"], ["daily", "Daily trend"]] as [View, string][]).map(([v, l]) => (
+        <div className="flex flex-wrap items-center gap-2"><Link to="/cost-explorer" className="inline-flex min-h-8 items-center gap-1 rounded-lg px-2 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground">Explore<ChevronRight className="size-3.5" /></Link><TableToggle on={asTable} onChange={setAsTable} /><div className="flex rounded-xl bg-secondary p-1">
+          {([["service", "Donut · service"], ["region", "Stacked · region"], ["team", "Treemap · team"], ["daily", "Daily trend"]] as [View, string][]).map(([v, l]) => (
              <button key={v} onClick={() => setView(v)} className={`rounded-lg px-3 py-1 text-xs transition-[transform,background-color,color] duration-200 active:scale-95 ${view === v ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"}`}>{l}</button>
           ))}
         </div></div>
@@ -202,6 +210,14 @@ export function CostDistribution() {
             {providers.includes("GCP") && <Bar dataKey="GCP" stackId="a" fill="var(--gcp)" radius={[6, 6, 0, 0]} />}
           </BarChart></ResponsiveContainer></div>
         )}
+        {!asTable && view === "team" && (
+          <div key="team" className="animate-in fade-in h-full duration-300"><ResponsiveContainer>
+            <Treemap data={d.teams.map((t, i) => ({ ...t, fill: chartColors[i % chartColors.length] }))} dataKey="value" nameKey="name" stroke="var(--card)" isAnimationActive animationDuration={500}
+              content={<TreeCell total={total} />}>
+              <Tooltip contentStyle={tip} formatter={(v) => [`${fmtUSD(Number(v))} · ${pct(Number(v))}`, "Cost"]} />
+            </Treemap>
+          </ResponsiveContainer></div>
+        )}
         {!asTable && view === "daily" && (
           <div key="daily" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><AreaChart data={daily}>
             <defs><linearGradient id="dg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="var(--chart-1)" stopOpacity={0.35} /><stop offset="1" stopColor="var(--chart-1)" stopOpacity={0} /></linearGradient></defs>
@@ -212,6 +228,16 @@ export function CostDistribution() {
         )}
       </div>
     </article>
+  );
+}
+
+function TreeCell(p: { x?: number; y?: number; width?: number; height?: number; name?: string; value?: number; fill?: string; total: number }) {
+  const { x = 0, y = 0, width = 0, height = 0, name, value = 0, fill, total } = p;
+  return (
+    <g>
+      <rect x={x} y={y} width={width} height={height} rx={10} fill={fill} fillOpacity={0.22} stroke="var(--card)" strokeWidth={3} />
+      {width > 70 && height > 40 && <><text x={x + 12} y={y + 22} fill="var(--foreground)" fontSize={12}>{name}</text><text x={x + 12} y={y + 40} fill="var(--muted-foreground)" fontSize={11} fontFamily="var(--font-mono)">{fmtUSD(value)} · {total ? ((value / total) * 100).toFixed(1) : 0}%</text></>}
+    </g>
   );
 }
 
@@ -322,7 +348,7 @@ export function AnomalyStrip({ onOpen }: { onOpen: (d: Detail) => void }) {
   const a = useDashboard().data?.kpis.anomalies[0];
   if (!a) return null;
   return (
-    <button onClick={() => onOpen({ title: a.title, description: "Anomaly detected against 30-day baseline.", rows: [["Change", `+${a.change}%`], ["Est. monthly impact", fmtUSD(a.impact)], ["Detected", a.since], ["Suggested action", "Enable CDN caching for media container"]] })} className="group flex w-full items-center gap-3 rounded-2xl bg-destructive-soft px-4 py-2.5 text-left text-sm transition-[transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-destructive-soft/80 active:scale-[0.99]">
+    <button onClick={() => onOpen({ title: a.title, description: "Last 3 days vs the prior 14-day baseline.", rows: [["Change", `+${a.change}%`], ["Est. monthly impact", fmtUSD(a.impact)], ["Detected", a.since], ["Suggested action", "Enable CDN caching for media container"]] })} className="group flex w-full items-center gap-3 rounded-2xl bg-destructive-soft px-4 py-2.5 text-left text-sm transition-[transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-destructive-soft/80 active:scale-[0.99]">
       <AlertTriangle className="size-4 shrink-0 text-destructive" />
       <span className="flex-1"><span className="font-medium text-destructive">Anomaly:</span> <span className="text-foreground">Unexpected +{a.change}% spike in {a.title}</span></span>
       <ChevronRight className="size-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1" />

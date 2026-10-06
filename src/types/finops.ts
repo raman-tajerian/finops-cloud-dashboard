@@ -35,4 +35,34 @@ export interface DashboardDto {
   carbon: CarbonRegionDto[];
   topology: { nodes: TopoNodeDto[]; edges: { from: string; to: string }[] };
   resources: ResourceDto[];
+  overview: OverviewKpis;
+  trend: ProviderDaily[];
+  teams: CostByDimension[];
+  movers: { up: Mover[]; down: Mover[] };
+  totals: { total: number; byProvider: CostByDimension[] };
 }
+
+/* ---------- Master dataset (single source of truth) ---------- */
+export type Team = "Platform" | "Data" | "FinOps" | "Media";
+export type ServiceName = "EC2" | "RDS" | "S3" | "EKS" | "Lambda" | "Azure VM" | "AKS" | "Blob" | "SQL DB" | "GCP Compute" | "GKE" | "BigQuery";
+export type Category = "Compute" | "Kubernetes" | "Storage" | "Database" | "Serverless" | "Analytics";
+export interface MasterResource {
+  id: string; name: string; provider: CloudProvider; service: ServiceName; category: Category; sku: string; region: string;
+  environment: Environment; team: Team; tags: { app: string; costCenter: string };
+  monthlyCost: number; cpuAvg: number; memAvg: number; status: "Running" | "Idle" | "Warning";
+  /** Daily cost, oldest first; last entry = DATA_END_DATE. */
+  daily: number[];
+}
+
+export interface KpiValue { value: number; previous: number; spark: number[] }
+export interface OverviewKpis {
+  totalSpend: KpiValue; forecastEom: KpiValue; dailyBurn: KpiValue; savings: KpiValue; idleWaste: KpiValue;
+  anomalies: KpiValue; costPerUser: KpiValue; costPerRequest: KpiValue; idleCount: number;
+}
+export interface ProviderDaily { day: string; AWS: number; Azure: number; GCP: number; total: number; forecast: number | null; band: [number, number] | null; anomaly?: string }
+export interface Mover { id: string; name: string; provider: CloudProvider; service: ServiceName; current: number; previous: number; delta: number }
+
+export type GroupBy = "service" | "provider" | "region" | "team" | "environment" | "tag";
+export interface ExploreRow { name: string; current: number; previous: number; changePct: number; share: number; spark: number[] }
+/** GET /api/v1/costs/explore */
+export interface ExploreDto { groupBy: GroupBy; keys: string[]; series: Record<string, number | string>[]; rows: ExploreRow[]; total: number; previousTotal: number }
