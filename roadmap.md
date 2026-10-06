@@ -9,6 +9,7 @@
 - [x] Replace the dark glass theme with the approved Apple/Stripe light visual system.
 - [x] Add the selected Interactive FinOps Hub motion and interaction system.- [x] Add AI anomaly analyst (causes + prioritized actions).
 - [x] Phase 1: foundation — grouped nav + routes, command palette, notifications, breadcrumbs, API client + contract.
+- [x] Foundation follow-up: URL filters, query-backed cards, states, table views, coming-soon pages.
 - [ ] Phase 2: Overview, Cost Explorer, Resources, Sustainability pages.
 - [ ] Phase 3: Recommendations, Kubernetes, Security, Budgets, Scenario simulator.
 - [ ] Phase 4: Reports, Integrations, Settings, shortcuts, tests, polish.
