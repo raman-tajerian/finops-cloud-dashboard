@@ -3,6 +3,7 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Too
 import { ArrowDown, ArrowUp, Leaf, TrendingDown } from "lucide-react";
 import { useSustainability } from "@/lib/queries";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import { CardSkeleton, DataTableView, EmptyState, ErrorState, StatusBadge, TableToggle } from "./States";
 import type { CarbonBreakdown, SustainabilityRegionDto } from "@/types/finops";
 
@@ -28,7 +29,7 @@ type RegionSort = "region" | "provider" | "intensity" | "rating" | "tons" | "sha
 function RegionTable({ data }: { data: SustainabilityRegionDto[] }) {
   const [sort, setSort] = useState<{ key: RegionSort; dir: 1 | -1 }>({ key: "tons", dir: -1 });
   const rows = useMemo(() => [...data].sort((a, b) => (typeof a[sort.key] === "number" ? Number(a[sort.key]) - Number(b[sort.key]) : String(a[sort.key]).localeCompare(String(b[sort.key]))) * sort.dir), [data, sort]);
-  const head = (key: RegionSort, label: string) => <th className="px-4 py-3 font-medium"><button className="inline-flex min-h-10 items-center gap-1" onClick={() => setSort((s) => ({ key, dir: s.key === key ? (s.dir === 1 ? -1 : 1) : -1 }))}>{label}{sort.key === key && (sort.dir === 1 ? <ArrowUp className="size-3"/> : <ArrowDown className="size-3"/>)}</button></th>;
+  const head = (key: RegionSort, label: string) => <th className="px-2 py-1 font-medium"><Button variant="ghost" size="sm" className="min-h-10 px-2 font-mono text-[10px] uppercase text-muted-foreground" onClick={() => setSort((s) => ({ key, dir: s.key === key ? (s.dir === 1 ? -1 : 1) : -1 }))}>{label}{sort.key === key && (sort.dir === 1 ? <ArrowUp className="size-3"/> : <ArrowDown className="size-3"/>)}</Button></th>;
   return <article className="organic-card overflow-hidden"><div className="border-b border-border p-5"><h2 className="font-semibold">Region ranking</h2><p className="text-xs text-muted-foreground">Highest estimated emissions first</p></div><div className="overflow-x-auto"><table className="w-full min-w-[720px] text-left text-sm"><thead className="font-mono text-[10px] uppercase text-muted-foreground"><tr>{head("region", "Region")}{head("provider", "Provider")}{head("intensity", "gCO₂/kWh")}{head("rating", "Rating")}{head("tons", "t CO₂e")}{head("share", "Share")}</tr></thead><tbody>{rows.map((r) => <tr key={r.region} className="border-t border-border hover:bg-secondary"><td className="px-4 py-3 font-medium">{r.region}</td><td className="px-4 py-3">{r.provider}</td><td className="metric-numbers px-4 py-3">{r.intensity}</td><td className="px-4 py-3"><StatusBadge tone={r.rating === "A" || r.rating === "B" ? "success" : r.rating === "C" ? "warning" : "critical"}>{r.rating}</StatusBadge></td><td className="metric-numbers px-4 py-3">{r.tons.toFixed(2)}</td><td className="metric-numbers px-4 py-3">{r.share.toFixed(1)}%</td></tr>)}</tbody></table></div></article>;
 }
 
