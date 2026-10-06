@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { BudgetForecast, ResourceTable } from "@/components/finops/Widgets";
+import { ResourceTable } from "@/components/finops/Widgets";
+import { BudgetForecast, WhatIfSimulator } from "@/components/finops/Operations";
 import { AnomalyStrip, CostDistribution, DetailDrawer, K8sHealth, SavingsFeed, type Detail } from "@/components/finops/Platform";
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
 import { DataGate, useDashboard } from "@/lib/queries";
 import { CardBoundary } from "@/components/finops/States";
 import { CostTrendCard, OverviewKpis, TopMovers } from "@/components/finops/Overview";
-import { AnomalyForecast, GreenOps, Tilt, Topology3D, WhatIfSimulator } from "@/components/finops/Insights";
+import { AnomalyForecast, GreenOps, Tilt, Topology3D } from "@/components/finops/Insights";
 import { AnomalyAnalyst } from "@/components/finops/AnomalyAnalyst";
 
 export const Route = createFileRoute("/")({

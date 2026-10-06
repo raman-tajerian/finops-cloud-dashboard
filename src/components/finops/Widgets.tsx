@@ -69,20 +69,6 @@ export function CostTrend({ data }: { data: CostPoint[] }) {
   );
 }
 
-export function BudgetForecast() {
-  const [budget, setBudget] = useState(300);
-  const forecast = 284.6;
-  const percentage = Math.min(100, Math.round((forecast / budget) * 100));
-  return (
-    <article className="organic-card flex h-full min-h-[410px] flex-col p-6 md:p-8">
-      <div className="flex items-start justify-between"><div><Label>Budget & forecast</Label><h2 className="mt-2 text-xl font-medium">Q4 trajectory</h2></div><span className={`rounded-full px-2 py-1 text-xs ${percentage > 95 ? "bg-warning-soft text-warning" : "bg-success-soft text-success"}`}>{percentage}% projected</span></div>
-      <div className="mt-8 flex justify-center"><Ring value={percentage} tone={percentage > 95 ? "warning" : "success"} size={154} /></div>
-      <div className="mt-6 grid grid-cols-2 gap-4 border-t border-border pt-5"><div><Label>Forecast</Label><p className="metric-numbers mt-2 text-xl font-medium">${forecast}k</p></div><div><Label>Budget</Label><p className="metric-numbers mt-2 text-xl font-medium">${budget}k</p></div></div>
-      <div className="mt-auto pt-6"><div className="mb-3 flex justify-between text-xs text-muted-foreground"><span>Adjust scenario</span><span className="metric-numbers">${budget}k</span></div><Slider value={[budget]} min={260} max={360} step={5} onValueChange={(value) => setBudget(value[0] ?? 300)} aria-label="Quarterly budget" /></div>
-    </article>
-  );
-}
-
 const initialLogs = [
   { time: "12:11:04", event: "checkout-api v3.18 deployed", state: "Healthy" },
   { time: "12:08:31", event: "worker-pool scaled 18 → 24 pods", state: "Scaled" },

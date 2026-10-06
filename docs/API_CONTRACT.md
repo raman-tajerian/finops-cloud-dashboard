@@ -23,3 +23,23 @@ Query: `range, providers, env, team`. Returns `ResourcesDto`: `items` (ResourceR
 
 ## GET /api/v1/resources/{id}
 Returns `ResourceDetailDto` (90-day cost and utilization, tags, activity, `rightsizing`) or `null`. The rightsizing saving must use the same rule as recommendations (`rightsizeSaving`).
+
+## GET /api/v1/kubernetes
+Query: global filters. Returns `KubernetesDto` (`src/types/finops.ts`).
+- Clusters = EKS, AKS and GKE resources matching the filters; `monthlyCost` = the resource's last-30-day cost.
+- `nodes = max(3, round(cost / 350))`, `podsTotal = nodes × 14`, failed/pending = `round(pods × rate)` with rate 1% (Running/Idle) or 4% (Warning); which pods fail is chosen with the seeded PRNG.
+- Namespace weights: prod-api 35%, data 25%, web 20%, monitoring 10%, system 10% (sum = cluster cost).
+- Namespace efficiency = `round(avg(cpuAvg, memAvg) × factor)` with factors 1.15 / 1.0 / 0.9 / 0.6 / 0.5; under 30% = over-provisioned.
+- Live CPU/memory gauges and the activity feed are simulated client-side ("Demo telemetry") and not part of this contract.
+
+## GET /api/v1/budget
+Query: global filters. Returns `BudgetDto`.
+- `spendToDate` = month-to-date spend; `forecastEom` uses the same function as the Overview forecast (MTD + 7-day run rate × remaining days).
+- `defaultBudget = 105% × previous quarter (Q3) spend ÷ 3`. The client lets users override it; bar turns amber at 80% and red at 100%.
+
+## GET /api/v1/scenario
+Query: global filters. Returns `ScenarioDto` — eligible spend for the simulator; the client applies `simulate()` (`src/lib/scenario.ts`).
+- `baseline` = Total spend on Overview for the same filters.
+- Reserved Instances: compute + Kubernetes spend × slider × 30%.
+- Region migration (us-east-1 → eu-north-1): moved spend × (1 − cost-index ratio); carbon uses the Sustainability intensities.
+- Rightsizing: Σ `rightsizeSaving()` × (period days / 30) × slider.

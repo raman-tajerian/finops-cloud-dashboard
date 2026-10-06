@@ -42,3 +42,16 @@ export function useSustainability() {
   const { filters } = useGlobalFilters();
   return useQuery({ queryKey: ["sustainability", filters], queryFn: () => api.getSustainability(filters), placeholderData: keepPreviousData, staleTime: 60_000 });
 }
+
+export function useKubernetes() {
+  const { filters } = useGlobalFilters();
+  return useQuery({ queryKey: ["kubernetes", filters], queryFn: () => api.getKubernetes(filters), placeholderData: keepPreviousData, staleTime: 60_000 });
+}
+export function useBudget() {
+  const { filters } = useGlobalFilters();
+  return useQuery({ queryKey: ["budget", filters], queryFn: () => api.getBudget(filters), placeholderData: keepPreviousData, staleTime: 60_000 });
+}
+export function useScenario() {
+  const { filters } = useGlobalFilters();
+  return useQuery({ queryKey: ["scenario", filters], queryFn: () => api.getScenario(filters), placeholderData: keepPreviousData, staleTime: 60_000 });
+}
