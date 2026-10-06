@@ -83,11 +83,11 @@ export function ComingSoon({ icon: I, what }: { icon: LucideIcon; what: string }
 
 /** Isolates one card: a render error shows the error card with Retry instead of breaking the page. */
 export class CardBoundary extends Component<{ children: ReactNode; onReset?: () => void; label?: string }, { error: Error | null }> {
-  state = { error: null as Error | null };
+  override state = { error: null as Error | null };
   static getDerivedStateFromError(error: Error) { return { error }; }
-  componentDidCatch(error: Error) { console.error(`[${this.props.label ?? "card"}]`, error); }
+  override componentDidCatch(error: Error) { console.error(`[${this.props.label ?? "card"}]`, error); }
   reset = () => { this.props.onReset?.(); this.setState({ error: null }); };
-  render() {
+  override render() {
     if (this.state.error) return <ErrorState message={`${this.props.label ?? "This card"} failed to render. Try again.`} onRetry={this.reset} />;
     return this.props.children;
   }
