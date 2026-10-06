@@ -3,7 +3,11 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, P
 import { AlertTriangle, BellPlus, Bot, ChevronRight, Download, EyeOff, FileJson, FileSpreadsheet, FileText, UserPlus, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { fmtUSD } from "@/lib/finops-data";
-import { byRegion, byService, cluster, dailySpend, envShare, platformKpis, providerShare, rangeLabels, recommendations, spark, tickerSeed, type CloudId, type Env, type PlatformRange } from "@/lib/finops-platform-data";
+import { rangeLabels, spark, type CloudId, type Env, type PlatformRange } from "@/lib/finops-platform-data";
+import { useDashboard, useDashboardData } from "@/lib/queries";
+import { allProviders, teams, type Filters, type Team } from "@/lib/filters";
+import { DataTableView, TableToggle } from "./States";
+import type { RecommendationDto } from "@/types/finops";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -12,10 +16,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { CountUp, Tilt } from "./Insights";
-import { unitExtra } from "@/lib/finops-insights-data";
 
-export interface Filters { range: PlatformRange; providers: CloudId[]; env: Env | "All" }
-export const scaleOf = (f: Filters) => f.providers.reduce((s, p) => s + providerShare[p], 0) * (f.env === "All" ? 1 : envShare[f.env]);
+export type { Filters };
 
 const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{children}</p>;
 const Pill = ({ tone, children }: { tone: "success" | "warning" | "destructive" | "muted"; children: ReactNode }) => {
@@ -28,7 +30,8 @@ const chartColors = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(
 
 /* ---------- Filter bar ---------- */
 export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (f: Filters) => void }) {
-  const all: CloudId[] = ["AWS", "Azure", "GCP"];
+  const all: CloudId[] = allProviders;
+  const services = useDashboard().data?.services ?? [];
   const multi = filters.providers.length === 3;
   const toggle = (p: CloudId) => {
     const next = filters.providers.includes(p) ? filters.providers.filter((x) => x !== p) : [...filters.providers, p];
@@ -36,7 +39,7 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
   };
   const exportAs = (kind: "PDF" | "CSV" | "JSON") => {
     if (kind === "PDF") { window.print(); return; }
-    const rows = byService.map((s) => ({ service: s.name, cost: Math.round(s.value * scaleOf(filters)) }));
+    const rows = services.map((s) => ({ service: s.name, cost: s.value }));
     const body = kind === "JSON" ? JSON.stringify({ filters, rows }, null, 2) : ["service,cost", ...rows.map((r) => `${r.service},${r.cost}`)].join("\n");
     const url = URL.createObjectURL(new Blob([body], { type: kind === "JSON" ? "application/json" : "text/csv" }));
     const a = Object.assign(document.createElement("a"), { href: url, download: `nimbusops-report.${kind.toLowerCase()}` });
@@ -58,6 +61,10 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
       <Select value={filters.env} onValueChange={(v) => onChange({ ...filters, env: v as Env | "All" })}>
         <SelectTrigger className="h-9 w-[160px] rounded-xl"><SelectValue /></SelectTrigger>
         <SelectContent>{["All", "Production", "Staging", "Development"].map((e) => <SelectItem key={e} value={e}>{e === "All" ? "All environments" : e}</SelectItem>)}</SelectContent>
+      </Select>
+      <Select value={filters.team} onValueChange={(v) => onChange({ ...filters, team: v as Team | "All" })}>
+        <SelectTrigger className="h-9 w-[140px] rounded-xl" aria-label="Team"><SelectValue /></SelectTrigger>
+        <SelectContent>{["All", ...teams].map((t) => <SelectItem key={t} value={t}>{t === "All" ? "All teams" : t}</SelectItem>)}</SelectContent>
       </Select>
       <div className="ml-auto flex gap-2">
         <BudgetAlertDialog />
@@ -121,20 +128,22 @@ function Spark({ seed, color }: { seed: number; color: string }) {
 }
 
 /* ---------- KPI cards ---------- */
-export function DenseKpis({ scale, onOpen }: { scale: number; onOpen: (d: Detail) => void }) {
-  const k = platformKpis;
-  const s = (n: number) => fmtUSD(n * scale);
+export function DenseKpis({ onOpen }: { onOpen: (d: Detail) => void }) {
+  const k = useDashboardData().kpis;
+  const unitExtra = k.unit;
+  const top = k.anomalies[0];
+  const s = (n: number) => fmtUSD(n);
   const items = [
-    { label: "Total monthly spend", n: k.spend.total * scale, f: (n: number) => fmtUSD(n), value: "", pill: <Pill tone="warning">+{k.spend.mom}% MoM</Pill>, color: "var(--chart-1)", seed: 1,
+    { label: "Total monthly spend", n: k.spend.total, f: (n: number) => fmtUSD(n), value: "", pill: <Pill tone="warning">+{k.spend.mom}% MoM</Pill>, color: "var(--chart-1)", seed: 1,
       subs: [["Daily burn", `${s(k.spend.burn)}/day`], ["EOM projection", s(k.spend.projected)]],
       detail: { title: "Total monthly spend", description: "Month-to-date spend across selected clouds.", rows: [["MTD spend", s(k.spend.total)], ["Month over month", `+${k.spend.mom}%`], ["Daily burn rate", s(k.spend.burn)], ["Projected end of month", s(k.spend.projected)], ["Budget remaining", s(300_000 - k.spend.projected)]] } },
-    { label: "Idle resource waste", n: k.waste.total * scale, f: (n: number) => `${fmtUSD(n)}/mo`, value: "", pill: <Pill tone="warning">34 resources</Pill>, color: "var(--chart-3)", seed: 2,
+    { label: "Idle resource waste", n: k.waste.total, f: (n: number) => `${fmtUSD(n)}/mo`, value: "", pill: <Pill tone="warning">34 resources</Pill>, color: "var(--chart-3)", seed: 2,
       subs: [["Unattached EBS", `${k.waste.ebs}`], ["Idle RDS · Oversized EC2", `${k.waste.rds} · ${k.waste.ec2}`]],
       detail: { title: "Idle resource waste", description: "Resources costing money without doing work.", rows: [["Unattached EBS volumes", `${k.waste.ebs}`], ["Idle RDS instances", `${k.waste.rds}`], ["Oversized EC2 nodes", `${k.waste.ec2}`], ["Monthly waste", s(k.waste.total)]] } },
-    { label: "Cost anomalies", n: k.anomalies.length, f: (n: number) => `${Math.round(n)} active`, value: "", pill: <Pill tone="destructive">Critical</Pill>, color: "var(--destructive)", seed: 3,
-      subs: [["Top spike", `+${k.anomalies[0]!.change}% Blob egress`], ["Est. impact", s(k.anomalies.reduce((a, b) => a + b.impact, 0))]],
+    { label: "Cost anomalies", n: k.anomalies.length, f: (n: number) => `${Math.round(n)} active`, value: "", pill: top ? <Pill tone="destructive">Critical</Pill> : <Pill tone="success">None</Pill>, color: "var(--destructive)", seed: 3,
+      subs: [["Top spike", top ? `+${top.change}% ${top.provider}` : "—"], ["Est. impact", s(k.anomalies.reduce((a, b) => a + b.impact, 0))]],
       detail: { title: "Cost anomalies", description: "Detected spend deviations from the 30-day baseline.", rows: k.anomalies.flatMap((a) => [[a.title, `+${a.change}%`], [`Impact · since ${a.since}`, fmtUSD(a.impact)]] as [string, string][]) } },
-    { label: "Unit economics", n: k.unit.perUser * Math.max(0.6, scale), f: (n: number) => `$${n.toFixed(3)}`, value: "", pill: <Pill tone="success">per active user</Pill>, color: "var(--chart-2)", seed: 4,
+    { label: "Unit economics", n: k.unit.perUser, f: (n: number) => `$${n.toFixed(3)}`, value: "", pill: <Pill tone="success">per active user</Pill>, color: "var(--chart-2)", seed: 4,
       subs: [["Per API request", `$${k.unit.perRequest.toFixed(5)}`], ["Per deployment", `$${unitExtra.perDeployment.toFixed(2)}`], ["Per active session", `$${unitExtra.perSession.toFixed(3)}`], ["Active users", (k.unit.activeUsers / 1e6).toFixed(2) + "M"]],
       detail: { title: "Unit economics", description: "Cloud cost normalized by business volume.", rows: [["Cost per active user", `$${k.unit.perUser}`], ["Cost per API request", `$${k.unit.perRequest}`], ["Cost per deployment", `$${unitExtra.perDeployment}`], ["Cost per active session", `$${unitExtra.perSession}`], ["Active users (30d)", k.unit.activeUsers.toLocaleString("en-US")], ["API requests (30d)", k.unit.requests.toLocaleString("en-US")]] } },
   ];
@@ -156,31 +165,36 @@ export function DenseKpis({ scale, onOpen }: { scale: number; onOpen: (d: Detail
 
 /* ---------- Cost distribution ---------- */
 type View = "service" | "region" | "daily";
-export function CostDistribution({ scale, providers }: { scale: number; providers: CloudId[] }) {
+export function CostDistribution() {
   const [view, setView] = useState<View>("service");
-  const services = byService.map((s) => ({ ...s, value: Math.round(s.value * scale) }));
+  const [asTable, setAsTable] = useState(false);
+  const d = useDashboardData();
+  const providers = d.providers;
+  const services = d.services;
   const total = services.reduce((a, b) => a + b.value, 0);
-  const daily = dailySpend.map((d) => ({ ...d, spend: Math.round(d.spend * scale) }));
+  const daily = d.daily;
   const pct = (v: number) => `${((v / total) * 100).toFixed(1)}%`;
+  const table = view === "service" ? { columns: ["Service", "Cost", "Share"], rows: services.map((s) => [s.name, fmtUSD(s.value), pct(s.value)]) } : view === "region" ? { columns: ["Region", ...providers], rows: d.regions.map((r) => [r.region, ...providers.map((p) => fmtUSD(r[p]))]) } : { columns: ["Day", "Spend"], rows: daily.map((x) => [x.day, fmtUSD(x.spend)]) };
   return (
     <article className={card}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div><Label>Cost distribution</Label><p className="metric-numbers mt-1 text-2xl">{fmtUSD(total)}</p></div>
-        <div className="flex rounded-xl bg-secondary p-1">
+        <div className="flex items-center gap-2"><TableToggle on={asTable} onChange={setAsTable} /><div className="flex rounded-xl bg-secondary p-1">
           {([["service", "By service"], ["region", "By region"], ["daily", "Daily trend"]] as [View, string][]).map(([v, l]) => (
              <button key={v} onClick={() => setView(v)} className={`rounded-lg px-3 py-1 text-xs transition-[transform,background-color,color] duration-200 active:scale-95 ${view === v ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"}`}>{l}</button>
           ))}
-        </div>
+        </div></div>
       </div>
-      <div className="mt-6 h-80">
-        {view === "service" && (
+      <div className="mt-6 h-80" aria-live="polite">
+        {asTable && <DataTableView caption={`Cost distribution ${view}`} columns={table.columns} rows={table.rows} />}
+        {!asTable && view === "service" && (
           <div key="service" className="animate-in fade-in zoom-in-95 grid h-full gap-6 duration-300 md:grid-cols-[1fr_220px]">
             <ResponsiveContainer><PieChart><Pie data={services} dataKey="value" nameKey="name" innerRadius="62%" outerRadius="90%" paddingAngle={2} stroke="none">{services.map((_, i) => <Cell key={i} fill={chartColors[i] ?? "var(--chart-4)"} />)}</Pie><Tooltip contentStyle={tip} formatter={(v) => [`${fmtUSD(Number(v))} · ${pct(Number(v))}`, "Cost"]} /></PieChart></ResponsiveContainer>
             <ul className="hidden flex-col justify-center gap-3 md:flex">{services.map((s, i) => <li key={s.name} className="flex items-center gap-2 text-sm"><span className="size-2 rounded-full" style={{ background: chartColors[i] }} /><span className="flex-1 text-muted-foreground">{s.name}</span><span className="metric-numbers">{pct(s.value)}</span></li>)}</ul>
           </div>
         )}
-        {view === "region" && (
-          <div key="region" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><BarChart data={byRegion.map((r) => ({ region: r.region, AWS: r.AWS * scale, Azure: r.Azure * scale, GCP: r.GCP * scale }))}>
+        {!asTable && view === "region" && (
+          <div key="region" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><BarChart data={d.regions}>
             <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="region" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${Math.round(Number(v) / 1000)}k`} />
             <Tooltip contentStyle={tip} cursor={{ fill: "var(--secondary)" }} formatter={(v, n) => [fmtUSD(Number(v)), String(n)]} />
             {providers.includes("AWS") && <Bar dataKey="AWS" stackId="a" fill="var(--aws)" />}
@@ -188,7 +202,7 @@ export function CostDistribution({ scale, providers }: { scale: number; provider
             {providers.includes("GCP") && <Bar dataKey="GCP" stackId="a" fill="var(--gcp)" radius={[6, 6, 0, 0]} />}
           </BarChart></ResponsiveContainer></div>
         )}
-        {view === "daily" && (
+        {!asTable && view === "daily" && (
           <div key="daily" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><AreaChart data={daily}>
             <defs><linearGradient id="dg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="var(--chart-1)" stopOpacity={0.35} /><stop offset="1" stopColor="var(--chart-1)" stopOpacity={0} /></linearGradient></defs>
             <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="day" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} interval={4} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(Number(v) / 1000).toFixed(1)}k`} />
@@ -204,11 +218,12 @@ export function CostDistribution({ scale, providers }: { scale: number; provider
 /* ---------- Savings feed ---------- */
 type RecState = "open" | "remediating" | "done" | "assigned" | "ignored";
 export function SavingsFeed() {
+  const recommendations = useDashboardData().recommendations;
   const [state, setState] = useState<Record<string, RecState>>({});
   const active = recommendations.filter((r) => (state[r.id] ?? "open") !== "ignored" && state[r.id] !== "done");
   const realized = recommendations.filter((r) => state[r.id] === "done").reduce((a, b) => a + b.savings, 0);
   const pending = active.reduce((a, b) => a + b.savings, 0);
-  const [confirm, setConfirm] = useState<(typeof recommendations)[number] | null>(null);
+  const [confirm, setConfirm] = useState<RecommendationDto | null>(null);
   const remediate = (id: string) => { setState((s) => ({ ...s, [id]: "remediating" })); window.setTimeout(() => { setState((s) => ({ ...s, [id]: "done" })); toast.success("Remediation applied"); }, 1200); };
   return (
     <article className={card}>
@@ -217,6 +232,7 @@ export function SavingsFeed() {
         <div className="text-right"><Label>Realized</Label><p className="metric-numbers mt-1 text-xl text-success">{fmtUSD(realized)}</p></div>
       </div>
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="progress-reveal h-full rounded-full bg-success transition-all duration-700" style={{ width: `${(realized / 18_400) * 100}%` }} /></div>
+      {recommendations.length === 0 && <p className="mt-6 rounded-xl bg-secondary p-6 text-center text-sm text-muted-foreground">No recommendations for this team. Try "All teams" in the filters.</p>}
       <ul className="mt-5 divide-y divide-border">
         {recommendations.map((r) => {
           const st = state[r.id] ?? "open";
@@ -267,6 +283,7 @@ export function SavingsFeed() {
 
 /* ---------- Kubernetes health ---------- */
 export function K8sHealth({ onOpen }: { onOpen: (d: Detail) => void }) {
+  const { cluster, ticker: tickerSeed } = useDashboardData();
   const [cpu, setCpu] = useState(cluster.cpu);
   const [mem, setMem] = useState(cluster.memory);
   const [ticker, setTicker] = useState(() => tickerSeed.slice(0, 4).map((t, i) => ({ t, ago: [12, 26, 41, 58][i]! })));
@@ -277,7 +294,7 @@ export function K8sHealth({ onOpen }: { onOpen: (d: Detail) => void }) {
       setTicker((list) => [{ t: tickerSeed[Math.floor(Math.random() * tickerSeed.length)]!, ago: 0 }, ...list.map((x) => ({ ...x, ago: x.ago + 1 }))].slice(0, 5));
     }, 6000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [tickerSeed]);
   const bars = [["CPU allocation", cpu, cpu > 85 ? "var(--warning)" : "var(--chart-1)", `${cpu}%`], ["Memory utilization", mem, "var(--chart-2)", `${mem}%`], ["Pod health", (cluster.podsHealthy / cluster.podsTotal) * 100, "var(--success)", `${cluster.podsHealthy}/${cluster.podsTotal}`]] as const;
   return (
     <article className={`${card} flex h-full flex-col`}>
@@ -302,11 +319,12 @@ export function K8sHealth({ onOpen }: { onOpen: (d: Detail) => void }) {
 }
 
 export function AnomalyStrip({ onOpen }: { onOpen: (d: Detail) => void }) {
-  const a = platformKpis.anomalies[0]!;
+  const a = useDashboard().data?.kpis.anomalies[0];
+  if (!a) return null;
   return (
     <button onClick={() => onOpen({ title: a.title, description: "Anomaly detected against 30-day baseline.", rows: [["Change", `+${a.change}%`], ["Est. monthly impact", fmtUSD(a.impact)], ["Detected", a.since], ["Suggested action", "Enable CDN caching for media container"]] })} className="group flex w-full items-center gap-3 rounded-2xl bg-destructive-soft px-4 py-2.5 text-left text-sm transition-[transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-destructive-soft/80 active:scale-[0.99]">
       <AlertTriangle className="size-4 shrink-0 text-destructive" />
-      <span className="flex-1"><span className="font-medium text-destructive">Anomaly:</span> <span className="text-foreground">Unexpected +{a.change}% spike in Azure Blob Storage egress fees</span></span>
+      <span className="flex-1"><span className="font-medium text-destructive">Anomaly:</span> <span className="text-foreground">Unexpected +{a.change}% spike in {a.title}</span></span>
       <ChevronRight className="size-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1" />
     </button>
   );

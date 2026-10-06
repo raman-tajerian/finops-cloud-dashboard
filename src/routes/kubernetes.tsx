@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { GlobalFilters } from "@/components/finops/GlobalFilters";
+import { DataGate } from "@/lib/queries";
 import { K8sHealth } from "@/components/finops/Platform";
 import { Topology3D } from "@/components/finops/Insights";
 import { PageHeader } from "@/components/finops/States";
@@ -21,7 +23,8 @@ function KubernetesPage() {
   return (
     <>
       <PageHeader title="Kubernetes" description="Cluster health, utilization and live automation events" />
-      <div className="grid gap-6 xl:grid-cols-2"><K8sHealth onOpen={() => {}} /><Topology3D /></div>
+      <GlobalFilters />
+      <div className="grid gap-6 xl:grid-cols-2"><DataGate h="h-72"><K8sHealth onOpen={() => {}} /></DataGate><DataGate h="h-72"><Topology3D /></DataGate></div>
     </>
   );
 }

@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
-import { toast } from "sonner";
-import { EmptyState } from "@/components/finops/States";
+import { ComingSoon } from "@/components/finops/States";
 import { PageHeader } from "@/components/finops/States";
 
 export const Route = createFileRoute("/security")({
@@ -22,7 +21,7 @@ function SecurityPage() {
   return (
     <>
       <PageHeader title="Security & Compliance" description="Findings and compliance posture across clouds" />
-      <EmptyState icon={ShieldCheck} title="The findings table and compliance cards arrive in the next phase. Run a scan to refresh posture now." action="Run security scan" onAction={() => toast.success("Security scan queued (demo)")} />
+      <ComingSoon icon={ShieldCheck} what="Security & Compliance" />
     </>
   );
 }

@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { GlobalFilters } from "@/components/finops/GlobalFilters";
+import { DataGate } from "@/lib/queries";
 import { CostDistribution } from "@/components/finops/Platform";
 import { AnomalyForecast } from "@/components/finops/Insights";
 import { PageHeader } from "@/components/finops/States";
@@ -21,7 +23,8 @@ function CostExplorerPage() {
   return (
     <>
       <PageHeader title="Cost Explorer" description="Slice spend by service, region and provider" />
-      <div className="grid gap-6"><CostDistribution scale={1} providers={["AWS","Azure","GCP"]} /><AnomalyForecast scale={1} /></div>
+      <GlobalFilters />
+      <div className="grid gap-6"><DataGate h="h-72"><CostDistribution /></DataGate><DataGate h="h-64"><AnomalyForecast /></DataGate></div>
     </>
   );
 }

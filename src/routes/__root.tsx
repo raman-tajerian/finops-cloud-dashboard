@@ -7,11 +7,15 @@ import {
   HeadContent,
   Scripts,
   type ErrorComponentProps,
+  retainSearchParams,
+  stripSearchParams,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
 import { Shell } from "../components/finops/Shell";
 import { Toaster } from "../components/ui/sonner";
+import { zodValidator } from "@tanstack/zod-adapter";
+import { defaultFilters, filterSearchSchema } from "../lib/filters";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -76,6 +80,8 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  validateSearch: zodValidator(filterSearchSchema),
+  search: { middlewares: [retainSearchParams(["range", "providers", "env", "team"]), stripSearchParams(defaultFilters)] },
   head: () => ({
     meta: [
       { charSet: "utf-8" },

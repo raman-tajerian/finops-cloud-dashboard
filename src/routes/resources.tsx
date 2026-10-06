@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { GlobalFilters } from "@/components/finops/GlobalFilters";
+import { DataGate } from "@/lib/queries";
 import { ResourceTable } from "@/components/finops/Widgets";
 import { PageHeader } from "@/components/finops/States";
 
@@ -20,7 +22,8 @@ function ResourcesPage() {
   return (
     <>
       <PageHeader title="Resources" description="Every cloud resource with cost, region and status" />
-      <ResourceTable />
+      <GlobalFilters />
+      <DataGate h="h-72"><ResourceTable /></DataGate>
     </>
   );
 }

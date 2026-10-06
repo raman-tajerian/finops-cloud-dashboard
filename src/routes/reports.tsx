@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FilterBar, scaleOf, type Filters } from "@/components/finops/Platform";
-import { useState } from "react";
+import { FileText } from "lucide-react";
+import { ComingSoon } from "@/components/finops/States";
 import { PageHeader } from "@/components/finops/States";
 
 export const Route = createFileRoute("/reports")({
@@ -21,13 +21,7 @@ function ReportsPage() {
   return (
     <>
       <PageHeader title="Reports" description="Generate, download and schedule cost reports" />
-      <ReportsBody />
+      <ComingSoon icon={FileText} what="Reports" />
     </>
   );
-}
-
-function ReportsBody() {
-  const [f, setF] = useState<Filters>({ range: "mtd", providers: ["AWS", "Azure", "GCP"], env: "All" });
-  void scaleOf;
-  return <div className="space-y-4"><p className="text-sm text-muted-foreground">Use Export report to download the current view as CSV, JSON or PDF.</p><FilterBar filters={f} onChange={setF} /></div>;
 }

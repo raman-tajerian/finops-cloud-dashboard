@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { GlobalFilters } from "@/components/finops/GlobalFilters";
+import { DataGate } from "@/lib/queries";
 import { GreenOps } from "@/components/finops/Insights";
 import { PageHeader } from "@/components/finops/States";
 
@@ -20,7 +22,8 @@ function SustainabilityPage() {
   return (
     <>
       <PageHeader title="Sustainability" description="Estimated carbon footprint by region and provider — figures are estimates" />
-      <div className="max-w-2xl"><GreenOps scale={1} /></div>
+      <GlobalFilters />
+      <div className="max-w-2xl"><DataGate h="h-72"><GreenOps /></DataGate></div>
     </>
   );
 }

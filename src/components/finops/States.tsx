@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { AlertCircle, CheckCircle2, CircleDashed, OctagonAlert, TriangleAlert, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -50,4 +51,32 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry: () 
 
 export function CardSkeleton({ h = "h-40" }: { h?: string }) {
   return <div className="organic-card space-y-3 p-6"><Skeleton className="h-3 w-24" /><Skeleton className="h-7 w-32" /><Skeleton className={`w-full ${h}`} /></div>;
+}
+
+/** Toggle between a chart and an accessible table of the same data. */
+export function TableToggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+  return <Button size="sm" variant="ghost" className="h-8 text-xs text-muted-foreground" aria-pressed={on} onClick={() => onChange(!on)}>{on ? "View as chart" : "View as table"}</Button>;
+}
+export function DataTableView({ columns, rows, caption }: { columns: string[]; rows: (string | number)[][]; caption: string }) {
+  return (
+    <div className="h-full overflow-auto rounded-xl border border-border">
+      <table className="w-full text-left text-sm">
+        <caption className="sr-only">{caption}</caption>
+        <thead className="sticky top-0 bg-card text-xs text-muted-foreground"><tr>{columns.map((c) => <th key={c} scope="col" className="px-4 py-2 font-medium">{c}</th>)}</tr></thead>
+        <tbody>{rows.map((r, i) => <tr key={i} className="border-t border-border">{r.map((v, j) => <td key={j} className={`px-4 py-2 ${j ? "metric-numbers" : ""}`}>{v}</td>)}</tr>)}</tbody>
+      </table>
+    </div>
+  );
+}
+
+/** Placeholder for pages still being built, with a way back to Overview. */
+export function ComingSoon({ icon: I, what }: { icon: LucideIcon; what: string }) {
+  return (
+    <div className="organic-card grid place-items-center gap-3 p-10 text-center">
+      <span className="grid size-11 place-items-center rounded-full bg-secondary"><I className="size-5 text-muted-foreground" /></span>
+      <p className="text-base font-medium">{what} is coming soon</p>
+      <p className="max-w-sm text-sm text-muted-foreground">This page is being built. In the meantime, everything you need is on Overview.</p>
+      <Button asChild><Link to="/">Back to Overview</Link></Button>
+    </div>
+  );
 }

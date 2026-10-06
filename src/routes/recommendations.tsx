@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { GlobalFilters } from "@/components/finops/GlobalFilters";
+import { DataGate } from "@/lib/queries";
 import { SavingsFeed } from "@/components/finops/Platform";
 import { PageHeader } from "@/components/finops/States";
 
@@ -20,7 +22,8 @@ function RecommendationsPage() {
   return (
     <>
       <PageHeader title="Recommendations" description="Savings actions ranked by impact" />
-      <SavingsFeed />
+      <GlobalFilters />
+      <DataGate h="h-72"><SavingsFeed /></DataGate>
     </>
   );
 }
