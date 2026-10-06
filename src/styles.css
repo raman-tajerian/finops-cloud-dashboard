@@ -160,3 +160,6 @@
 @keyframes topo-pulse { 0% { transform: scale(1); opacity: .45 } 100% { transform: scale(2.6); opacity: 0 } }
 .topo-pulse { transform-box: fill-box; transform-origin: center; animation: topo-pulse 1.8s ease-out infinite; }
 @media (prefers-reduced-motion: reduce) { .topo-pulse { animation: none; opacity: .2 } }
+@layer base {
+  :where(a, button, input, textarea, select, [role="button"], [tabindex]):focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+}
