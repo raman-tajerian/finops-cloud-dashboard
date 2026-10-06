@@ -36,15 +36,3 @@ export const forecast = Array.from({ length: 30 }, (_, i) => {
 });
 
 export const unitExtra = { perDeployment: 1.24, perSession: 0.018 };
-export const scenarioBase = { monthly: 248_730, computeShare: 0.58, riDiscount: 0.42, euNorthDiscount: 0.11, usEastShare: 0.45 };
-
-/** Projected monthly savings for the what-if simulator (percentages 0–100). */
-export function simulateSavings(riPct: number, migratePct: number, rightsizePct: number) {
-  const b = scenarioBase;
-  const compute = b.monthly * b.computeShare;
-  const ri = compute * (riPct / 100) * b.riDiscount;
-  const migrate = b.monthly * b.usEastShare * (migratePct / 100) * b.euNorthDiscount;
-  const rightsize = compute * (rightsizePct / 100) * 0.5;
-  const total = Math.round(ri + migrate + rightsize);
-  return { ri: Math.round(ri), migrate: Math.round(migrate), rightsize: Math.round(rightsize), total, projected: b.monthly - total };
-}
