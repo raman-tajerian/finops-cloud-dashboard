@@ -3,7 +3,7 @@ import type { Filters } from "@/lib/filters";
 import type {
   ResourceDetailDto, ResourceRow, ResourcesDto,
   Anomaly, CarbonRegionDto, CostByDimension, DashboardDto, ExploreDto, GroupBy, KpiValue, MasterResource, Mover,
-  ProviderDaily, RecommendationDto, RegionCost, ResourceDto, TopoNodeDto,
+  ProviderDaily, RecommendationDto, RegionCost, ResourceDto, SustainabilityDto, TopoNodeDto,
 } from "@/types/finops";
 import { businessVolume, DATA_END_DATE, dayAt, dayLabel, HISTORY_DAYS } from "./resources";
 import { cluster, tickerSeed } from "./operations";
@@ -81,9 +81,61 @@ export function buildRecommendations(rs: MasterResource[]): RecommendationDto[] 
 }
 
 /* ---------- Carbon ---------- */
-const intensity: Record<string, number> = { "us-east-1": 379, "us-west-2": 240, "eu-west-1": 290, "eu-north-1": 28, westeurope: 268, northeurope: 210, "europe-west1": 112, "us-central1": 410 };
+export const REGION_INTENSITY: Record<string, number> = { "us-east-1": 379, "us-west-2": 240, "eu-west-1": 290, "eu-north-1": 28, westeurope: 268, northeurope: 210, "europe-west1": 112, "us-central1": 410 };
+export const REGION_COST_INDEX: Record<string, number> = { "us-east-1": 1, "us-west-2": 1.04, "eu-west-1": 1.08, "eu-north-1": 1.02, westeurope: 1.05, northeurope: 1.01, "europe-west1": 1.03, "us-central1": 0.98 };
 export const KWH_PER_USD = 2.2;
 const rating = (g: number): CarbonRegionDto["rating"] => (g < 100 ? "A" : g < 200 ? "B" : g < 300 ? "C" : "D");
+/** Single carbon formula used by Overview GreenOps and Sustainability. */
+export const carbonTons = (costUsd: number, region: string) => (costUsd * KWH_PER_USD * (REGION_INTENSITY[region] ?? 300)) / 1e6;
+
+export function buildSustainability(all: MasterResource[], f: Filters): SustainabilityDto {
+  const rs = filterResources(all, f), w = windowOf(f.range), pw = previousOf(w);
+  const footprint = (r: MasterResource, win: Window) => carbonTons(sumWin(r, win), r.region);
+  const totalTons = rs.reduce((a, r) => a + footprint(r, w), 0);
+  const previousTons = rs.reduce((a, r) => a + footprint(r, pw), 0);
+  const totalCost = totalOf(rs, w);
+  const grouped = (key: (r: MasterResource) => string) => {
+    const map = new Map<string, number>();
+    for (const r of rs) map.set(key(r), (map.get(key(r)) ?? 0) + footprint(r, w));
+    return [...map].map(([name, tons]) => ({ name, tons, share: totalTons ? (tons / totalTons) * 100 : 0 })).sort((a, b) => b.tons - a.tons);
+  };
+  const regionCost = new Map<string, number>();
+  const regionCarbon = new Map<string, number>();
+  for (const r of rs) {
+    regionCost.set(r.region, (regionCost.get(r.region) ?? 0) + sumWin(r, w));
+    regionCarbon.set(r.region, (regionCarbon.get(r.region) ?? 0) + footprint(r, w));
+  }
+  const regions = [...regionCarbon].map(([region, tons]) => {
+    const members = rs.filter((r) => r.region === region);
+    const provider = members[0]?.provider ?? "AWS";
+    const intensity = REGION_INTENSITY[region] ?? 300;
+    const cost = regionCost.get(region) ?? 0;
+    return { region, provider, intensity, rating: rating(intensity), tons, cost, share: totalTons ? (tons / totalTons) * 100 : 0 };
+  }).sort((a, b) => b.tons - a.tons);
+  const abCost = regions.filter((r) => r.rating === "A" || r.rating === "B").reduce((a, r) => a + r.cost, 0);
+  const trend = Array.from({ length: w.days }, (_, k) => {
+    const i = w.start + k;
+    return { day: dayLabel(i), tons: rs.reduce((a, r) => a + carbonTons(r.daily[i] ?? 0, r.region), 0) };
+  });
+  const suggestions = rs.map((r) => {
+    const currentIntensity = REGION_INTENSITY[r.region] ?? 300;
+    const candidates = Object.entries(REGION_INTENSITY).filter(([region, g]) => region !== r.region && g < currentIntensity && all.some((x) => x.provider === r.provider && x.region === region));
+    const best = candidates.sort((a, b) => a[1] - b[1])[0];
+    if (!best) return null;
+    const [suggestedRegion, suggestedIntensity] = best;
+    const currentTons = footprint(r, w);
+    const suggestedTons = (currentTons * suggestedIntensity) / currentIntensity;
+    const currentIndex = REGION_COST_INDEX[r.region] ?? 1;
+    const suggestedIndex = REGION_COST_INDEX[suggestedRegion] ?? 1;
+    return { resourceId: r.id, workload: r.name, provider: r.provider, currentRegion: r.region, suggestedRegion, currentIntensity, suggestedIntensity, currentTons, reductionTons: currentTons - suggestedTons, reductionPct: (1 - suggestedIntensity / currentIntensity) * 100, costChangePct: (suggestedIndex / currentIndex - 1) * 100 };
+  }).filter((x): x is NonNullable<typeof x> => x !== null).sort((a, b) => b.currentTons - a.currentTons).slice(0, 3);
+  return {
+    totalTons, previousTons, changePct: previousTons ? ((totalTons - previousTons) / previousTons) * 100 : 0,
+    kgPerThousandUsd: totalCost ? (totalTons * 1000) / (totalCost / 1000) : 0,
+    abSpendShare: totalCost ? (abCost / totalCost) * 100 : 0, trend, regions,
+    providers: grouped((r) => r.provider), services: grouped((r) => r.service), suggestions,
+  };
+}
 
 /* ---------- Dashboard ---------- */
 const kv = (value: number, previous: number, spark: number[]): KpiValue => ({ value, previous, spark: sample(spark) });
@@ -143,9 +195,9 @@ export function buildDashboard(all: MasterResource[], f: Filters): DashboardDto 
 
   // Carbon per region
   const carbon: CarbonRegionDto[] = regions.map((r) => {
-    const cost = r.AWS + r.Azure + r.GCP, g = intensity[r.region] ?? 300;
+    const cost = r.AWS + r.Azure + r.GCP, g = REGION_INTENSITY[r.region] ?? 300;
     const provider = (["AWS", "Azure", "GCP"] as const).reduce((a, b) => (r[b] > r[a] ? b : a));
-    return { region: r.region, provider, intensity: g, rating: rating(g), tons: (cost * KWH_PER_USD * g) / 1e6 };
+    return { region: r.region, provider, intensity: g, rating: rating(g), tons: carbonTons(cost, r.region) };
   }).sort((a, b) => a.intensity - b.intensity);
 
   // Topology costs/health derived from resources

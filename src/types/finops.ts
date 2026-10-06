@@ -19,6 +19,19 @@ export interface RegionCost { region: string; AWS: number; Azure: number; GCP: n
 export interface DailyCost { day: string; spend: number }
 export interface ForecastPoint { day: string; forecast: number; band: [number, number]; actual: number | null }
 export interface CarbonRegionDto { region: string; provider: CloudProvider; intensity: number; rating: "A" | "B" | "C" | "D"; tons: number }
+export interface SustainabilityRegionDto extends CarbonRegionDto { cost: number; share: number }
+export interface CarbonBreakdown { name: string; tons: number; share: number }
+export interface CarbonTrendPoint { day: string; tons: number }
+export interface GreenerRegionSuggestion {
+  resourceId: string; workload: string; provider: CloudProvider; currentRegion: string; suggestedRegion: string;
+  currentIntensity: number; suggestedIntensity: number; currentTons: number; reductionTons: number; reductionPct: number; costChangePct: number;
+}
+/** GET /api/v1/sustainability */
+export interface SustainabilityDto {
+  totalTons: number; previousTons: number; changePct: number; kgPerThousandUsd: number; abSpendShare: number;
+  trend: CarbonTrendPoint[]; regions: SustainabilityRegionDto[]; providers: CarbonBreakdown[]; services: CarbonBreakdown[];
+  suggestions: GreenerRegionSuggestion[];
+}
 export interface TopoNodeDto { id: string; label: string; kind: "region" | "vpc" | "cluster"; health: "ok" | "oversized" | "anomaly"; x: number; y: number; z: number; cost: number }
 
 /** Everything the dashboard cards need for one filter combination: GET /api/v1/dashboard */

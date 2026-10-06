@@ -37,3 +37,8 @@ export function useResources() {
 export function useResource(id: string | undefined) {
   return useQuery({ queryKey: ["resource", id], queryFn: () => api.getResource(id!), enabled: !!id, staleTime: 60_000 });
 }
+
+export function useSustainability() {
+  const { filters } = useGlobalFilters();
+  return useQuery({ queryKey: ["sustainability", filters], queryFn: () => api.getSustainability(filters), placeholderData: keepPreviousData, staleTime: 60_000 });
+}
