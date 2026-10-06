@@ -16,7 +16,7 @@ describe("kubernetes", () => {
   it.each(combos)("namespace costs sum to cluster cost; clusters sum to EKS+AKS+GKE on Resources (%#)", (f) => {
     const k = buildKubernetes(masterResources, f);
     for (const c of k.clusters) expect(c.namespaces.reduce((a, n) => a + n.cost, 0)).toBeCloseTo(c.monthlyCost, 6);
-    const res = buildResources(masterResources, f).rows.filter((r) => ["EKS", "AKS", "GKE"].includes(r.service));
+    const res = buildResources(masterResources, f).items.filter((r) => ["EKS", "AKS", "GKE"].includes(r.service));
     expect(k.totalCost).toBeCloseTo(res.reduce((a, r) => a + r.monthlyCost, 0), 6);
     expect(k.clusters.length).toBe(res.length);
   });
