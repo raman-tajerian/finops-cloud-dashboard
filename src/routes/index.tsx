@@ -29,7 +29,7 @@ function Index() {
     <>
       <div className="reveal-up"><CardBoundary label="Anomaly banner"><AnomalyStrip onOpen={setDetail} /></CardBoundary></div>
       <div className="reveal-up reveal-delay-1 flex flex-wrap items-end justify-between gap-4">
-        <div><p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Cloud & FinOps platform · <ResourceCount /> resources</p><h1 className="mt-1 text-3xl font-semibold tracking-tight md:text-4xl">Good afternoon, Raman.</h1></div>
+        <div><p className="font-mono text-[10px] text-muted-foreground">Cloud & FinOps platform · <ResourceCount /> resources</p><h1 className="mt-1 text-3xl font-semibold tracking-tight md:text-4xl">Good afternoon, Raman.</h1></div>
       </div>
       <div className="reveal-up reveal-delay-2"><GlobalFilters /></div>
       <div className="reveal-up reveal-delay-3"><DataGate h="h-16"><OverviewKpis /></DataGate></div>

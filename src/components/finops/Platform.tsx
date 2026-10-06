@@ -21,7 +21,7 @@ import { CountUp, Tilt } from "./Insights";
 
 export type { Filters };
 
-const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{children}</p>;
+const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] text-muted-foreground">{children}</p>;
 const Pill = ({ tone, children }: { tone: "success" | "warning" | "destructive" | "muted"; children: ReactNode }) => {
   const c = { success: "bg-success-soft text-success", warning: "bg-warning-soft text-warning", destructive: "bg-destructive-soft text-destructive", muted: "bg-secondary text-muted-foreground" }[tone];
   return <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${c}`}>{children}</span>;

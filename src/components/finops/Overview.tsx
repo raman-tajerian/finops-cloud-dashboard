@@ -9,7 +9,7 @@ import { CountUp } from "./Insights";
 import { Spark } from "./Platform";
 import type { KpiValue } from "@/types/finops";
 
-const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{children}</p>;
+const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] text-muted-foreground">{children}</p>;
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
 type To = "/cost-explorer" | "/recommendations" | "/resources" | "/budgets";
 
