@@ -3,7 +3,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useGlobalFilters } from "@/lib/filters";
 import { CardBoundary, CardSkeleton, ErrorState } from "@/components/finops/States";
-import type { DashboardDto } from "@/types/finops";
+import type { DashboardDto, GroupBy } from "@/types/finops";
 
 /** Dashboard data for the active URL filters; the key includes every filter. */
 export function useDashboard() {
@@ -22,4 +22,10 @@ export function DataGate({ children, h }: { children: ReactNode; h?: string }) {
   if (q.isPending) return <CardSkeleton h={h ?? "h-40"} />;
   if (q.isError) return <ErrorState message="We couldn't load this data. Check your connection and try again." onRetry={() => q.refetch()} />;
   return <CardBoundary onReset={() => q.refetch()}>{children}</CardBoundary>;
+}
+
+/** Cost Explorer data; the key includes every global filter plus the grouping. */
+export function useExplore(groupBy: GroupBy) {
+  const { filters } = useGlobalFilters();
+  return useQuery({ queryKey: ["explore", filters, groupBy], queryFn: () => api.getExplore(filters, groupBy), placeholderData: keepPreviousData, staleTime: 60_000 });
 }
