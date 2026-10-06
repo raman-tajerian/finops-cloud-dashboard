@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
-import { DataGate } from "@/lib/queries";
-import { GreenOps } from "@/components/finops/Insights";
+import { SustainabilityDashboard } from "@/components/finops/Sustainability";
 import { PageHeader } from "@/components/finops/States";
 
 export const Route = createFileRoute("/sustainability")({
@@ -23,7 +22,7 @@ function SustainabilityPage() {
     <>
       <PageHeader title="Sustainability" description="Estimated carbon footprint by region and provider — figures are estimates" />
       <GlobalFilters />
-      <div className="max-w-2xl"><DataGate h="h-72"><GreenOps /></DataGate></div>
+      <SustainabilityDashboard />
     </>
   );
 }

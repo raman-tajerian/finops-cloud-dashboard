@@ -35,5 +35,10 @@ export function useResources() {
   return useQuery({ queryKey: ["resources", filters], queryFn: () => api.getResources(filters), placeholderData: keepPreviousData, staleTime: 60_000 });
 }
 export function useResource(id: string | undefined) {
-  return useQuery({ queryKey: ["resource", id], queryFn: () => api.getResource(id!), enabled: !!id, staleTime: 60_000 });
+  return useQuery({ queryKey: ["resource", id], queryFn: () => id ? api.getResource(id) : Promise.resolve(null), enabled: !!id, staleTime: 60_000 });
+}
+
+export function useSustainability() {
+  const { filters } = useGlobalFilters();
+  return useQuery({ queryKey: ["sustainability", filters], queryFn: () => api.getSustainability(filters), placeholderData: keepPreviousData, staleTime: 60_000 });
 }

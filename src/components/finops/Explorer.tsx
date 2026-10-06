@@ -1,4 +1,4 @@
-import { useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDown, ArrowUp, Bookmark, Download, FileJson, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
@@ -26,18 +26,9 @@ const Seg = <T extends string>({ value, options, onChange, label }: { value: T; 
   </div>
 );
 
-/* ---------- Saved views (session memory only) ---------- */
-interface SavedView { name: string; filters: Filters; state: ExplorerState }
-let saved: SavedView[] = [];
-const subs = new Set<() => void>();
-const viewStore = {
-  subscribe: (f: () => void) => { subs.add(f); return () => subs.delete(f); },
-  get: () => saved,
-  add: (v: SavedView) => { saved = [...saved.filter((x) => x.name !== v.name), v]; subs.forEach((f) => f()); },
-};
+export interface SavedView { name: string; filters: Filters; state: ExplorerState }
 
-function SavedViews({ state, onApply }: { state: ExplorerState; onApply: (v: SavedView) => void }) {
-  const views = useSyncExternalStore(viewStore.subscribe, viewStore.get, viewStore.get);
+function SavedViews({ state, views, onSave, onApply }: { state: ExplorerState; views: SavedView[]; onSave: (v: SavedView) => void; onApply: (v: SavedView) => void }) {
   const { filters } = useGlobalFilters();
   const [name, setName] = useState("");
   return (
@@ -46,11 +37,11 @@ function SavedViews({ state, onApply }: { state: ExplorerState; onApply: (v: Sav
         <PopoverTrigger asChild><Button variant="secondary" className="rounded-xl"><Bookmark />Save view</Button></PopoverTrigger>
         <PopoverContent align="end" className="w-64 space-y-3">
           <Label>View name</Label>
-          <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (!name.trim()) return; viewStore.add({ name: name.trim(), filters, state }); toast.success(`Saved view "${name.trim()}"`); setName(""); }}>
+          <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (!name.trim()) return; onSave({ name: name.trim(), filters, state }); toast.success(`Saved view "${name.trim()}"`); setName(""); }}>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Prod by team" maxLength={40} aria-label="View name" />
             <Button type="submit" disabled={!name.trim()}>Save</Button>
           </form>
-          <p className="text-[11px] text-muted-foreground">Kept for this session. Share the page link to share a view.</p>
+          <p className="text-[11px] text-muted-foreground">Saved in this page URL so it survives reload and can be shared.</p>
         </PopoverContent>
       </Popover>
       <DropdownMenu>
@@ -78,7 +69,7 @@ export function toCsv(rows: ExploreRow[], group: GroupBy) {
 
 /* ---------- Page body ---------- */
 type SortKey = "name" | "current" | "previous" | "changePct" | "share";
-export function CostExplorer({ state, setState }: { state: ExplorerState; setState: (s: Partial<ExplorerState>, f?: Filters) => void }) {
+export function CostExplorer({ state, views, setViews, setState }: { state: ExplorerState; views: SavedView[]; setViews: (v: SavedView[]) => void; setState: (s: Partial<ExplorerState>, f?: Filters) => void }) {
   const q = useExplore(state.group);
   const { filters } = useGlobalFilters();
   if (q.isPending) return <CardSkeleton h="h-96" />;
@@ -99,7 +90,7 @@ export function CostExplorer({ state, setState }: { state: ExplorerState; setSta
           <input type="checkbox" checked={state.compare} onChange={(e) => setState({ compare: e.target.checked })} className="accent-[var(--primary)]" />Compare to previous period
         </label>
         <div className="ml-auto flex flex-wrap gap-2">
-          <SavedViews state={state} onApply={(v) => { setState(v.state, v.filters); toast(`Opened "${v.name}"`); }} />
+          <SavedViews state={state} views={views} onSave={(v) => setViews([...views.filter((x) => x.name !== v.name), v].slice(-8))} onApply={(v) => { setState(v.state, v.filters); toast(`Opened "${v.name}"`); }} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild><Button variant="secondary" className="rounded-xl"><Download />Export</Button></DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -138,7 +129,7 @@ function ExplorerChart({ d, state }: { d: ExploreDto; state: ExplorerState }) {
         {asTable ? <DataTableView caption={`Daily spend by ${state.group}`} columns={["Day", ...d.keys, "Total", ...(state.compare ? ["Previous"] : [])]} rows={d.series.map((s) => [String(s["day"]), ...d.keys.map((k) => fmtUSD(Number(s[k]))), fmtUSD(Number(s["total"])), ...(state.compare ? [fmtUSD(Number(s["previous"]))] : [])])} /> :
         <ResponsiveContainer key={`${state.chart}-${state.group}`}>
           {state.chart === "bar" ? (
-            <BarChart data={d.series}>{children}{d.keys.map((k, i) => <Bar key={k} dataKey={k} stackId="s" fill={col(i)} fillOpacity={0.85} />)}</BarChart>
+            <BarChart data={d.series}>{children}{d.keys.map((k, i) => <Bar key={k} dataKey={k} stackId="s" fill={col(i)} fillOpacity={0.85} />)}{overlay}</BarChart>
           ) : state.chart === "line" ? (
             <LineChart data={d.series}>{children}{d.keys.map((k, i) => <Line key={k} dataKey={k} stroke={col(i)} dot={false} strokeWidth={1.6} />)}{overlay}</LineChart>
           ) : (
@@ -146,7 +137,6 @@ function ExplorerChart({ d, state }: { d: ExploreDto; state: ExplorerState }) {
           )}
         </ResponsiveContainer>}
       </div>
-      {state.compare && state.chart === "bar" && <p className="mt-2 text-[11px] text-muted-foreground">Previous-period overlay shows on Area and Line charts; the table below lists previous costs.</p>}
     </article>
   );
 }
@@ -161,8 +151,8 @@ function ExplorerTable({ d, group }: { d: ExploreDto; group: GroupBy }) {
   );
   const totalChange = d.previousTotal ? ((d.total - d.previousTotal) / d.previousTotal) * 100 : 0;
   return (
-    <article className="organic-card overflow-hidden">
-      <div className="overflow-x-auto">
+    <article className="organic-card inline-contain min-w-0 max-w-full overflow-hidden">
+      <div className="max-w-full overflow-x-auto overscroll-x-contain">
         <table className="w-full min-w-[720px] text-left text-sm">
           <caption className="sr-only">Cost by {group}</caption>
           <thead className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground"><tr>{th("name", groupLabels[group], false)}{th("current", "Current")}{th("previous", "Previous")}{th("changePct", "Change")}{th("share", "Share")}<th scope="col" className="px-4 py-3 font-medium">Trend</th></tr></thead>

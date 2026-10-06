@@ -18,3 +18,4 @@
 - All cost figures derive from the seeded master dataset in src/data via pure functions in src/data/aggregate.ts — one source keeps totals identical across cards (tested in src/test/aggregate.test.ts).
 - Every card sits in a CardBoundary (DataGate includes one) and routes use the router's defaultErrorComponent — one failure never takes down a page.
 - Per-resource savings come only from rightsizeSaving() in src/data/aggregate.ts — recommendations and the resource drawer must show identical numbers.
+- Carbon estimates come only from carbonTons()/buildSustainability() in src/data/aggregate.ts — Overview and Sustainability must reconcile exactly.
