@@ -49,7 +49,8 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
     toast.success(`${kind} report exported`);
   };
   return (
-    <div className="organic-card flex min-w-0 max-w-full flex-wrap items-center gap-3 p-3">
+    <div className="organic-card @container flex min-w-0 max-w-full items-center gap-3 p-3">
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
       <Select value={filters.range} onValueChange={(v) => { onChange({ ...filters, range: v as PlatformRange }); if (v === "custom") toast("Custom range: Sep 4 – Oct 3, 2026"); }}>
         <SelectTrigger className="h-9 w-[150px] rounded-xl" aria-label="Date range"><SelectValue /></SelectTrigger>
         <SelectContent>{(Object.keys(rangeLabels) as PlatformRange[]).map((r) => <SelectItem key={r} value={r}>{rangeLabels[r]}</SelectItem>)}</SelectContent>
@@ -74,10 +75,11 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
           </Select>
         </PopoverContent>
       </Popover>
-      <div className="ml-auto flex shrink-0 gap-2">
+      </div>
+      <div className="flex shrink-0 items-center gap-2 self-center">
         <BudgetAlertDialog />
         <DropdownMenu>
-          <DropdownMenuTrigger asChild><Button variant="secondary" className="rounded-xl"><Download /><span className="hidden 2xl:inline">Export report</span><span className="2xl:hidden">Export</span></Button></DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild><Button variant="outline" aria-label="Export" className="rounded-xl border-border bg-card shadow-none"><Download /><span className="hidden @[860px]:inline">Export</span></Button></DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => exportAs("PDF")}><FileText />PDF</DropdownMenuItem>
             <DropdownMenuItem onClick={() => exportAs("CSV")}><FileSpreadsheet />CSV</DropdownMenuItem>
@@ -96,7 +98,7 @@ function BudgetAlertDialog() {
   const [threshold, setThreshold] = useState(80);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button className="rounded-xl"><BellPlus /><span className="hidden 2xl:inline">Create budget alert</span><span className="2xl:hidden">Budget alert</span></Button></DialogTrigger>
+      <DialogTrigger asChild><Button aria-label="Budget alert" className="rounded-xl"><BellPlus /><span className="hidden @[860px]:inline">Budget alert</span></Button></DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>Create budget alert</DialogTitle><DialogDescription>Get notified when spend crosses a threshold.</DialogDescription></DialogHeader>
         <div className="space-y-4">
