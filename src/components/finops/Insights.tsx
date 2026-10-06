@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] text-muted-foreground">{children}</p>;
+const Label = ({ children }: { children: ReactNode }) => <p className="text-[15px] font-medium leading-snug text-foreground">{children}</p>;
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
 
 /** Animated number counter that re-tweens whenever value changes. */
@@ -77,7 +77,7 @@ export function Topology3D() {
   return (
     <article className="organic-card flex h-full flex-col p-6">
       <div className="flex items-start justify-between gap-3">
-        <div><Label>Cloud topology</Label><p className="mt-1 text-sm text-muted-foreground">Regions, VPCs and clusters · drag to rotate</p></div>
+        <div><Label>Cloud topology</Label><p className="mt-1 text-[13px] text-muted-foreground">Regions, VPCs and clusters · drag to rotate</p></div>
         <div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><Move3d className="size-4 text-muted-foreground" /></div>
       </div>
       {asTable ? <div className="mt-4 h-[300px]"><DataTableView caption="Cloud topology nodes" columns={["Node", "Type", "Health", "Cost / mo"]} rows={topoNodes.map((n) => [n.label, n.kind, n.health === "ok" ? "Healthy" : n.health, fmtUSD(n.cost)])} /></div> :
@@ -154,7 +154,7 @@ export function AnomalyForecast() {
   return (
     <article className="organic-card h-full p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div><Label>Anomaly detection · spend forecast</Label><p className="mt-1 text-sm text-muted-foreground">Daily spend vs. 90% confidence band</p></div>
+        <div><Label>Anomaly detection · spend forecast</Label><p className="mt-1 text-[13px] text-muted-foreground">Daily spend vs. 90% confidence band</p></div>
         <motion.span initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="inline-flex items-center gap-1.5 rounded-full bg-destructive-soft px-2.5 py-1 text-[11px] font-medium text-destructive">
           <span className="size-1.5 animate-pulse rounded-full bg-destructive" /><TrendingUp className="size-3" />{top ? `+${top.change}% spike in ${top.title}` : "No active anomalies"}
         </motion.span>
@@ -201,7 +201,7 @@ export function WhatIfSimulator() {
   return (
     <article className="organic-card h-full p-6">
       <div className="flex items-start justify-between gap-3">
-        <div><Label>What-if scenario simulator</Label><p className="mt-1 text-sm text-muted-foreground">Model commitments and migrations in real time</p></div>
+        <div><Label>What-if scenario simulator</Label><p className="mt-1 text-[13px] text-muted-foreground">Model commitments and migrations in real time</p></div>
         <Dialog>
           <DialogTrigger asChild><Button size="sm" variant="secondary"><Calculator />Expand</Button></DialogTrigger>
           <DialogContent className="sm:max-w-lg"><DialogHeader><DialogTitle>What-if scenario simulator</DialogTitle><DialogDescription>Based on current $248,730 monthly spend.</DialogDescription></DialogHeader>{body}</DialogContent>

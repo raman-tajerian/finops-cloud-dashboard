@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function PageHeader({ title, description, actions }: { title: string; description: string; actions?: ReactNode }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
-      <div className="min-w-0"><h1 className="text-2xl font-semibold tracking-tight">{title}</h1><p className="mt-1 text-sm text-muted-foreground">{description}</p></div>
+      <div className="min-w-0"><h1 className="font-display text-[30px] font-normal leading-tight tracking-tight">{title}</h1><p className="mt-1 text-[13px] text-muted-foreground">{description}</p></div>
       {actions}
     </div>
   );

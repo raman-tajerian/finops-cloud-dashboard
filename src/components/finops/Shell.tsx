@@ -88,7 +88,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <Button variant="ghost" size="icon" className="size-10 lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu"><Menu /></Button>
           <nav aria-label="Breadcrumb" className="min-w-0 truncate text-sm"><span className="text-muted-foreground">Acme Corp</span><span className="px-2 text-muted-foreground">/</span><span className="font-medium">{current.label}</span></nav>
           <div className="ml-auto flex items-center gap-2">
-            <Button variant="secondary" className="hidden h-10 gap-2 text-muted-foreground md:flex" onClick={() => setPalette(true)}><Search />Search<kbd className="rounded border border-border px-1.5 font-mono text-[10px]">⌘K</kbd></Button>
+            <Button variant="outline" className="hidden h-10 gap-2 border-border bg-card text-muted-foreground shadow-none md:flex" onClick={() => setPalette(true)}><Search />Search<kbd className="rounded border border-border px-1.5 font-mono text-[10px]">⌘K</kbd></Button>
             <Button variant="ghost" size="icon" className="size-10 md:hidden" onClick={() => setPalette(true)} aria-label="Search"><Search /></Button>
             <Popover>
               <PopoverTrigger asChild>
@@ -119,7 +119,7 @@ export function Shell({ children }: { children: ReactNode }) {
             </DropdownMenu>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[1540px] space-y-6 p-4 md:p-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1540px] min-w-0 space-y-6 p-4 pb-24 md:p-8 md:pb-24">{children}</main>
         <footer className="mx-auto flex max-w-[1540px] flex-wrap gap-3 px-4 pb-8 text-xs text-muted-foreground md:px-8"><span>NimbusOps v0.4.0</span><span>·</span><span>{dataSource === "live" ? "Live data" : "Demo data — all figures are simulated"}</span></footer>
       </div>
 
