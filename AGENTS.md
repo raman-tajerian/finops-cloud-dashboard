@@ -17,3 +17,4 @@
 - Global filters live in the root route's URL search (validated in src/lib/filters.ts, retained across nav); cards read data via useDashboard/DataGate in src/lib/queries.tsx keyed by filters.
 - All cost figures derive from the seeded master dataset in src/data via pure functions in src/data/aggregate.ts — one source keeps totals identical across cards (tested in src/test/aggregate.test.ts).
 - Every card sits in a CardBoundary (DataGate includes one) and routes use the router's defaultErrorComponent — one failure never takes down a page.
+- Per-resource savings come only from rightsizeSaving() in src/data/aggregate.ts — recommendations and the resource drawer must show identical numbers.

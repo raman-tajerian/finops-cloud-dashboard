@@ -14,4 +14,5 @@
 - [ ] Phase 3: Recommendations, Kubernetes, Security, Budgets, Scenario simulator.
 - [ ] Phase 4: Reports, Integrations, Settings, shortcuts, tests, polish.
 - [x] Phase 2a: master dataset, error boundaries, one-row filter bar, Overview KPIs/trend/movers, Cost Explorer.
-- [ ] Phase 2b: Resources (advanced table) and Sustainability pages.
+- [x] Phase 2b: Resources page (advanced table, bulk actions, detail drawer, URL state).
+- [ ] Sustainability page.
