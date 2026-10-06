@@ -66,3 +66,14 @@ export type GroupBy = "service" | "provider" | "region" | "team" | "environment"
 export interface ExploreRow { name: string; current: number; previous: number; changePct: number; share: number; spark: number[] }
 /** GET /api/v1/costs/explore */
 export interface ExploreDto { groupBy: GroupBy; keys: string[]; series: Record<string, number | string>[]; rows: ExploreRow[]; total: number; previousTotal: number }
+
+export interface ResourceRow { id: string; name: string; provider: CloudProvider; service: ServiceName; sku: string; region: string; environment: Environment; team: Team; monthlyCost: number; cpuAvg: number; memAvg: number; status: "Running" | "Idle" | "Warning" }
+/** GET /api/v1/resources */
+export interface ResourcesDto { items: ResourceRow[]; count: number; monthlyTotal: number; periodTotal: number }
+/** GET /api/v1/resources/{id} */
+export interface ResourceDetailDto {
+  resource: ResourceRow; tags: Record<string, string>;
+  cost: { day: string; cost: number }[]; util: { day: string; cpu: number; mem: number }[];
+  activity: { day: string; text: string; tone: "success" | "warning" | "critical" | "idle" }[];
+  rightsizing: { saving: number; action: string } | null;
+}

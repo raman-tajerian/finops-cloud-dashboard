@@ -17,3 +17,9 @@ Returns `ExploreDto` (src/types/finops.ts): `keys`, daily `series` (one column p
 
 ## Derivation rules (mock mode)
 All figures are computed in `src/data/aggregate.ts` from the seeded dataset in `src/data/resources.ts`. The live API must keep these invariants: sum by provider = sum by service = sum by team = total spend for the same filters.
+
+## GET /api/v1/resources
+Query: `range, providers, env, team`. Returns `ResourcesDto`: `items` (ResourceRow), `count`, `monthlyTotal` (sum of last-30-day cost), `periodTotal` (same value as Overview total spend for these filters).
+
+## GET /api/v1/resources/{id}
+Returns `ResourceDetailDto` (90-day cost and utilization, tags, activity, `rightsizing`) or `null`. The rightsizing saving must use the same rule as recommendations (`rightsizeSaving`).

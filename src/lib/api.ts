@@ -1,8 +1,8 @@
 // Typed API client. Uses the seeded master dataset unless VITE_API_BASE_URL is set, then calls GET {base}/api/v1/...
 import { masterResources } from "@/data/resources";
-import { buildDashboard, buildExplore } from "@/data/aggregate";
+import { buildDashboard, buildExplore, buildResourceDetail, buildResources } from "@/data/aggregate";
 import type { Filters } from "@/lib/filters";
-import type { DashboardDto, ExploreDto, GroupBy } from "@/types/finops";
+import type { DashboardDto, ExploreDto, GroupBy, ResourceDetailDto, ResourcesDto } from "@/types/finops";
 
 const base = (import.meta.env["VITE_API_BASE_URL"] as string | undefined)?.replace(/\/$/, "");
 export const dataSource: "live" | "demo" = base ? "live" : "demo";
@@ -20,4 +20,6 @@ async function call<T>(path: string, mock: () => T): Promise<T> {
 export const api = {
   getDashboard: (f: Filters) => call<DashboardDto>(`/dashboard?${qs(f)}`, () => buildDashboard(masterResources, f)),
   getExplore: (f: Filters, groupBy: GroupBy) => call<ExploreDto>(`/costs/explore?${qs(f, { groupBy })}`, () => buildExplore(masterResources, f, groupBy)),
+  getResources: (f: Filters) => call<ResourcesDto>(`/resources?${qs(f)}`, () => buildResources(masterResources, f)),
+  getResource: (id: string) => call<ResourceDetailDto | null>(`/resources/${encodeURIComponent(id)}`, () => buildResourceDetail(masterResources, id)),
 };
