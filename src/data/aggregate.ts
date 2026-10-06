@@ -202,7 +202,7 @@ export function buildExplore(all: MasterResource[], f: Filters, g: GroupBy): Exp
     for (const key of keys) row[key] = 0;
     let t = 0, p = 0;
     for (const r of rs) { const val = r.daily[i] ?? 0; row[keyOf[g](r)] = (row[keyOf[g](r)] as number) + val; t += val; p += r.daily[pw.start + k] ?? 0; }
-    row.total = t; row.previous = p;
+    row["total"] = t; row["previous"] = p;
     return row;
   });
   const rows = cur.map((c) => {
