@@ -16,7 +16,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 export type ChartType = "area" | "bar" | "line";
 export interface ExplorerState { group: GroupBy; chart: ChartType; compare: boolean }
 export const groupLabels: Record<GroupBy, string> = { service: "Service", provider: "Provider", region: "Region", team: "Team", environment: "Environment", tag: "Tag (app)" };
-const palette = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--aws)", "var(--azure)", "var(--gcp)", "var(--muted-foreground)"];
+const palette: string[] = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--aws)", "var(--azure)", "var(--gcp)", "var(--muted-foreground)"];
+const col = (i: number) => palette[i % palette.length] ?? "var(--chart-1)";
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
 const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{children}</p>;
 const Seg = <T extends string>({ value, options, onChange, label }: { value: T; options: [T, string][]; onChange: (v: T) => void; label: string }) => (
@@ -137,11 +138,11 @@ function ExplorerChart({ d, state }: { d: ExploreDto; state: ExplorerState }) {
         {asTable ? <DataTableView caption={`Daily spend by ${state.group}`} columns={["Day", ...d.keys, "Total", ...(state.compare ? ["Previous"] : [])]} rows={d.series.map((s) => [String(s["day"]), ...d.keys.map((k) => fmtUSD(Number(s[k]))), fmtUSD(Number(s["total"])), ...(state.compare ? [fmtUSD(Number(s["previous"]))] : [])])} /> :
         <ResponsiveContainer key={`${state.chart}-${state.group}`}>
           {state.chart === "bar" ? (
-            <BarChart data={d.series}>{children}{d.keys.map((k, i) => <Bar key={k} dataKey={k} stackId="s" fill={palette[i % palette.length]} fillOpacity={0.85} />)}</BarChart>
+            <BarChart data={d.series}>{children}{d.keys.map((k, i) => <Bar key={k} dataKey={k} stackId="s" fill={col(i)} fillOpacity={0.85} />)}</BarChart>
           ) : state.chart === "line" ? (
-            <LineChart data={d.series}>{children}{d.keys.map((k, i) => <Line key={k} dataKey={k} stroke={palette[i % palette.length]} dot={false} strokeWidth={1.6} />)}{overlay}</LineChart>
+            <LineChart data={d.series}>{children}{d.keys.map((k, i) => <Line key={k} dataKey={k} stroke={col(i)} dot={false} strokeWidth={1.6} />)}{overlay}</LineChart>
           ) : (
-            <AreaChart data={d.series}>{children}{d.keys.map((k, i) => <Area key={k} dataKey={k} stackId="s" stroke={palette[i % palette.length]} fill={palette[i % palette.length]} fillOpacity={0.1} />)}{overlay}</AreaChart>
+            <AreaChart data={d.series}>{children}{d.keys.map((k, i) => <Area key={k} dataKey={k} stackId="s" stroke={col(i)} fill={col(i)} fillOpacity={0.1} />)}{overlay}</AreaChart>
           )}
         </ResponsiveContainer>}
       </div>
@@ -168,12 +169,12 @@ function ExplorerTable({ d, group }: { d: ExploreDto; group: GroupBy }) {
           <tbody>
             {rows.map((r, i) => (
               <tr key={r.name} className="border-t border-border hover:bg-secondary">
-                <td className="sticky left-0 bg-card px-4 py-3 font-medium"><span className="mr-2 inline-block size-2 rounded-full" style={{ background: palette[d.keys.indexOf(r.name) % palette.length] }} />{r.name}</td>
+                <td className="sticky left-0 bg-card px-4 py-3 font-medium"><span className="mr-2 inline-block size-2 rounded-full" style={{ background: col(d.keys.indexOf(r.name)) }} />{r.name}</td>
                 <td className="metric-numbers px-4 py-3 text-right">{fmtUSD(r.current)}</td>
                 <td className="metric-numbers px-4 py-3 text-right text-muted-foreground">{fmtUSD(r.previous)}</td>
                 <td className={`metric-numbers px-4 py-3 text-right ${r.changePct > 0 ? "text-warning" : "text-success"}`}>{r.changePct > 0 ? "+" : ""}{r.changePct.toFixed(1)}%</td>
                 <td className="metric-numbers px-4 py-3 text-right">{r.share.toFixed(1)}%</td>
-                <td className="px-4 py-2"><Spark data={r.spark} color={palette[d.keys.indexOf(r.name) % palette.length] ?? "var(--chart-1)"} className="h-7 w-24" /><span className="sr-only">row {i + 1}</span></td>
+                <td className="px-4 py-2"><Spark data={r.spark} color={col(d.keys.indexOf(r.name))} className="h-7 w-24" /><span className="sr-only">row {i + 1}</span></td>
               </tr>
             ))}
           </tbody>
