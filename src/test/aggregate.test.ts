@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { masterResources } from "@/data/resources";
-import { buildDashboard, buildExplore, groupTotals, totalOf, filterResources, windowOf } from "@/data/aggregate";
+import { buildDashboard, buildExplore, buildSustainability, groupTotals, totalOf, filterResources, windowOf } from "@/data/aggregate";
 import { defaultFilters, type Filters } from "@/lib/filters";
 
 const combos: Filters[] = [
@@ -40,5 +40,21 @@ describe("derived figures", () => {
     expect(d.kpis.anomalies.length).toBeGreaterThan(0);
     expect(d.overview.idleCount).toBe(masterResources.filter((r) => r.status === "Idle").length);
     expect(d.overview.savings.value).toBe(d.recommendations.reduce((a, b) => a + b.savings, 0));
+  });
+});
+
+describe.each(combos)("carbon estimates reconcile for %o", (f) => {
+  const sustainability = buildSustainability(masterResources, f);
+  const total = sustainability.totalTons;
+  it("matches every dimensional breakdown and Overview GreenOps", () => {
+    expect(sustainability.regions.reduce((sum, row) => sum + row.tons, 0)).toBeCloseTo(total, 10);
+    expect(sustainability.providers.reduce((sum, row) => sum + row.tons, 0)).toBeCloseTo(total, 10);
+    expect(sustainability.services.reduce((sum, row) => sum + row.tons, 0)).toBeCloseTo(total, 10);
+    expect(buildDashboard(masterResources, f).carbon.reduce((sum, row) => sum + row.tons, 0)).toBeCloseTo(total, 10);
+  });
+  it("only suggests regions with lower carbon intensity", () => {
+    for (const suggestion of sustainability.suggestions) {
+      expect(suggestion.suggestedIntensity).toBeLessThan(suggestion.currentIntensity);
+    }
   });
 });

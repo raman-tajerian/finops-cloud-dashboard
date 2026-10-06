@@ -193,12 +193,10 @@ export function buildDashboard(all: MasterResource[], f: Filters): DashboardDto 
   for (const r of rs) { const row = regionMap.get(r.region) ?? { region: r.region, AWS: 0, Azure: 0, GCP: 0 }; row[r.provider] += sumWin(r, w); regionMap.set(r.region, row); }
   const regions = [...regionMap.values()].sort((a, b) => b.AWS + b.Azure + b.GCP - (a.AWS + a.Azure + a.GCP));
 
-  // Carbon per region
-  const carbon: CarbonRegionDto[] = regions.map((r) => {
-    const cost = r.AWS + r.Azure + r.GCP, g = REGION_INTENSITY[r.region] ?? 300;
-    const provider = (["AWS", "Azure", "GCP"] as const).reduce((a, b) => (r[b] > r[a] ? b : a));
-    return { region: r.region, provider, intensity: g, rating: rating(g), tons: carbonTons(cost, r.region) };
-  }).sort((a, b) => a.intensity - b.intensity);
+  // Carbon is sourced from the same aggregate as the Sustainability page.
+  const carbon: CarbonRegionDto[] = buildSustainability(all, f).regions
+    .map(({ region, provider, intensity, rating: regionRating, tons }) => ({ region, provider, intensity, rating: regionRating, tons }))
+    .sort((a, b) => a.intensity - b.intensity);
 
   // Topology costs/health derived from resources
   const topology: { nodes: TopoNodeDto[]; edges: typeof topoEdges } = {
