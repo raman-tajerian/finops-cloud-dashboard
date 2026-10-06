@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { AlertTriangle, BellPlus, Bot, ChevronRight, Download, EyeOff, FileJson, FileSpreadsheet, FileText, UserPlus, Wand2 } from "lucide-react";
+import { SlidersHorizontal, AlertTriangle, BellPlus, Bot, ChevronRight, Download, EyeOff, FileJson, FileSpreadsheet, FileText, UserPlus, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { fmtUSD } from "@/lib/finops-data";
 import { rangeLabels, type CloudId, type Env, type PlatformRange } from "@/lib/finops-platform-data";
@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { CountUp, Tilt } from "./Insights";
 
@@ -47,9 +48,9 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
     toast.success(`${kind} report exported`);
   };
   return (
-    <div className="organic-card flex flex-wrap items-center gap-3 p-3">
+    <div className="organic-card flex flex-wrap items-center gap-3 p-3 lg:flex-nowrap [&>*]:shrink-0">
       <Select value={filters.range} onValueChange={(v) => { onChange({ ...filters, range: v as PlatformRange }); if (v === "custom") toast("Custom range: Sep 4 – Oct 3, 2026"); }}>
-        <SelectTrigger className="h-9 w-[170px] rounded-xl"><SelectValue /></SelectTrigger>
+        <SelectTrigger className="h-9 w-[150px] rounded-xl" aria-label="Date range"><SelectValue /></SelectTrigger>
         <SelectContent>{(Object.keys(rangeLabels) as PlatformRange[]).map((r) => <SelectItem key={r} value={r}>{rangeLabels[r]}</SelectItem>)}</SelectContent>
       </Select>
       <div className="flex items-center gap-1 rounded-xl bg-secondary p-1">
@@ -59,17 +60,23 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
         ))}
       </div>
       <Select value={filters.env} onValueChange={(v) => onChange({ ...filters, env: v as Env | "All" })}>
-        <SelectTrigger className="h-9 w-[160px] rounded-xl"><SelectValue /></SelectTrigger>
+        <SelectTrigger className="h-9 w-[150px] rounded-xl" aria-label="Environment"><SelectValue /></SelectTrigger>
         <SelectContent>{["All", "Production", "Staging", "Development"].map((e) => <SelectItem key={e} value={e}>{e === "All" ? "All environments" : e}</SelectItem>)}</SelectContent>
       </Select>
-      <Select value={filters.team} onValueChange={(v) => onChange({ ...filters, team: v as Team | "All" })}>
-        <SelectTrigger className="h-9 w-[140px] rounded-xl" aria-label="Team"><SelectValue /></SelectTrigger>
-        <SelectContent>{["All", ...teams].map((t) => <SelectItem key={t} value={t}>{t === "All" ? "All teams" : t}</SelectItem>)}</SelectContent>
-      </Select>
+      <Popover>
+        <PopoverTrigger asChild><Button variant="secondary" className="h-9 shrink-0 rounded-xl"><SlidersHorizontal />More filters{filters.team !== "All" && <span className="rounded-full bg-accent px-1.5 text-[10px]">1</span>}</Button></PopoverTrigger>
+        <PopoverContent align="start" className="w-64 space-y-3">
+          <Label>Team</Label>
+          <Select value={filters.team} onValueChange={(v) => onChange({ ...filters, team: v as Team | "All" })}>
+            <SelectTrigger className="h-9 w-full rounded-xl" aria-label="Team"><SelectValue /></SelectTrigger>
+            <SelectContent>{["All", ...teams].map((t) => <SelectItem key={t} value={t}>{t === "All" ? "All teams" : t}</SelectItem>)}</SelectContent>
+          </Select>
+        </PopoverContent>
+      </Popover>
       <div className="ml-auto flex gap-2">
         <BudgetAlertDialog />
         <DropdownMenu>
-          <DropdownMenuTrigger asChild><Button variant="secondary" className="rounded-xl"><Download />Export report</Button></DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild><Button variant="secondary" className="rounded-xl"><Download /><span className="hidden 2xl:inline">Export report</span><span className="2xl:hidden">Export</span></Button></DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => exportAs("PDF")}><FileText />PDF</DropdownMenuItem>
             <DropdownMenuItem onClick={() => exportAs("CSV")}><FileSpreadsheet />CSV</DropdownMenuItem>
@@ -88,7 +95,7 @@ function BudgetAlertDialog() {
   const [threshold, setThreshold] = useState(80);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button className="rounded-xl"><BellPlus />Create budget alert</Button></DialogTrigger>
+      <DialogTrigger asChild><Button className="rounded-xl"><BellPlus /><span className="hidden 2xl:inline">Create budget alert</span><span className="2xl:hidden">Budget alert</span></Button></DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>Create budget alert</DialogTitle><DialogDescription>Get notified when spend crosses a threshold.</DialogDescription></DialogHeader>
         <div className="space-y-4">
