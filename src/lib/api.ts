@@ -3,7 +3,7 @@ import { byRegion, byService, cluster, platformKpis, recommendations } from "@/l
 import { resources } from "@/lib/finops-data";
 import type { Anomaly, ClusterDto, CostByDimension, RecommendationDto, ResourceDto, SpendSummary } from "@/types/finops";
 
-const base = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "");
+const base = (import.meta.env["VITE_API_BASE_URL"] as string | undefined)?.replace(/\/$/, "");
 export const dataSource: "live" | "demo" = base ? "live" : "demo";
 
 const delay = () => new Promise((r) => setTimeout(r, 300 + Math.random() * 500));

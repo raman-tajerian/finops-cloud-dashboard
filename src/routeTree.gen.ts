@@ -10,11 +10,71 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BudgetsRouteImport } from './routes/budgets'
+import { Route as CostExplorerRouteImport } from './routes/cost-explorer'
+import { Route as IntegrationsRouteImport } from './routes/integrations'
+import { Route as KubernetesRouteImport } from './routes/kubernetes'
+import { Route as RecommendationsRouteImport } from './routes/recommendations'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as ResourcesRouteImport } from './routes/resources'
+import { Route as SecurityRouteImport } from './routes/security'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SustainabilityRouteImport } from './routes/sustainability'
 import { Route as ApiAnomalyAnalysisRouteImport } from './routes/api/anomaly-analysis'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BudgetsRoute = BudgetsRouteImport.update({
+  id: '/budgets',
+  path: '/budgets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CostExplorerRoute = CostExplorerRouteImport.update({
+  id: '/cost-explorer',
+  path: '/cost-explorer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegrationsRoute = IntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KubernetesRoute = KubernetesRouteImport.update({
+  id: '/kubernetes',
+  path: '/kubernetes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecommendationsRoute = RecommendationsRouteImport.update({
+  id: '/recommendations',
+  path: '/recommendations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesRoute = ResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecurityRoute = SecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SustainabilityRoute = SustainabilityRouteImport.update({
+  id: '/sustainability',
+  path: '/sustainability',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAnomalyAnalysisRoute = ApiAnomalyAnalysisRouteImport.update({
@@ -25,27 +85,104 @@ const ApiAnomalyAnalysisRoute = ApiAnomalyAnalysisRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/budgets': typeof BudgetsRoute
+  '/cost-explorer': typeof CostExplorerRoute
+  '/integrations': typeof IntegrationsRoute
+  '/kubernetes': typeof KubernetesRoute
+  '/recommendations': typeof RecommendationsRoute
+  '/reports': typeof ReportsRoute
+  '/resources': typeof ResourcesRoute
+  '/security': typeof SecurityRoute
+  '/settings': typeof SettingsRoute
+  '/sustainability': typeof SustainabilityRoute
   '/api/anomaly-analysis': typeof ApiAnomalyAnalysisRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/budgets': typeof BudgetsRoute
+  '/cost-explorer': typeof CostExplorerRoute
+  '/integrations': typeof IntegrationsRoute
+  '/kubernetes': typeof KubernetesRoute
+  '/recommendations': typeof RecommendationsRoute
+  '/reports': typeof ReportsRoute
+  '/resources': typeof ResourcesRoute
+  '/security': typeof SecurityRoute
+  '/settings': typeof SettingsRoute
+  '/sustainability': typeof SustainabilityRoute
   '/api/anomaly-analysis': typeof ApiAnomalyAnalysisRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/budgets': typeof BudgetsRoute
+  '/cost-explorer': typeof CostExplorerRoute
+  '/integrations': typeof IntegrationsRoute
+  '/kubernetes': typeof KubernetesRoute
+  '/recommendations': typeof RecommendationsRoute
+  '/reports': typeof ReportsRoute
+  '/resources': typeof ResourcesRoute
+  '/security': typeof SecurityRoute
+  '/settings': typeof SettingsRoute
+  '/sustainability': typeof SustainabilityRoute
   '/api/anomaly-analysis': typeof ApiAnomalyAnalysisRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/anomaly-analysis'
+  fullPaths:
+    | '/'
+    | '/budgets'
+    | '/cost-explorer'
+    | '/integrations'
+    | '/kubernetes'
+    | '/recommendations'
+    | '/reports'
+    | '/resources'
+    | '/security'
+    | '/settings'
+    | '/sustainability'
+    | '/api/anomaly-analysis'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/anomaly-analysis'
-  id: '__root__' | '/' | '/api/anomaly-analysis'
+  to:
+    | '/'
+    | '/budgets'
+    | '/cost-explorer'
+    | '/integrations'
+    | '/kubernetes'
+    | '/recommendations'
+    | '/reports'
+    | '/resources'
+    | '/security'
+    | '/settings'
+    | '/sustainability'
+    | '/api/anomaly-analysis'
+  id:
+    | '__root__'
+    | '/'
+    | '/budgets'
+    | '/cost-explorer'
+    | '/integrations'
+    | '/kubernetes'
+    | '/recommendations'
+    | '/reports'
+    | '/resources'
+    | '/security'
+    | '/settings'
+    | '/sustainability'
+    | '/api/anomaly-analysis'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BudgetsRoute: typeof BudgetsRoute
+  CostExplorerRoute: typeof CostExplorerRoute
+  IntegrationsRoute: typeof IntegrationsRoute
+  KubernetesRoute: typeof KubernetesRoute
+  RecommendationsRoute: typeof RecommendationsRoute
+  ReportsRoute: typeof ReportsRoute
+  ResourcesRoute: typeof ResourcesRoute
+  SecurityRoute: typeof SecurityRoute
+  SettingsRoute: typeof SettingsRoute
+  SustainabilityRoute: typeof SustainabilityRoute
   ApiAnomalyAnalysisRoute: typeof ApiAnomalyAnalysisRoute
 }
 
@@ -56,6 +193,76 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/budgets': {
+      id: '/budgets'
+      path: '/budgets'
+      fullPath: '/budgets'
+      preLoaderRoute: typeof BudgetsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cost-explorer': {
+      id: '/cost-explorer'
+      path: '/cost-explorer'
+      fullPath: '/cost-explorer'
+      preLoaderRoute: typeof CostExplorerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integrations': {
+      id: '/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof IntegrationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kubernetes': {
+      id: '/kubernetes'
+      path: '/kubernetes'
+      fullPath: '/kubernetes'
+      preLoaderRoute: typeof KubernetesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recommendations': {
+      id: '/recommendations'
+      path: '/recommendations'
+      fullPath: '/recommendations'
+      preLoaderRoute: typeof RecommendationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources': {
+      id: '/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security': {
+      id: '/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof SecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sustainability': {
+      id: '/sustainability'
+      path: '/sustainability'
+      fullPath: '/sustainability'
+      preLoaderRoute: typeof SustainabilityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/anomaly-analysis': {
@@ -70,6 +277,16 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BudgetsRoute: BudgetsRoute,
+  CostExplorerRoute: CostExplorerRoute,
+  IntegrationsRoute: IntegrationsRoute,
+  KubernetesRoute: KubernetesRoute,
+  RecommendationsRoute: RecommendationsRoute,
+  ReportsRoute: ReportsRoute,
+  ResourcesRoute: ResourcesRoute,
+  SecurityRoute: SecurityRoute,
+  SettingsRoute: SettingsRoute,
+  SustainabilityRoute: SustainabilityRoute,
   ApiAnomalyAnalysisRoute: ApiAnomalyAnalysisRoute,
 }
 export const routeTree = rootRouteImport
