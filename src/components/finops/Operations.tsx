@@ -116,7 +116,7 @@ function BudgetCard({ d }: { d: NonNullable<ReturnType<typeof useBudget>["data"]
   const tone = budgetTone(pct);
   return (
     <article className="organic-card flex h-full flex-col p-6 md:p-8">
-      <div className="flex items-start justify-between gap-3"><Title sub={`${d.period} · day ${d.dayOfMonth} of ${d.monthDays}`}>Budget & forecast</Title><StatusBadge tone={tone}>{pct.toFixed(0)}% projected</StatusBadge></div>
+      <div className="flex items-start justify-between gap-3"><Title sub={`${d.period} · day ${d.dayOfMonth} of ${d.monthDays}`}>Budget & forecast</Title><StatusBadge tone={tone}>{pct.toFixed(1)}% projected</StatusBadge></div>
       <div className="mt-6 grid grid-cols-2 gap-4">
         <div><p className="text-[13px] text-muted-foreground">Spend to date</p><p className="mt-1 font-display text-[30px] leading-none tabular-nums"><CountUp value={d.spendToDate} format={(n) => fmtUSD(n)} /></p></div>
         <div><p className="text-[13px] text-muted-foreground">Projected end of month</p><p className="mt-1 font-display text-[30px] leading-none tabular-nums"><CountUp value={d.forecastEom} format={(n) => fmtUSD(n)} /></p></div>
@@ -148,7 +148,7 @@ function Simulator({ d }: { d: NonNullable<ReturnType<typeof useScenario>["data"
   const [l, setL] = useState({ ri: 0, migrate: 0, rightsize: 0 });
   const [asTable, setAsTable] = useState(false);
   const r = simulate(d, l);
-  const sign = (n: number) => (n >= 0 ? `−${fmtUSD(n)}` : `+${fmtUSD(-n)}`);
+  const sign = (n: number) => (Math.abs(n) < 0.5 ? "$0" : n > 0 ? `−${fmtUSD(n)}` : `+${fmtUSD(-n)}`);
   const levers = [
     { k: "ri" as const, label: "Shift compute to Reserved Instances", save: r.ri },
     { k: "migrate" as const, label: `Migrate ${d.migrateFrom} → ${d.migrateTo}`, save: r.migrate },
