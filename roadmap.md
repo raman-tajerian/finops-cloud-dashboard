@@ -15,4 +15,4 @@
 - [ ] Phase 4: Reports, Integrations, Settings, shortcuts, tests, polish.
 - [x] Phase 2a: master dataset, error boundaries, one-row filter bar, Overview KPIs/trend/movers, Cost Explorer.
 - [x] Phase 2b: Resources page (advanced table, bulk actions, detail drawer, URL state).
-- [ ] Sustainability page.
+- [x] Sustainability page.
