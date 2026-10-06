@@ -153,7 +153,7 @@ export function ResourcesWorkspace({ search, setSearch }: { search: TableSearch;
                 <tr>
                   <th scope="col" className="sticky left-0 z-10 w-12 bg-card px-3"><Checkbox aria-label="Select all on page" className="size-5" checked={allOnPage} onCheckedChange={(on) => setSelected((cur) => { const n = new Set(cur); rows.forEach((r) => (on ? n.add(r.id) : n.delete(r.id))); return n; })} /></th>
                   {visible.map((c) => (
-                    <th key={c.k} scope="col" aria-sort={s.sort === c.k ? (s.dir === "asc" ? "ascending" : "descending") : "none"} className={`px-3 font-medium ${c.k === "name" ? "sticky left-12 z-10 bg-card" : ""} ${c.num ? "text-right" : ""}`}>
+                    <th key={c.k} scope="col" aria-sort={s.sort === c.k ? (s.dir === "asc" ? "ascending" : "descending") : "none"} className={`whitespace-nowrap px-3 font-medium ${c.k === "name" ? "sticky left-12 z-10 bg-card" : ""} ${c.num ? "text-right" : ""}`}>
                       <button className="inline-flex min-h-10 items-center gap-1 hover:text-foreground" onClick={() => setSearch({ sort: c.k, dir: s.sort === c.k && s.dir === "desc" ? "asc" : "desc" })}>
                         {c.label}{s.sort === c.k && (s.dir === "asc" ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />)}
                       </button>

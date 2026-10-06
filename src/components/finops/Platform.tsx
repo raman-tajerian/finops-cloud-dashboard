@@ -49,7 +49,7 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
     toast.success(`${kind} report exported`);
   };
   return (
-    <div className="organic-card flex flex-wrap items-center gap-3 p-3 lg:flex-nowrap [&>*]:shrink-0">
+    <div className="organic-card flex flex-wrap items-center gap-3 p-3 xl:flex-nowrap [&>*]:shrink-0">
       <Select value={filters.range} onValueChange={(v) => { onChange({ ...filters, range: v as PlatformRange }); if (v === "custom") toast("Custom range: Sep 4 – Oct 3, 2026"); }}>
         <SelectTrigger className="h-9 w-[150px] rounded-xl" aria-label="Date range"><SelectValue /></SelectTrigger>
         <SelectContent>{(Object.keys(rangeLabels) as PlatformRange[]).map((r) => <SelectItem key={r} value={r}>{rangeLabels[r]}</SelectItem>)}</SelectContent>
