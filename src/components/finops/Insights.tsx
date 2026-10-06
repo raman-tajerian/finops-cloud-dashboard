@@ -125,7 +125,7 @@ export function GreenOps() {
     <article className="organic-card h-full p-6">
       <div className="flex items-start justify-between"><Label>Carbon footprint · GreenOps</Label><div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><Leaf className="size-4 text-success" /></div></div>
       <div className="mt-3 flex items-end gap-6">
-        <div><p className="metric-numbers text-3xl"><CountUp value={tons} format={(n) => n.toFixed(1)} /> t</p><p className="text-[11px] text-muted-foreground">CO₂e this month</p></div>
+        <div><p className="metric-numbers text-3xl"><CountUp value={tons} format={(n) => n.toFixed(1)} /> t</p><p className="text-[11px] text-muted-foreground">CO₂e in period (est.)</p></div>
         <div><p className="metric-numbers text-xl">{Math.round(avg)}</p><p className="text-[11px] text-muted-foreground">avg gCO₂/kWh</p></div>
       </div>
       {asTable ? <div className="mt-5"><DataTableView caption="Carbon intensity by region" columns={["Region", "Provider", "gCO₂/kWh", "Rating", "t CO₂e"]} rows={carbonRegions.map((r) => [r.region, r.provider, r.intensity, r.rating, r.tons.toFixed(1)])} /></div> :
