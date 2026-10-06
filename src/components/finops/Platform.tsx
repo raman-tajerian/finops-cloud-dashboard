@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis } from "recharts";
 import { SlidersHorizontal, AlertTriangle, BellPlus, Bot, ChevronRight, Download, EyeOff, FileJson, FileSpreadsheet, FileText, UserPlus, Wand2 } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 import { fmtUSD } from "@/lib/finops-data";
 import { rangeLabels, type CloudId, type Env, type PlatformRange } from "@/lib/finops-platform-data";
 import { useDashboard, useDashboardData } from "@/lib/queries";
@@ -186,7 +187,7 @@ export function CostDistribution() {
     <article className={card}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div><Label>Cost distribution</Label><p className="metric-numbers mt-1 text-2xl">{fmtUSD(total)}</p></div>
-        <div className="flex items-center gap-2"><TableToggle on={asTable} onChange={setAsTable} /><div className="flex rounded-xl bg-secondary p-1">
+        <div className="flex flex-wrap items-center gap-2"><Link to="/cost-explorer" className="inline-flex min-h-8 items-center gap-1 rounded-lg px-2 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground">Explore<ChevronRight className="size-3.5" /></Link><TableToggle on={asTable} onChange={setAsTable} /><div className="flex rounded-xl bg-secondary p-1">
           {([["service", "Donut · service"], ["region", "Stacked · region"], ["team", "Treemap · team"], ["daily", "Daily trend"]] as [View, string][]).map(([v, l]) => (
              <button key={v} onClick={() => setView(v)} className={`rounded-lg px-3 py-1 text-xs transition-[transform,background-color,color] duration-200 active:scale-95 ${view === v ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"}`}>{l}</button>
           ))}
