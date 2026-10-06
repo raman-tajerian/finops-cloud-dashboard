@@ -173,8 +173,8 @@ export function CostDistribution() {
   const services = d.services;
   const total = services.reduce((a, b) => a + b.value, 0);
   const daily = d.daily;
-  const table = view === "service" ? { columns: ["Service", "Cost", "Share"], rows: services.map((s) => [s.name, fmtUSD(s.value), pct(s.value)]) } : view === "region" ? { columns: ["Region", ...providers], rows: d.regions.map((r) => [r.region, ...providers.map((p) => fmtUSD(r[p]))]) } : { columns: ["Day", "Spend"], rows: daily.map((x) => [x.day, fmtUSD(x.spend)]) };
   const pct = (v: number) => `${((v / total) * 100).toFixed(1)}%`;
+  const table = view === "service" ? { columns: ["Service", "Cost", "Share"], rows: services.map((s) => [s.name, fmtUSD(s.value), pct(s.value)]) } : view === "region" ? { columns: ["Region", ...providers], rows: d.regions.map((r) => [r.region, ...providers.map((p) => fmtUSD(r[p]))]) } : { columns: ["Day", "Spend"], rows: daily.map((x) => [x.day, fmtUSD(x.spend)]) };
   return (
     <article className={card}>
       <div className="flex flex-wrap items-center justify-between gap-3">
