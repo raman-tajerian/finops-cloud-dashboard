@@ -10,7 +10,7 @@ import { CostExplorer, type ExplorerState, type SavedView } from "@/components/f
 import type { Filters } from "@/lib/filters";
 import { useState } from "react";
 
-const defaults = { group: "service", chart: "area", compare: false } as const;
+const defaults = { group: "service", chart: "area", compare: false, views: "" } as const;
 const schema = z.object({
   group: fallback(z.enum(["service", "provider", "region", "team", "environment", "tag"]), "service").default("service"),
   chart: fallback(z.enum(["area", "bar", "line"]), "area").default("area"),
