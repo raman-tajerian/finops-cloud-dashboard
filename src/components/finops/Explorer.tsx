@@ -151,7 +151,7 @@ function ExplorerTable({ d, group }: { d: ExploreDto; group: GroupBy }) {
   );
   const totalChange = d.previousTotal ? ((d.total - d.previousTotal) / d.previousTotal) * 100 : 0;
   return (
-    <article className="organic-card min-w-0 max-w-full overflow-hidden">
+    <article className="organic-card inline-contain min-w-0 max-w-full overflow-hidden">
       <div className="max-w-full overflow-x-auto overscroll-x-contain">
         <table className="w-full min-w-[720px] text-left text-sm">
           <caption className="sr-only">Cost by {group}</caption>

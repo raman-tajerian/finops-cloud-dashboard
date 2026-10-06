@@ -136,6 +136,10 @@
   &:active { transform: scale(.985); }
 }
 
+@utility inline-contain {
+  contain: inline-size;
+}
+
 @utility progress-reveal {
   transform-origin: left;
   animation: progress-reveal 700ms cubic-bezier(.2,.8,.2,1) both;
