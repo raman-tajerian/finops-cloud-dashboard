@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis } from "recharts";
 import { SlidersHorizontal, AlertTriangle, BellPlus, Bot, ChevronRight, Download, EyeOff, FileJson, FileSpreadsheet, FileText, UserPlus, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { fmtUSD } from "@/lib/finops-data";
@@ -171,7 +171,7 @@ export function DenseKpis({ onOpen }: { onOpen: (d: Detail) => void }) {
 }
 
 /* ---------- Cost distribution ---------- */
-type View = "service" | "region" | "daily";
+type View = "service" | "region" | "team" | "daily";
 export function CostDistribution() {
   const [view, setView] = useState<View>("service");
   const [asTable, setAsTable] = useState(false);
@@ -181,13 +181,13 @@ export function CostDistribution() {
   const total = services.reduce((a, b) => a + b.value, 0);
   const daily = d.daily;
   const pct = (v: number) => `${((v / total) * 100).toFixed(1)}%`;
-  const table = view === "service" ? { columns: ["Service", "Cost", "Share"], rows: services.map((s) => [s.name, fmtUSD(s.value), pct(s.value)]) } : view === "region" ? { columns: ["Region", ...providers], rows: d.regions.map((r) => [r.region, ...providers.map((p) => fmtUSD(r[p]))]) } : { columns: ["Day", "Spend"], rows: daily.map((x) => [x.day, fmtUSD(x.spend)]) };
+  const table = view === "service" ? { columns: ["Service", "Cost", "Share"], rows: services.map((s) => [s.name, fmtUSD(s.value), pct(s.value)]) } : view === "region" ? { columns: ["Region", ...providers], rows: d.regions.map((r) => [r.region, ...providers.map((p) => fmtUSD(r[p]))]) } : view === "team" ? { columns: ["Team", "Cost", "Share"], rows: d.teams.map((s) => [s.name, fmtUSD(s.value), pct(s.value)]) } : { columns: ["Day", "Spend"], rows: daily.map((x) => [x.day, fmtUSD(x.spend)]) };
   return (
     <article className={card}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div><Label>Cost distribution</Label><p className="metric-numbers mt-1 text-2xl">{fmtUSD(total)}</p></div>
         <div className="flex items-center gap-2"><TableToggle on={asTable} onChange={setAsTable} /><div className="flex rounded-xl bg-secondary p-1">
-          {([["service", "By service"], ["region", "By region"], ["daily", "Daily trend"]] as [View, string][]).map(([v, l]) => (
+          {([["service", "Donut · service"], ["region", "Stacked · region"], ["team", "Treemap · team"], ["daily", "Daily trend"]] as [View, string][]).map(([v, l]) => (
              <button key={v} onClick={() => setView(v)} className={`rounded-lg px-3 py-1 text-xs transition-[transform,background-color,color] duration-200 active:scale-95 ${view === v ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"}`}>{l}</button>
           ))}
         </div></div>
@@ -209,6 +209,14 @@ export function CostDistribution() {
             {providers.includes("GCP") && <Bar dataKey="GCP" stackId="a" fill="var(--gcp)" radius={[6, 6, 0, 0]} />}
           </BarChart></ResponsiveContainer></div>
         )}
+        {!asTable && view === "team" && (
+          <div key="team" className="animate-in fade-in h-full duration-300"><ResponsiveContainer>
+            <Treemap data={d.teams.map((t, i) => ({ ...t, fill: chartColors[i % chartColors.length] }))} dataKey="value" nameKey="name" stroke="var(--card)" isAnimationActive animationDuration={500}
+              content={<TreeCell total={total} />}>
+              <Tooltip contentStyle={tip} formatter={(v) => [`${fmtUSD(Number(v))} · ${pct(Number(v))}`, "Cost"]} />
+            </Treemap>
+          </ResponsiveContainer></div>
+        )}
         {!asTable && view === "daily" && (
           <div key="daily" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><AreaChart data={daily}>
             <defs><linearGradient id="dg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="var(--chart-1)" stopOpacity={0.35} /><stop offset="1" stopColor="var(--chart-1)" stopOpacity={0} /></linearGradient></defs>
@@ -219,6 +227,16 @@ export function CostDistribution() {
         )}
       </div>
     </article>
+  );
+}
+
+function TreeCell(p: { x?: number; y?: number; width?: number; height?: number; name?: string; value?: number; fill?: string; total: number }) {
+  const { x = 0, y = 0, width = 0, height = 0, name, value = 0, fill, total } = p;
+  return (
+    <g>
+      <rect x={x} y={y} width={width} height={height} rx={10} fill={fill} fillOpacity={0.22} stroke="var(--card)" strokeWidth={3} />
+      {width > 70 && height > 40 && <><text x={x + 12} y={y + 22} fill="var(--foreground)" fontSize={12}>{name}</text><text x={x + 12} y={y + 40} fill="var(--muted-foreground)" fontSize={11} fontFamily="var(--font-mono)">{fmtUSD(value)} · {total ? ((value / total) * 100).toFixed(1) : 0}%</text></>}
+    </g>
   );
 }
 
