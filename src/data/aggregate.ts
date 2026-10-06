@@ -140,13 +140,8 @@ export function buildSustainability(all: MasterResource[], f: Filters): Sustaina
 /* ---------- Dashboard ---------- */
 const kv = (value: number, previous: number, spark: number[]): KpiValue => ({ value, previous, spark: sample(spark) });
 
-export function buildDashboard(all: MasterResource[], f: Filters): DashboardDto {
-  const rs = filterResources(all, f);
-  const w = windowOf(f.range), pw = previousOf(w);
-  const total = totalOf(rs, w), prevTotal = totalOf(rs, pw);
-  const daily = dailyOf(rs, w);
-
-  // Forecast end of month from the month-to-date window + 7-day run rate.
+/** End-of-month forecast: month-to-date spend + 7-day run rate x remaining days. Shared by Overview and Budgets. */
+export function forecastMonth(rs: MasterResource[]) {
   const mw = windowOf("mtd"), dom = DATA_END_DATE.getUTCDate();
   const monthDays = new Date(Date.UTC(DATA_END_DATE.getUTCFullYear(), DATA_END_DATE.getUTCMonth() + 1, 0)).getUTCDate();
   const remaining = monthDays - dom;
@@ -154,7 +149,17 @@ export function buildDashboard(all: MasterResource[], f: Filters): DashboardDto 
   const rate = last7.reduce((a, b) => a + b, 0) / 7;
   const sd = Math.sqrt(last7.reduce((a, b) => a + (b - rate) ** 2, 0) / 7);
   const mtd = totalOf(rs, mw);
-  const forecastEom = mtd + rate * remaining;
+  return { mtd, dom, monthDays, remaining, rate, sd, forecastEom: mtd + rate * remaining };
+}
+
+export function buildDashboard(all: MasterResource[], f: Filters): DashboardDto {
+  const rs = filterResources(all, f);
+  const w = windowOf(f.range), pw = previousOf(w);
+  const total = totalOf(rs, w), prevTotal = totalOf(rs, pw);
+  const daily = dailyOf(rs, w);
+
+  // Forecast end of month from the month-to-date window + 7-day run rate.
+  const { dom, monthDays, remaining, rate, sd, forecastEom } = forecastMonth(rs);
   const prevMonth = totalOf(rs, { start: H - dom - (monthDays - 1), end: H - dom, days: monthDays - 1 }); // previous month (30 days)
 
   const anomalies = detectAnomalies(rs), prevAnomalies = detectAnomalies(rs, 7);

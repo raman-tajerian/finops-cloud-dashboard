@@ -8,7 +8,7 @@ export const HISTORY_DAYS = 184;
 /** Business volumes (not costs) used for unit economics, per 30 days. */
 export const businessVolume = { activeUsers: 5_920_000, apiRequests: 2_070_000_000, deployments: 125_000, sessions: 13_600_000 };
 
-function mulberry32(seed: number) {
+export function mulberry32(seed: number) {
   return () => {
     seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
     let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
