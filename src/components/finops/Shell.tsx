@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { resources } from "@/lib/finops-data";
+import { useDashboard } from "@/lib/queries";
 
 const seedNotes = [
   { id: 1, kind: "Anomaly", text: "+140% Azure Blob Storage egress", time: "2h ago" },
@@ -24,6 +24,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [unread, setUnread] = useState<number[]>(seedNotes.map((n) => n.id));
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
+  const resources = useDashboard().data?.resources ?? [];
   const current = navItems.find((i) => i.to === path) ?? navItems[0]!;
 
   useEffect(() => {

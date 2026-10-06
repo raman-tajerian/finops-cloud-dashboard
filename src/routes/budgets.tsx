@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { GlobalFilters } from "@/components/finops/GlobalFilters";
+import { DataGate } from "@/lib/queries";
 import { BudgetForecast } from "@/components/finops/Widgets";
 import { AnomalyAnalyst } from "@/components/finops/AnomalyAnalyst";
 import { PageHeader } from "@/components/finops/States";
@@ -21,7 +23,8 @@ function BudgetsPage() {
   return (
     <>
       <PageHeader title="Budgets & Alerts" description="Budgets, thresholds and anomaly alerts" />
-      <div className="grid gap-6 xl:grid-cols-[1fr_2fr]"><BudgetForecast /><AnomalyAnalyst /></div>
+      <GlobalFilters />
+      <div className="grid gap-6 xl:grid-cols-[1fr_2fr]"><BudgetForecast /><DataGate h="h-24"><AnomalyAnalyst /></DataGate></div>
     </>
   );
 }

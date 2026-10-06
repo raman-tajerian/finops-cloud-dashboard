@@ -3,7 +3,10 @@ import { animate, motion, useMotionValue, useReducedMotion, useSpring, useTransf
 import { Area, ComposedChart, CartesianGrid, Line, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Calculator, Leaf, Move3d, TrendingUp } from "lucide-react";
 import { fmtUSD } from "@/lib/finops-data";
-import { carbonRegions, forecast, simulateSavings, topoEdges, topoNodes, type TopoNode } from "@/lib/finops-insights-data";
+import { simulateSavings } from "@/lib/finops-insights-data";
+import { useDashboardData } from "@/lib/queries";
+import { DataTableView, TableToggle } from "./States";
+import type { TopoNodeDto as TopoNode } from "@/types/finops";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -48,6 +51,8 @@ export function Tilt({ children, className = "" }: { children: ReactNode; classN
 /* ---------- 3D topology (CSS-projected SVG graph, drag to rotate) ---------- */
 const healthColor = { ok: "var(--chart-2)", oversized: "var(--warning)", anomaly: "var(--destructive)" } as const;
 export function Topology3D() {
+  const { nodes: topoNodes, edges: topoEdges } = useDashboardData().topology;
+  const [asTable, setAsTable] = useState(false);
   const [yaw, setYaw] = useState(0.5);
   const [pitch, setPitch] = useState(-0.25);
   const [hover, setHover] = useState<TopoNode | null>(null);
@@ -73,8 +78,9 @@ export function Topology3D() {
     <article className="organic-card flex h-full flex-col p-6">
       <div className="flex items-start justify-between gap-3">
         <div><Label>Cloud topology</Label><p className="mt-1 text-sm text-muted-foreground">Regions, VPCs and clusters · drag to rotate</p></div>
-        <Move3d className="size-4 text-muted-foreground" />
+        <div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><Move3d className="size-4 text-muted-foreground" /></div>
       </div>
+      {asTable ? <div className="mt-4 h-[300px]"><DataTableView caption="Cloud topology nodes" columns={["Node", "Type", "Health", "Cost / mo"]} rows={topoNodes.map((n) => [n.label, n.kind, n.health === "ok" ? "Healthy" : n.health, fmtUSD(n.cost)])} /></div> :
       <div className="relative mt-4 flex-1 cursor-grab touch-none select-none active:cursor-grabbing"
         onPointerDown={(e) => { drag.current = { x: e.clientX, y: e.clientY }; e.currentTarget.setPointerCapture(e.pointerId); }}
         onPointerMove={(e) => { if (!drag.current) return; setYaw((y) => y + (e.clientX - drag.current!.x) * 0.008); setPitch((p) => Math.max(-1.2, Math.min(1.2, p + (e.clientY - drag.current!.y) * 0.006))); drag.current = { x: e.clientX, y: e.clientY }; }}
@@ -99,7 +105,7 @@ export function Topology3D() {
             <p className="metric-numbers mt-0.5">{fmtUSD(hover.cost)}/mo · {hover.health === "ok" ? "healthy" : hover.health}</p>
           </div>
         )}
-      </div>
+      </div>}
       <div className="mt-3 flex flex-wrap gap-4 text-[11px] text-muted-foreground">
         {(["ok", "oversized", "anomaly"] as const).map((h) => <span key={h} className="inline-flex items-center gap-1.5"><span className="size-2 rounded-full" style={{ background: healthColor[h] }} />{h === "ok" ? "Healthy" : h === "oversized" ? "Oversized" : "Anomaly"}</span>)}
       </div>
@@ -109,17 +115,20 @@ export function Topology3D() {
 
 /* ---------- GreenOps ---------- */
 const ratingTone = { A: "bg-success-soft text-success", B: "bg-success-soft text-success", C: "bg-warning-soft text-warning", D: "bg-destructive-soft text-destructive" } as const;
-export function GreenOps({ scale }: { scale: number }) {
-  const tons = carbonRegions.reduce((a, b) => a + b.tons, 0) * scale;
-  const avg = carbonRegions.reduce((a, b) => a + b.intensity * b.tons, 0) / carbonRegions.reduce((a, b) => a + b.tons, 0);
-  const max = Math.max(...carbonRegions.map((r) => r.intensity));
+export function GreenOps() {
+  const carbonRegions = useDashboardData().carbon;
+  const [asTable, setAsTable] = useState(false);
+  const tons = carbonRegions.reduce((a, b) => a + b.tons, 0);
+  const avg = tons ? carbonRegions.reduce((a, b) => a + b.intensity * b.tons, 0) / tons : 0;
+  const max = Math.max(1, ...carbonRegions.map((r) => r.intensity));
   return (
     <article className="organic-card h-full p-6">
-      <div className="flex items-start justify-between"><Label>Carbon footprint · GreenOps</Label><Leaf className="size-4 text-success" /></div>
+      <div className="flex items-start justify-between"><Label>Carbon footprint · GreenOps</Label><div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><Leaf className="size-4 text-success" /></div></div>
       <div className="mt-3 flex items-end gap-6">
         <div><p className="metric-numbers text-3xl"><CountUp value={tons} format={(n) => n.toFixed(1)} /> t</p><p className="text-[11px] text-muted-foreground">CO₂e this month</p></div>
         <div><p className="metric-numbers text-xl">{Math.round(avg)}</p><p className="text-[11px] text-muted-foreground">avg gCO₂/kWh</p></div>
       </div>
+      {asTable ? <div className="mt-5"><DataTableView caption="Carbon intensity by region" columns={["Region", "Provider", "gCO₂/kWh", "Rating", "t CO₂e"]} rows={carbonRegions.map((r) => [r.region, r.provider, r.intensity, r.rating, r.tons.toFixed(1)])} /></div> :
       <ul className="mt-5 space-y-3">
         {carbonRegions.map((r, i) => (
           <li key={r.region}>
@@ -131,14 +140,15 @@ export function GreenOps({ scale }: { scale: number }) {
             </div>
           </li>
         ))}
-      </ul>
+      </ul>}
     </article>
   );
 }
 
 /* ---------- Anomaly forecast with prediction band ---------- */
-export function AnomalyForecast({ scale }: { scale: number }) {
-  const data = forecast.map((d) => ({ ...d, forecast: d.forecast * scale, band: [d.band[0] * scale, d.band[1] * scale], actual: d.actual === null ? null : d.actual * scale }));
+export function AnomalyForecast() {
+  const data = useDashboardData().forecast;
+  const [asTable, setAsTable] = useState(false);
   const spike = data[18]!;
   return (
     <article className="organic-card h-full p-6">
@@ -147,8 +157,10 @@ export function AnomalyForecast({ scale }: { scale: number }) {
         <motion.span initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="inline-flex items-center gap-1.5 rounded-full bg-destructive-soft px-2.5 py-1 text-[11px] font-medium text-destructive">
           <span className="size-1.5 animate-pulse rounded-full bg-destructive" /><TrendingUp className="size-3" />+240% spike in Azure Blob Storage Egress
         </motion.span>
+        <TableToggle on={asTable} onChange={setAsTable} />
       </div>
       <div className="mt-4 h-64">
+        {asTable ? <DataTableView caption="Daily spend vs forecast" columns={["Day", "Actual", "Forecast", "Band low", "Band high"]} rows={data.map((d) => [d.day, d.actual === null ? "—" : fmtUSD(d.actual), fmtUSD(d.forecast), fmtUSD(d.band[0]), fmtUSD(d.band[1])])} /> :
         <ResponsiveContainer>
           <ComposedChart data={data} margin={{ left: -10, right: 8 }}>
             <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} />
@@ -160,7 +172,7 @@ export function AnomalyForecast({ scale }: { scale: number }) {
             <Line dataKey="actual" name="Actual" stroke="var(--chart-2)" dot={false} strokeWidth={2} connectNulls={false} animationDuration={1100} />
             <ReferenceDot x={spike.day} y={spike.actual ?? 0} r={5} fill="var(--destructive)" stroke="var(--card)" strokeWidth={2} />
           </ComposedChart>
-        </ResponsiveContainer>
+        </ResponsiveContainer>}
       </div>
     </article>
   );

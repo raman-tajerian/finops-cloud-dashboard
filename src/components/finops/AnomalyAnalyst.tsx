@@ -1,14 +1,15 @@
 import { useRef, useState } from "react";
 import { Sparkles, Square } from "lucide-react";
 import { fmtUSD } from "@/lib/finops-data";
-import { platformKpis } from "@/lib/finops-platform-data";
+import { useDashboardData } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 /** Lets FinOps members pick an anomaly and get AI-suggested causes and prioritized actions. */
 export function AnomalyAnalyst() {
-  const list = platformKpis.anomalies;
-  const [id, setId] = useState(list[0]!.id);
+  const list = useDashboardData().kpis.anomalies;
+  const [picked, setId] = useState("");
+  const id = list.some((a) => a.id === picked) ? picked : list[0]?.id ?? "";
   const [note, setNote] = useState("");
   const [text, setText] = useState("");
   const [error, setError] = useState("");
@@ -49,7 +50,8 @@ export function AnomalyAnalyst() {
       </div>
       <Textarea className="mt-3" rows={2} maxLength={500} placeholder="Optional context, e.g. 'new CDN rollout on Oct 1'" value={note} onChange={(e) => setNote(e.target.value)} disabled={busy} />
       <div className="mt-3 flex gap-2">
-        <Button onClick={run} disabled={busy}><Sparkles />{busy ? "Analyzing…" : "Analyze anomaly"}</Button>
+        {list.length === 0 && <p className="mt-3 text-sm text-muted-foreground">No active anomalies for the selected providers.</p>}
+        <Button onClick={run} disabled={busy || !id}><Sparkles />{busy ? "Analyzing…" : "Analyze anomaly"}</Button>
         {busy && <Button variant="secondary" onClick={() => ctrl.current?.abort()}><Square />Stop</Button>}
       </div>
       {(text || error || busy) && (

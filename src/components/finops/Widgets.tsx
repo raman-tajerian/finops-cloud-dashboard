@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Activity, ArrowDownRight, ArrowUpRight, Check, ChevronRight, CircleAlert, Cpu, Database, MemoryStick, Search, Server, Sparkles } from "lucide-react";
-import { allocation, fmtUSD, kpis, resources, type CostPoint, type ResourceStatus } from "@/lib/finops-data";
+import { allocation, fmtUSD, kpis, type CostPoint, type ResourceStatus } from "@/lib/finops-data";
+import { useDashboardData } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
@@ -137,9 +138,10 @@ export function Allocation() {
 const statusStyle: Record<ResourceStatus, string> = { Running: "bg-success-soft text-success", Idle: "bg-muted text-muted-foreground", Warning: "bg-warning-soft text-warning" };
 
 export function ResourceTable() {
+  const resources = useDashboardData().resources;
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"All" | ResourceStatus>("All");
-  const rows = useMemo(() => resources.filter((item) => (status === "All" || item.status === status) && `${item.name} ${item.type} ${item.region}`.toLowerCase().includes(query.toLowerCase())), [query, status]);
+  const rows = useMemo(() => resources.filter((item) => (status === "All" || item.status === status) && `${item.name} ${item.type} ${item.region}`.toLowerCase().includes(query.toLowerCase())), [query, status, resources]);
   return (
     <article id="resources" className="organic-card h-full overflow-hidden">
       <div className="p-6 md:p-8"><div className="flex flex-wrap items-end gap-3"><div><Label>Resource inventory</Label><h2 className="mt-2 text-xl font-medium">Cloud estate</h2></div><label className="ml-auto flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-input bg-secondary px-3 py-2 sm:max-w-56"><Search className="size-4 text-muted-foreground" /><input className="w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search…" /></label><select value={status} onChange={(event) => setStatus(event.target.value as typeof status)} className="rounded-xl border border-input bg-secondary px-3 py-2 text-sm outline-none"><option>All</option><option>Running</option><option>Idle</option><option>Warning</option></select></div></div>
