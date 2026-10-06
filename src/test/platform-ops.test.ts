@@ -60,3 +60,11 @@ describe("budget", () => {
     expect(budgetTone(100)).toBe("critical");
   });
 });
+
+describe("no hard-coded simulator baseline", () => {
+  it("baseline changes with filters and is never the old $248,730", () => {
+    const a = buildScenario(masterResources, defaultFilters).baseline, b = buildScenario(masterResources, combos[1]!).baseline;
+    expect(a).not.toBe(b);
+    for (const f of combos) expect(Math.round(buildScenario(masterResources, f).baseline)).not.toBe(248_730);
+  });
+});

@@ -39,6 +39,7 @@ function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
   const [asTable, setAsTable] = useState(false);
   const [sort, setSort] = useState<{ k: SortKey; dir: 1 | -1 }>({ k: "cost", dir: -1 });
   const [pod, setPod] = useState<K8sPodDto | null>(null);
+  const [podTable, setPodTable] = useState(false);
   const ns = useMemo(() => [...c.namespaces].sort((a, b) => sort.dir * (sort.k === "name" ? a.name.localeCompare(b.name) : sort.k === "cost" ? a.cost - b.cost : a.efficiency - b.efficiency)), [c, sort]);
   const th = (k: SortKey, label: string, right?: boolean) => (
     <th scope="col" className={`px-4 py-2 font-medium ${right ? "text-right" : ""}`} aria-sort={sort.k === k ? (sort.dir === 1 ? "ascending" : "descending") : "none"}>
@@ -88,10 +89,10 @@ function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
       </div>
       <article className="organic-card p-6">
         <div className="flex flex-wrap items-start justify-between gap-3"><Title sub="Each square is one pod. Hover for details, click to open.">Pod status</Title>
-          <div className="flex gap-3 text-xs text-muted-foreground">{(["Running", "Pending", "Failed"] as const).map((s) => <span key={s} className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-[3px]" style={{ background: podColor[s] }} />{s}</span>)}</div></div>
-        <div className="mt-5 flex flex-wrap gap-1" role="list" aria-label="Pods">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground"><TableToggle on={podTable} onChange={setPodTable} />{(["Running", "Pending", "Failed"] as const).map((s) => <span key={s} className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-[3px]" style={{ background: podColor[s] }} />{s}</span>)}</div></div>
+        {podTable ? <div className="mt-5 h-72"><DataTableView caption="Pods" columns={["Pod", "Namespace", "Status", "Restarts"]} rows={c.pods.map((p) => [p.name, p.namespace, p.status, p.restarts])} /></div> : <div className="mt-5 flex flex-wrap gap-1" role="list" aria-label="Pods">
           {c.pods.map((p) => <button key={p.name} role="listitem" title={`${p.name} · ${p.status} · ${p.restarts} restarts`} aria-label={`${p.name}, ${p.status}, ${p.restarts} restarts`} onClick={() => setPod(p)} className="size-3.5 rounded-[3px] transition-transform hover:scale-125 focus-visible:scale-125" style={{ background: podColor[p.status], opacity: p.status === "Running" ? 0.55 : 1 }} />)}
-        </div>
+        </div>}
       </article>
       <Sheet open={!!pod} onOpenChange={(o) => !o && setPod(null)}>
         <SheetContent>
@@ -116,7 +117,7 @@ function BudgetCard({ d }: { d: NonNullable<ReturnType<typeof useBudget>["data"]
   const tone = budgetTone(pct);
   return (
     <article className="organic-card flex h-full flex-col p-6 md:p-8">
-      <div className="flex items-start justify-between gap-3"><Title sub={`${d.period} · day ${d.dayOfMonth} of ${d.monthDays}`}>Budget & forecast</Title><StatusBadge tone={tone}>{pct.toFixed(1)}% projected</StatusBadge></div>
+      <div className="flex items-start justify-between gap-3"><Title sub={`${d.period} · day ${d.dayOfMonth} of ${d.monthDays}`}>Budget & forecast</Title><StatusBadge tone={tone}>{pct.toFixed(1)}% of budget</StatusBadge></div>
       <div className="mt-6 grid grid-cols-2 gap-4">
         <div><p className="text-[13px] text-muted-foreground">Spend to date</p><p className="mt-1 font-display text-[30px] leading-none tabular-nums"><CountUp value={d.spendToDate} format={(n) => fmtUSD(n)} /></p></div>
         <div><p className="text-[13px] text-muted-foreground">Projected end of month</p><p className="mt-1 font-display text-[30px] leading-none tabular-nums"><CountUp value={d.forecastEom} format={(n) => fmtUSD(n)} /></p></div>

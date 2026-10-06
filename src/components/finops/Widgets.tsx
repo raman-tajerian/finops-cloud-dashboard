@@ -25,26 +25,6 @@ function Ring({ value, tone = "success", size = 96 }: { value: number; tone?: "s
   );
 }
 
-export function KpiCards() {
-  const total = kpis.resources.vms + kpis.resources.containers + kpis.resources.databases;
-  return (
-    <section className="grid border-y border-foreground/25 sm:grid-cols-2 xl:grid-cols-4 [&>*]:border-border sm:[&>*:nth-child(odd)]:border-r xl:[&>*]:border-r xl:[&>*:last-child]:border-r-0 [&>*]:border-b sm:[&>*:nth-child(n+3)]:border-b-0 xl:[&>*]:border-b-0">
-      {[
-        { label: "Monthly cloud spend", value: fmtUSD(kpis.monthlySpend), note: `+${kpis.spendTrend}% vs. last month`, tone: "text-warning" },
-        { label: "Active resources", value: total.toLocaleString("en-US"), note: "Across AWS & Azure", tone: "text-muted-foreground" },
-        { label: "FinOps score", value: `${kpis.finopsScore}`, note: "Top 12% of peers", tone: "text-success" },
-        { label: "Potential savings", value: fmtUSD(kpis.potentialSavings), note: "$51,270 remaining in Q4", tone: "text-muted-foreground" },
-      ].map((k) => (
-        <article key={k.label} className="group px-4 py-7 text-center transition-[transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-secondary/50">
-          <Label>{k.label}</Label>
-          <p className="metric-numbers mt-3 text-4xl font-normal transition-transform duration-200 group-hover:scale-[1.025] 2xl:text-5xl">{k.value}</p>
-          <p className={`mt-3 font-mono text-[11px] ${k.tone}`}>{k.note}</p>
-        </article>
-      ))}
-    </section>
-  );
-}
-
 export function CostTrend({ data }: { data: CostPoint[] }) {
   return (
     <article className="organic-card h-full min-h-[410px] p-6 md:p-8">
