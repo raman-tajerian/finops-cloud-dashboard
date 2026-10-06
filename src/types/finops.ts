@@ -90,3 +90,11 @@ export interface ResourceDetailDto {
   activity: { day: string; text: string; tone: "success" | "warning" | "critical" | "idle" }[];
   rightsizing: { saving: number; action: string } | null;
 }
+
+/* ---------- Kubernetes / budget / scenario ---------- */
+export interface K8sPodDto { name: string; namespace: string; status: "Running" | "Pending" | "Failed"; restarts: number }
+export interface K8sNamespaceDto { name: string; weight: number; cost: number; efficiency: number; overProvisioned: boolean }
+export interface K8sClusterDto { id: string; name: string; provider: CloudProvider; service: ServiceName; region: string; environment: Environment; status: MasterResource["status"]; cpuAvg: number; memAvg: number; monthlyCost: number; nodes: number; podsTotal: number; podsHealthy: number; podsFailed: number; namespaces: K8sNamespaceDto[]; pods: K8sPodDto[] }
+export interface KubernetesDto { clusters: K8sClusterDto[]; totalCost: number }
+export interface BudgetDto { spendToDate: number; forecastEom: number; dayOfMonth: number; monthDays: number; previousQuarterSpend: number; defaultBudget: number; period: string }
+export interface ScenarioDto { baseline: number; days: number; computeSpend: number; migrateSpend: number; rightsizeEligible: number; riDiscount: number; migrateFrom: string; migrateTo: string; costRatio: number; intensityFrom: number; intensityTo: number; kwhPerUsd: number }
