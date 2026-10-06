@@ -5,13 +5,14 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Inter Tight", "Helvetica Neue", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-sans: "Inter", "Helvetica Neue", system-ui, sans-serif;
+  --font-mono: "Inter", system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 6px);
   --radius-md: calc(var(--radius) - 3px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 6px);
-  --radius-2xl: calc(var(--radius) + 14px);
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -42,46 +43,67 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-overlay: var(--overlay);
+  --color-primary-hover: var(--primary-hover);
   --color-gcp: var(--gcp);
   --color-destructive-soft: var(--destructive-soft);
 }
 
 :root {
   --radius: 0.75rem;
-  --background: oklch(0.145 0.004 270);
-  --foreground: oklch(0.99 0 0);
-  --card: oklch(0.205 0.008 265);
+  --background: #F6F3EE;
+  --foreground: #1F2421;
+  --card: #FFFFFF;
   --card-foreground: var(--foreground);
-  --popover: oklch(0.23 0.009 265);
+  --popover: #FFFFFF;
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.44 0.03 257);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.24 0.009 265);
+  --primary: #4F6F5A;
+  --primary-hover: #435F4E;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EFEAE2;
   --secondary-foreground: var(--foreground);
-  --muted: oklch(0.28 0.01 265);
-  --muted-foreground: oklch(0.71 0.02 261);
-  --accent: oklch(0.27 0.012 260);
+  --muted: #EFEAE2;
+  --muted-foreground: #6B6F68;
+  --accent: #EDF1EC;
   --accent-foreground: var(--foreground);
-  --destructive: oklch(0.72 0.13 22);
-  --destructive-soft: oklch(0.72 0.13 22 / 15%);
-  --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.28 0.01 265);
-  --input: oklch(0.34 0.012 265);
-  --ring: oklch(0.6 0.05 257);
-  --success: oklch(0.76 0.15 150);
-  --success-soft: oklch(0.72 0.19 150 / 15%);
-  --warning: oklch(0.8 0.12 75);
-  --warning-soft: oklch(0.8 0.12 75 / 14%);
-  --aws: oklch(0.78 0.11 75);
-  --azure: oklch(0.66 0.08 255);
-  --gcp: oklch(0.68 0.1 160);
-  --chart-1: oklch(0.66 0.08 255);
-  --chart-2: oklch(0.68 0.1 160);
-  --chart-3: oklch(0.78 0.11 75);
-  --chart-4: oklch(0.6 0.02 260);
-  --chart-5: oklch(0.7 0.07 300);
-  --shadow-card: none;
+  --destructive: #B5483A;
+  --destructive-soft: rgb(181 72 58 / 13%);
+  --destructive-foreground: #FFFFFF;
+  --border: #E7E1D8;
+  --input: #DCD4C8;
+  --ring: #4F6F5A;
+  --success: #4F6F5A;
+  --success-soft: rgb(79 111 90 / 13%);
+  --warning: #9A7020;
+  --warning-soft: rgb(201 154 62 / 15%);
+  --sidebar-bg: #EFEAE2;
+  --overlay: rgb(31 36 33 / 35%);
+  --aws: #C99A3E;
+  --azure: #5B7083;
+  --gcp: #4F6F5A;
+  --chart-1: #4F6F5A;
+  --chart-2: #5B7083;
+  --chart-3: #C0694B;
+  --chart-4: #C99A3E;
+  --chart-5: #B98B8B;
+  --chart-6: #D9CDBB;
+  --shadow-card: 0 1px 2px rgb(31 36 33 / 4%), 0 8px 24px rgb(31 36 33 / 4%);
 }
+
+.recharts-cartesian-grid line { stroke: var(--border); }
+.recharts-area-area { fill-opacity: .14; }
+.recharts-line-curve, .recharts-area-curve { stroke-width: 2px; }
+.recharts-tooltip-wrapper .recharts-default-tooltip { background: var(--card) !important; border: 1px solid var(--border) !important; border-radius: 12px !important; box-shadow: var(--shadow-card); }
+.recharts-text { fill: var(--muted-foreground); }
+@keyframes sand-shimmer { from { background-position: -200% 0 } to { background-position: 200% 0 } }
+[data-slot="skeleton"], .animate-pulse.bg-muted { background: linear-gradient(90deg, #EFEAE2 25%, #F6F3EE 50%, #EFEAE2 75%); background-size: 200% 100%; animation: sand-shimmer 1.6s linear infinite; }
+table thead { position: sticky; top: 0; z-index: 1; backdrop-filter: blur(8px); }
+table td, table th { border-left: 0; border-right: 0; }
+table tbody tr { border-bottom: 1px solid var(--border); }
+table tbody tr:hover { background: var(--background); }
+h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
 
 @layer base {
   * { border-color: var(--color-border); }
@@ -93,6 +115,8 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
     letter-spacing: 0;
     -webkit-font-smoothing: antialiased;
   }
@@ -114,7 +138,7 @@
 @utility metric-numbers {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums lining-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
 @utility subtle-lift {
@@ -124,13 +148,13 @@
 }
 
 @utility reveal-up {
-  animation: reveal-up 560ms cubic-bezier(.2,.8,.2,1) both;
+  animation: reveal-up 360ms cubic-bezier(.2,.8,.2,1) both;
 }
 
-@utility reveal-delay-1 { animation-delay: 70ms; }
-@utility reveal-delay-2 { animation-delay: 140ms; }
-@utility reveal-delay-3 { animation-delay: 210ms; }
-@utility reveal-delay-4 { animation-delay: 280ms; }
+@utility reveal-delay-1 { animation-delay: 40ms; }
+@utility reveal-delay-2 { animation-delay: 80ms; }
+@utility reveal-delay-3 { animation-delay: 120ms; }
+@utility reveal-delay-4 { animation-delay: 160ms; }
 
 @utility interactive-surface {
   transition: transform 200ms cubic-bezier(.2,.8,.2,1), background-color 180ms ease, border-color 180ms ease;
@@ -160,7 +184,7 @@
 }
 
 @keyframes quiet-pulse { 0%, 45% { opacity: .6; transform: scale(.7); } 100% { opacity: 0; transform: scale(1.8); } }
-@keyframes reveal-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes reveal-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes progress-reveal { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 @keyframes topo-pulse { 0% { transform: scale(1); opacity: .45 } 100% { transform: scale(2.6); opacity: 0 } }

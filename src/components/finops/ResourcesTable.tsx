@@ -27,7 +27,7 @@ const columns: { k: SortKey; label: string; num?: boolean }[] = [
 const sortKeys = columns.map((c) => c.k);
 const tone = { Running: "success", Warning: "warning", Idle: "idle" } as const;
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
-const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{children}</p>;
+const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] text-muted-foreground">{children}</p>;
 
 /** Clamp raw URL values into safe table state. */
 export function normalizeTable(s: TableSearch) {
@@ -149,7 +149,7 @@ export function ResourcesWorkspace({ search, setSearch }: { search: TableSearch;
           <div className="overflow-x-auto">
             <table className="w-full min-w-[960px] text-left text-sm">
               <caption className="sr-only">Cloud resources</caption>
-              <thead className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              <thead className="font-mono text-[10px] text-muted-foreground">
                 <tr>
                   <th scope="col" className="sticky left-0 z-10 w-12 bg-card px-3"><Checkbox aria-label="Select all on page" className="size-5" checked={allOnPage} onCheckedChange={(on) => setSelected((cur) => { const n = new Set(cur); rows.forEach((r) => (on ? n.add(r.id) : n.delete(r.id))); return n; })} /></th>
                   {visible.map((c) => (

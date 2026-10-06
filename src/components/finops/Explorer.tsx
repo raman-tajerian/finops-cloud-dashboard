@@ -19,7 +19,7 @@ export const groupLabels: Record<GroupBy, string> = { service: "Service", provid
 const palette: string[] = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--aws)", "var(--azure)", "var(--gcp)", "var(--muted-foreground)"];
 const col = (i: number) => palette[i % palette.length] ?? "var(--chart-1)";
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
-const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{children}</p>;
+const Label = ({ children }: { children: ReactNode }) => <p className="font-mono text-[10px] text-muted-foreground">{children}</p>;
 const Seg = <T extends string>({ value, options, onChange, label }: { value: T; options: [T, string][]; onChange: (v: T) => void; label: string }) => (
   <div role="group" aria-label={label} className="flex flex-wrap rounded-xl bg-secondary p-1">
     {options.map(([v, l]) => <button key={v} aria-pressed={value === v} onClick={() => onChange(v)} className={`min-h-8 rounded-lg px-3 text-xs transition-colors active:scale-95 ${value === v ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"}`}>{l}</button>)}
@@ -120,7 +120,7 @@ function ExplorerChart({ d, state }: { d: ExploreDto; state: ExplorerState }) {
   return (
     <article className="organic-card p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div><p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Spend by {groupLabels[state.group].toLowerCase()}</p>
+        <div><p className="font-mono text-[10px] text-muted-foreground">Spend by {groupLabels[state.group].toLowerCase()}</p>
           <p className="metric-numbers mt-1 text-3xl">{fmtUSD(d.total)}</p>
           <p className={`text-xs ${change > 0 ? "text-warning" : "text-success"}`}>{change > 0 ? "+" : ""}{change.toFixed(1)}% <span className="text-muted-foreground">vs {fmtUSD(d.previousTotal)} previous period</span></p></div>
         <TableToggle on={asTable} onChange={setAsTable} />
@@ -155,7 +155,7 @@ function ExplorerTable({ d, group }: { d: ExploreDto; group: GroupBy }) {
       <div className="max-w-full overflow-x-auto overscroll-x-contain">
         <table className="w-full min-w-[720px] text-left text-sm">
           <caption className="sr-only">Cost by {group}</caption>
-          <thead className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground"><tr>{th("name", groupLabels[group], false)}{th("current", "Current")}{th("previous", "Previous")}{th("changePct", "Change")}{th("share", "Share")}<th scope="col" className="px-4 py-3 font-medium">Trend</th></tr></thead>
+          <thead className="font-mono text-[10px] text-muted-foreground"><tr>{th("name", groupLabels[group], false)}{th("current", "Current")}{th("previous", "Previous")}{th("changePct", "Change")}{th("share", "Share")}<th scope="col" className="px-4 py-3 font-medium">Trend</th></tr></thead>
           <tbody>
             {rows.map((r, i) => (
               <tr key={r.name} className="border-t border-border hover:bg-secondary">

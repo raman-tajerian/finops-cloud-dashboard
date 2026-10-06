@@ -37,7 +37,7 @@ export function AnomalyAnalyst() {
   return (
     <article className="organic-card h-full p-6">
       <div className="flex items-start justify-between gap-3">
-        <div><p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">AI anomaly analyst</p><p className="mt-1 text-sm text-muted-foreground">Pick an anomaly — AI reviews cost and resource data for likely causes and next actions.</p></div>
+        <div><p className="font-mono text-[10px] text-muted-foreground">AI anomaly analyst</p><p className="mt-1 text-sm text-muted-foreground">Pick an anomaly — AI reviews cost and resource data for likely causes and next actions.</p></div>
         <Sparkles className="size-4 text-muted-foreground" />
       </div>
       <div className="mt-5 grid gap-2 sm:grid-cols-2">

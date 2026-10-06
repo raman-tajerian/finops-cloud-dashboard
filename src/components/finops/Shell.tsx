@@ -39,7 +39,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
   return (
     <div className={`min-h-screen bg-background lg:grid ${collapsed ? "lg:grid-cols-[72px_minmax(0,1fr)]" : "lg:grid-cols-[248px_minmax(0,1fr)]"}`}>
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col border-r border-border bg-card px-3 py-4 transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${collapsed ? "lg:w-[72px]" : ""} ${open ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col bg-sidebar-bg px-3 py-4 transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${collapsed ? "lg:w-[72px]" : ""} ${open ? "translate-x-0" : "-translate-x-full"}`}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex h-11 w-full min-w-0 items-center gap-3 rounded-xl px-2 text-left hover:bg-secondary">
@@ -65,7 +65,7 @@ export function Shell({ children }: { children: ReactNode }) {
                   return (
                     <Link key={to} to={to} title={collapsed ? label : undefined} aria-current={active ? "page" : undefined}
                       className={`flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm transition-colors ${active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"} ${collapsed ? "lg:justify-center lg:px-0" : ""}`}>
-                      <Icon className={`size-4 shrink-0 ${active ? "text-primary-foreground" : ""}`} />
+                      <Icon className={`size-4 shrink-0 ${active ? "text-primary" : ""}`} />
                       <span className={collapsed ? "lg:sr-only" : ""}>{label}</span>
                     </Link>
                   );
@@ -100,7 +100,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 <div className="flex items-center justify-between border-b border-border px-4 py-3"><p className="text-sm font-medium">Notifications</p><Button size="sm" variant="ghost" disabled={!unread.length} onClick={() => setUnread([])}>Mark all as read</Button></div>
                 <ul>{seedNotes.map((n) => (
                   <li key={n.id}><button onClick={() => setUnread((u) => u.filter((x) => x !== n.id))} className="flex w-full gap-3 px-4 py-3 text-left hover:bg-secondary">
-                    <span className={`mt-1.5 size-2 shrink-0 rounded-full ${unread.includes(n.id) ? "bg-primary-foreground" : "bg-transparent"}`} aria-hidden />
+                    <span className={`mt-1.5 size-2 shrink-0 rounded-full ${unread.includes(n.id) ? "bg-primary" : "bg-transparent"}`} aria-hidden />
                     <span className="min-w-0"><span className="block text-xs text-muted-foreground">{n.kind} · {n.time}</span><span className="block text-sm">{n.text}</span></span>
                   </button></li>
                 ))}</ul>
