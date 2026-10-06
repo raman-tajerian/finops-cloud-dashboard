@@ -4,7 +4,7 @@ import { ArrowDown, ArrowUp, Boxes, Calculator, ChevronDown } from "lucide-react
 import type { UseQueryResult } from "@tanstack/react-query";
 import { fmtUSD } from "@/lib/finops-data";
 import { useBudget, useKubernetes, useScenario } from "@/lib/queries";
-import { simulate } from "@/lib/scenario";
+import { budgetTone, simulate } from "@/lib/scenario";
 import type { K8sClusterDto, K8sPodDto } from "@/types/finops";
 import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, StatusBadge, TableToggle } from "./States";
 import { CountUp } from "./Insights";
@@ -69,7 +69,7 @@ function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
                   <CartesianGrid vertical={false} strokeDasharray="3 3" />
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} interval={0} />
                   <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={52} tickFormatter={(v: number) => `$${(v / 1000).toFixed(1)}k`} />
-                  <Tooltip contentStyle={tip} cursor={{ fill: "var(--muted)" }} formatter={(v: number) => fmtUSD(v)} />
+                  <Tooltip contentStyle={tip} cursor={{ fill: "var(--muted)" }} formatter={(v) => fmtUSD(Number(v))} />
                   <Bar dataKey="cost" radius={[6, 6, 0, 0]}>{c.namespaces.map((n) => <Cell key={n.name} fill={n.overProvisioned ? "var(--chart-3)" : "var(--chart-1)"} />)}</Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -178,7 +178,7 @@ function Simulator({ d }: { d: NonNullable<ReturnType<typeof useScenario>["data"
             <BarChart data={chart} layout="vertical" margin={{ left: 8, right: 16 }}>
               <XAxis type="number" hide domain={[0, "dataMax"]} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} width={72} />
-              <Tooltip contentStyle={tip} cursor={{ fill: "var(--muted)" }} formatter={(v: number) => fmtUSD(v)} />
+              <Tooltip contentStyle={tip} cursor={{ fill: "var(--muted)" }} formatter={(v) => fmtUSD(Number(v))} />
               <Bar dataKey="v" radius={[0, 6, 6, 0]} barSize={22}>{chart.map((c, i) => <Cell key={c.name} fill={i ? "var(--chart-1)" : "var(--chart-6)"} />)}</Bar>
             </BarChart>
           </ResponsiveContainer>

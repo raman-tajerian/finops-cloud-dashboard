@@ -54,8 +54,7 @@ export function buildBudget(all: MasterResource[], f: Filters): BudgetDto {
   const previousQuarterSpend = totalOf(rs, windowOf("q3"));
   return { spendToDate: fm.mtd, forecastEom: fm.forecastEom, dayOfMonth: fm.dom, monthDays: fm.monthDays, previousQuarterSpend, defaultBudget: Math.round((previousQuarterSpend / 3) * BUDGET_UPLIFT), period: "October 2026" };
 }
-/** Progress bar tone thresholds: amber at 80%, red at 100%. */
-export const budgetTone = (pct: number): "success" | "warning" | "critical" => (pct >= 100 ? "critical" : pct >= 80 ? "warning" : "success");
+export { budgetTone } from "@/lib/scenario";
 
 /* ---------- Scenario simulator ---------- */
 export const RI_DISCOUNT = 0.3;

@@ -12,3 +12,6 @@ export function simulate(d: ScenarioDto, l: Levers) {
   const co2Reduction = (moved * d.kwhPerUsd * (d.intensityFrom - d.intensityTo * d.costRatio)) / 1e6; // t CO2e
   return { ri, migrate, rightsize, savings, projected, pct: d.baseline ? (savings / d.baseline) * 100 : 0, co2Reduction };
 }
+
+/** Budget bar tone: amber from 80%, red from 100%. */
+export const budgetTone = (pct: number): "success" | "warning" | "critical" => (pct >= 100 ? "critical" : pct >= 80 ? "warning" : "success");
