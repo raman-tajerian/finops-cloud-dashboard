@@ -16,7 +16,7 @@ const Body = z.object({
 export async function handleAnomalyAnalysis(request: Request) {
   const parsed = Body.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid request" }, { status: 400 });
-  const data = buildAnomalyContext(masterResources, normalizeFilters(parsed.data.filters ?? {}));
+  const data = buildAnomalyContext(masterResources, normalizeFilters((parsed.data.filters ?? {}) as Parameters<typeof normalizeFilters>[0]));
   const anomaly = data.anomalies.find((a) => a.id === parsed.data.anomalyId);
   if (!anomaly) return Response.json({ error: "Unknown anomaly" }, { status: 404 });
   const apiKey = process.env["LOVABLE_API_KEY"];
