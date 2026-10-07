@@ -2,12 +2,14 @@ import { useRef, useState } from "react";
 import { Sparkles, Square } from "lucide-react";
 import { fmtUSD } from "@/lib/finops-data";
 import { useDashboardData } from "@/lib/queries";
+import { useGlobalFilters } from "@/lib/filters";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 /** Lets FinOps members pick an anomaly and get AI-suggested causes and prioritized actions. */
 export function AnomalyAnalyst() {
   const list = useDashboardData().kpis.anomalies;
+  const { filters } = useGlobalFilters();
   const [picked, setId] = useState("");
   const id = list.some((a) => a.id === picked) ? picked : list[0]?.id ?? "";
   const [note, setNote] = useState("");
@@ -20,7 +22,7 @@ export function AnomalyAnalyst() {
     setText(""); setError(""); setBusy(true);
     const ac = new AbortController(); ctrl.current = ac;
     try {
-      const res = await fetch("/api/anomaly-analysis", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ anomalyId: id, note }), signal: ac.signal });
+      const res = await fetch("/api/anomaly-analysis", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ anomalyId: id, note, filters }), signal: ac.signal });
       if (!res.ok || !res.body) { const j = await res.json().catch(() => ({})); throw new Error(j.error ?? "The analysis failed."); }
       const reader = res.body.getReader(); const dec = new TextDecoder(); let acc = "";
       for (;;) {

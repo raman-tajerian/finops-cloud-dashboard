@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Activity, ArrowDownRight, ArrowUpRight, Check, ChevronRight, CircleAlert, Cpu, Database, MemoryStick, Search, Server, Sparkles } from "lucide-react";
-import { allocation, fmtUSD, kpis, type CostPoint, type ResourceStatus } from "@/lib/finops-data";
+import { allocation, fmtUSD, type CostPoint, type ResourceStatus } from "@/lib/finops-data";
 import { useDashboardData } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";

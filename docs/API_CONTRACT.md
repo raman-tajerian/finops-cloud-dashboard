@@ -43,3 +43,7 @@ Query: global filters. Returns `ScenarioDto` — eligible spend for the simulato
 - Reserved Instances: compute + Kubernetes spend × slider × 30%.
 - Region migration (us-east-1 → eu-north-1): moved spend × (1 − cost-index ratio); carbon uses the Sustainability intensities.
 - Rightsizing: Σ `rightsizeSaving()` × (period days / 30) × slider.
+
+## POST /api/anomaly-analysis
+Body: `{ anomalyId: string, note?: string, filters?: { range, providers[], env, team } }` (same filters as the URL).
+Context is built by `buildAnomalyContext()` from the master dataset — the same aggregate as Overview, so the total, anomaly list, amounts and percentages match Overview for the same filters. Streams plain-text markdown; errors are appended as `[[ERROR]]message`.
