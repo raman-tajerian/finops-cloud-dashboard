@@ -1,4 +1,4 @@
-import type { MasterResource } from "@/data/resources";
+import type { MasterResource } from "@/types/finops";
 import { buildDashboard } from "@/data/aggregate";
 import { buildKubernetes } from "@/data/platformOps";
 import type { Filters } from "@/lib/filters";

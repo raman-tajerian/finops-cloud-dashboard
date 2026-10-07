@@ -1,18 +1,23 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 import { z } from "zod";
-import { platformKpis, byService, byRegion, recommendations, cluster } from "@/lib/finops-platform-data";
-import { resources } from "@/lib/finops-data";
-import { forecast } from "@/lib/finops-insights-data";
+import { masterResources } from "@/data/resources";
+import { buildAnomalyContext } from "@/data/anomalyContext";
+import { normalizeFilters } from "@/lib/filters";
 
 const MODEL = "openai/gpt-6-astra";
 const RUN = "X-Lovable-AIG-Run-ID";
-const Body = z.object({ anomalyId: z.string().max(40), note: z.string().max(500).optional() });
+const Body = z.object({
+  anomalyId: z.string().max(80),
+  note: z.string().max(500).optional(),
+  filters: z.object({ range: z.string().max(20).optional(), providers: z.array(z.string().max(10)).max(3).optional(), env: z.string().max(20).optional(), team: z.string().max(20).optional() }).optional(),
+});
 
 export async function handleAnomalyAnalysis(request: Request) {
   const parsed = Body.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid request" }, { status: 400 });
-  const anomaly = platformKpis.anomalies.find((a) => a.id === parsed.data.anomalyId);
+  const data = buildAnomalyContext(masterResources, normalizeFilters(parsed.data.filters ?? {}));
+  const anomaly = data.anomalies.find((a) => a.id === parsed.data.anomalyId);
   if (!anomaly) return Response.json({ error: "Unknown anomaly" }, { status: 404 });
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) return Response.json({ error: "AI is not configured" }, { status: 401 });
@@ -31,13 +36,8 @@ export async function handleAnomalyAnalysis(request: Request) {
     },
   });
 
-  const context = {
-    anomaly,
-    otherAnomalies: platformKpis.anomalies.filter((a) => a.id !== anomaly.id),
-    spend: platformKpis.spend, waste: platformKpis.waste, costByService: byService, costByRegion: byRegion,
-    resources, openRecommendations: recommendations, kubernetes: cluster,
-    dailyForecastVsActual: forecast.filter((d) => d.actual !== null).map((d) => ({ day: d.day, forecast: d.forecast, actual: d.actual, band: d.band })),
-  };
+  const { anomalies, ...rest } = data;
+  const context = { anomaly, otherAnomalies: anomalies.filter((x) => x.id !== anomaly.id), ...rest };
 
   const result = streamText({
     model: provider.responses(MODEL),
