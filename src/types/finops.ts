@@ -7,6 +7,16 @@ export interface CostByDimension { name: string; value: number }
 export interface Anomaly { id: string; title: string; change: number; impact: number; since: string; provider: CloudProvider }
 export interface ResourceDto { id: string; name: string; provider: string; type: string; region: string; monthlyCost: number; status: "Running" | "Idle" | "Warning" }
 export interface RecommendationDto { id: string; title: string; detail: string; savings: number; impact: "High Impact" | "Quick Win"; team: string }
+export type SavingCategory = "Idle resources" | "Right-sizing" | "Reserved / Savings Plans" | "Storage tiering" | "Unused volumes and IPs" | "Scheduling";
+export type Level = "Low" | "Medium" | "High";
+export interface SavingItemDto extends RecommendationDto { category: SavingCategory; effort: Level; risk: Level; confidence: number; service: string; resourceIds: string[] }
+export interface SavingsMonth { month: string; realized: number; potential: number }
+export interface SavingsDto { items: SavingItemDto[]; total: number; target: number; targetShare: number; tracker: SavingsMonth[]; rules: { category: SavingCategory; effort: Level; risk: Level; confidence: number; rule: string }[] }
+export type BudgetScopeKind = "All" | "Provider" | "Team" | "Environment";
+export interface BudgetScope { kind: BudgetScopeKind; value: string }
+export interface ScopeSpendDto { key: string; scope: BudgetScope; spent: number; forecast: number; defaultAmount: number }
+export interface AnomalyRowDto { id: string; title: string; date: string; service: string; provider: CloudProvider; resourceId: string; expected: number; actual: number; change: number; impact: number; cause: string; series: { day: string; actual: number; low: number; high: number }[] }
+export interface AlertsDto { scopes: ScopeSpendDto[]; anomalies: AnomalyRowDto[] }
 export interface ClusterDto { name: string; region: string; version: string; nodes: number; cpu: number; memory: number; podsHealthy: number; podsTotal: number }
 
 export interface KpiBundle {
@@ -41,7 +51,7 @@ export interface DashboardDto {
   services: CostByDimension[];
   regions: RegionCost[];
   daily: DailyCost[];
-  recommendations: RecommendationDto[];
+  recommendations: SavingItemDto[];
   cluster: ClusterDto;
   ticker: string[];
   forecast: ForecastPoint[];

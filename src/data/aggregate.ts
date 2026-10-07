@@ -3,7 +3,7 @@ import type { Filters } from "@/lib/filters";
 import type {
   ResourceDetailDto, ResourceRow, ResourcesDto,
   Anomaly, CarbonRegionDto, CostByDimension, DashboardDto, ExploreDto, GroupBy, KpiValue, MasterResource, Mover,
-  ProviderDaily, RecommendationDto, RegionCost, ResourceDto, SustainabilityDto, TopoNodeDto,
+  ProviderDaily, RegionCost, SavingCategory, SavingItemDto, Level, ResourceDto, SustainabilityDto, TopoNodeDto,
 } from "@/types/finops";
 import { businessVolume, DATA_END_DATE, dayAt, dayLabel, HISTORY_DAYS } from "./resources";
 import { cluster, tickerSeed } from "./operations";
@@ -60,23 +60,57 @@ export const RIGHTSIZE_SAVING = 0.4;
 export const rightsizeSaving = (r: MasterResource) => (r.status === "Idle" ? r.monthlyCost : isOversized(r) ? r.monthlyCost * RIGHTSIZE_SAVING : 0);
 const last30 = (r: MasterResource, offset = 0) => r.daily.slice(H - 30 - offset, H - offset).reduce((a, b) => a + b, 0);
 
-export function buildRecommendations(rs: MasterResource[]): RecommendationDto[] {
-  const groups = new Map<string, MasterResource[]>();
+/* ---------- Savings catalog (documented, deterministic rules; each resource lands in at most one category) ---------- */
+export const SCHEDULE_OFF_HOURS = 12, SCHEDULE_EFFICIENCY = 0.7;
+export const RI_RATE = 0.3, RI_COVERAGE = 0.5, RI_MIN_CPU = 40;
+export const TIER_RATE = 0.35, TIER_COLD_SHARE = 0.4;
+export const SAVINGS_CATEGORIES: Record<SavingCategory, { effort: Level; risk: Level; confidence: number; rule: string }> = {
+  "Idle resources": { effort: "Low", risk: "Low", confidence: 95, rule: "Idle compute, database or Kubernetes resource → rightsizeSaving() = 100% of monthly cost." },
+  "Unused volumes and IPs": { effort: "Low", risk: "Low", confidence: 90, rule: "Idle storage (unattached volumes, unused IPs/buckets) → 100% of monthly cost." },
+  "Right-sizing": { effort: "Medium", risk: "Medium", confidence: 80, rule: "Running compute/database/Kubernetes with CPU avg < 25% → rightsizeSaving() = 40% of monthly cost." },
+  Scheduling: { effort: "Low", risk: "Low", confidence: 85, rule: "Non-production compute/Kubernetes → monthly cost × 12 off-hours / 24 × 70%." },
+  "Reserved / Savings Plans": { effort: "Medium", risk: "Low", confidence: 75, rule: "Production compute/Kubernetes with CPU avg ≥ 40% → monthly cost × 30% discount × 50% coverage." },
+  "Storage tiering": { effort: "Low", risk: "Medium", confidence: 70, rule: "Standard/Hot storage → monthly cost × 35% cheaper tier × 40% cold share." },
+};
+/** Category and monthly saving for one resource, or null. Order matters: the first matching rule wins. */
+export function savingRule(r: MasterResource): { category: SavingCategory; saving: number } | null {
+  const compute = r.category === "Compute" || r.category === "Kubernetes";
+  if (r.status === "Idle" && r.category !== "Storage") return { category: "Idle resources", saving: rightsizeSaving(r) };
+  if (r.status === "Idle") return { category: "Unused volumes and IPs", saving: r.monthlyCost };
+  if (isOversized(r)) return { category: "Right-sizing", saving: rightsizeSaving(r) };
+  if (compute && r.environment !== "Production") return { category: "Scheduling", saving: r.monthlyCost * (SCHEDULE_OFF_HOURS / 24) * SCHEDULE_EFFICIENCY };
+  if (compute && r.cpuAvg >= RI_MIN_CPU) return { category: "Reserved / Savings Plans", saving: r.monthlyCost * RI_RATE * RI_COVERAGE };
+  if (r.category === "Storage" && (r.sku === "Standard" || r.sku === "Hot")) return { category: "Storage tiering", saving: r.monthlyCost * TIER_RATE * TIER_COLD_SHARE };
+  return null;
+}
+const verb: Record<SavingCategory, string> = {
+  "Idle resources": "Remove", "Unused volumes and IPs": "Release", "Right-sizing": "Rightsize", Scheduling: "Schedule off-hours shutdown for",
+  "Reserved / Savings Plans": "Commit reserved capacity for", "Storage tiering": "Move cold data to a cheaper tier for",
+};
+const slug = (x: string) => x.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+/** Savings catalog grouped by category + service + team. Overview "Savings opportunity" = the sum of this list. */
+export function buildRecommendations(rs: MasterResource[]): SavingItemDto[] {
+  const groups = new Map<string, { category: SavingCategory; items: MasterResource[]; saving: number }>();
   for (const r of rs) {
-    const k = r.status === "Idle" ? `idle|${r.service}|${r.team}` : isOversized(r) ? `size|${r.service}|${r.team}` : null;
-    if (k) groups.set(k, [...(groups.get(k) ?? []), r]);
+    const hit = savingRule(r); if (!hit || hit.saving <= 0) continue;
+    const k = `${hit.category}|${r.service}|${r.team}`;
+    const g = groups.get(k) ?? { category: hit.category, items: [], saving: 0 };
+    g.items.push(r); g.saving += hit.saving; groups.set(k, g);
   }
-  return [...groups].map(([k, items]) => {
-    const [kind, service, team] = k.split("|") as [string, string, string];
-    const idle = kind === "idle";
-    const savings = Math.round(items.reduce((a, r) => a + rightsizeSaving(r), 0));
-    const n = items.length;
+  return [...groups].map(([k, g]) => {
+    const [, service, team] = k.split("|") as [string, string, string];
+    const n = g.items.length, meta = SAVINGS_CATEGORIES[g.category];
+    const savings = Math.round(g.saving);
+    const regions = g.items.map((r) => r.region).filter((x, i, a) => a.indexOf(x) === i).join(", ");
     return {
-      id: `rec-${kind}-${service}-${team}`.toLowerCase().replace(/\s+/g, "-"),
-      title: idle ? `Remove ${n} idle ${service} resource${n > 1 ? "s" : ""}` : `Rightsize ${n} oversized ${service} resource${n > 1 ? "s" : ""}`,
-      detail: idle ? `Avg CPU ${Math.round(items.reduce((a, r) => a + r.cpuAvg, 0) / n)}% · ${items.map((r) => r.region).filter((x, i, a) => a.indexOf(x) === i).join(", ")}` : `Avg CPU ${Math.round(items.reduce((a, r) => a + r.cpuAvg, 0) / n)}% · drop one size (≈${RIGHTSIZE_SAVING * 100}% saving)`,
-      savings, impact: idle || savings < 2_000 ? "Quick Win" : "High Impact", team,
-    } satisfies RecommendationDto;
+      id: `rec-${slug(g.category)}-${slug(service)}-${slug(team)}`,
+      title: `${verb[g.category]} ${n} ${service} resource${n > 1 ? "s" : ""}`,
+      detail: `Avg CPU ${Math.round(g.items.reduce((a, r) => a + r.cpuAvg, 0) / n)}% · ${regions}`,
+      savings, impact: savings >= 2_000 && meta.effort !== "Low" ? "High Impact" : savings >= 4_000 ? "High Impact" : "Quick Win", team,
+      category: g.category, effort: meta.effort, risk: meta.risk, confidence: meta.confidence, service,
+      resourceIds: g.items.map((r) => r.id),
+    } satisfies SavingItemDto;
   }).sort((a, b) => b.savings - a.savings);
 }
 
