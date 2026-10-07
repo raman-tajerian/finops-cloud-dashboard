@@ -31,13 +31,6 @@ export const costTrends: Record<TimeRange, CostPoint[]> = {
   YTD: series(10, (i) => months[i] ?? "", 138000),
 };
 
-export const kpis = {
-  monthlySpend: 248_730,
-  spendTrend: 4.2,
-  resources: { vms: 412, containers: 1_386, databases: 74 },
-  finopsScore: 88,
-  potentialSavings: 31_420,
-};
 
 export const allocation = [
   { name: "Compute", value: 108_400, color: "var(--chart-1)" },
