@@ -259,7 +259,7 @@ export function SavingsFeed() {
         <div><Label>Optimization recommendations</Label><p className="mt-1 text-[13px] text-muted-foreground">Executing all open actions saves <span className="metric-numbers text-foreground">{fmtUSD(pending)}/month</span></p></div>
         <div className="text-right"><Label>Realized</Label><p className="metric-numbers mt-1 text-xl text-success">{fmtUSD(realized)}</p></div>
       </div>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="progress-reveal h-full rounded-full bg-success transition-all duration-700" style={{ width: `${(realized / 18_400) * 100}%` }} /></div>
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="progress-reveal h-full rounded-full bg-success transition-all duration-700" style={{ width: `${Math.min(100, (realized / Math.max(1, realized + pending)) * 100)}%` }} /></div>
       {recommendations.length === 0 && <p className="mt-6 rounded-xl bg-secondary p-6 text-center text-sm text-muted-foreground">No recommendations for this team. Try "All teams" in the filters.</p>}
       <ul className="mt-5 divide-y divide-border">
         {recommendations.map((r) => {
@@ -289,7 +289,7 @@ export function SavingsFeed() {
             <div className="space-y-5 px-4 pb-6">
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-success-soft p-4"><Label>This action</Label><p className="metric-numbers mt-1 text-xl text-success">{fmtUSD(confirm.savings)}/mo</p></div>
-                <div className="rounded-xl bg-secondary p-4"><Label>All open actions</Label><p className="metric-numbers mt-1 text-xl">$18,400/mo</p></div>
+                <div className="rounded-xl bg-secondary p-4"><Label>All open actions</Label><p className="metric-numbers mt-1 text-xl">{fmtUSD(pending)}/mo</p></div>
               </div>
               <div><Label>CLI preview</Label><pre className="mt-2 overflow-x-auto rounded-xl border border-border bg-background p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">{`$ nimbus remediate --id ${confirm.id} \\
     --team ${confirm.team.toLowerCase()} --dry-run=false
