@@ -55,3 +55,11 @@ export function useScenario() {
   const { filters } = useGlobalFilters();
   return useQuery({ queryKey: ["scenario", filters], queryFn: () => api.getScenario(filters), placeholderData: keepPreviousData, staleTime: 60_000 });
 }
+export function useSavings() {
+  const { filters } = useGlobalFilters();
+  return useQuery({ queryKey: ["savings", filters], queryFn: () => api.getSavings(filters), placeholderData: keepPreviousData, staleTime: 60_000 });
+}
+export function useAlerts() {
+  const { filters } = useGlobalFilters();
+  return useQuery({ queryKey: ["alerts", filters], queryFn: () => api.getAlerts(filters), placeholderData: keepPreviousData, staleTime: 60_000 });
+}

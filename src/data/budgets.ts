@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { Filters } from "@/lib/filters";
 import type { AlertsDto, AnomalyRowDto, BudgetScope, MasterResource, SavingsDto, ScopeSpendDto, ServiceName } from "@/types/finops";
 import { buildRecommendations, detectAnomalies, filterResources, forecastMonth, SAVINGS_CATEGORIES, totalOf, windowOf } from "./aggregate";
+import { BUDGET_UPLIFT } from "./platformOps";
 import { dayLabel, HISTORY_DAYS, mulberry32 } from "./resources";
 
 /* ---------- Savings ---------- */
@@ -25,7 +26,6 @@ export function buildSavings(all: MasterResource[], f: Filters): SavingsDto {
 }
 
 /* ---------- Budget scopes ---------- */
-export const BUDGET_UPLIFT = 1.05;
 export const scopeKey = (s: BudgetScope) => `${s.kind}:${s.value}`;
 export const defaultScopes: BudgetScope[] = [
   { kind: "All", value: "All" }, { kind: "Provider", value: "AWS" }, { kind: "Provider", value: "Azure" }, { kind: "Provider", value: "GCP" },
