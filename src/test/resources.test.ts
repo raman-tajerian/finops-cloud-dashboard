@@ -24,9 +24,9 @@ describe("right-sizing", () => {
     const candidates = masterResources.filter((r) => rightsizeSaving(r) > 0);
     expect(candidates.length).toBeGreaterThan(0);
     for (const r of candidates) {
-      const group = masterResources.filter((x) => x.service === r.service && x.team === r.team && (x.status === "Idle") === (r.status === "Idle") && rightsizeSaving(x) > 0);
-      const rec = recs.find((x) => x.id === `rec-${r.status === "Idle" ? "idle" : "size"}-${r.service}-${r.team}`.toLowerCase().replace(/\s+/g, "-"));
+      const rec = recs.find((x) => x.resourceIds.includes(r.id));
       expect(rec).toBeDefined();
+      const group = masterResources.filter((x) => rec!.resourceIds.includes(x.id));
       expect(rec!.savings).toBe(Math.round(group.reduce((a, x) => a + rightsizeSaving(x), 0)));
       expect(buildResourceDetail(masterResources, r.id)!.rightsizing!.saving).toBe(rightsizeSaving(r));
       if (group.length === 1) expect(rec!.savings).toBe(Math.round(rightsizeSaving(r)));
