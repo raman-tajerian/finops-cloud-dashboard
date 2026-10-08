@@ -5,7 +5,7 @@ import { GlobalFilters } from "@/components/finops/GlobalFilters";
 import { CardBoundary, PageHeader } from "@/components/finops/States";
 import { ResourcesWorkspace, type TableSearch } from "@/components/finops/ResourcesTable";
 
-const defaults = { q: "", sort: "monthlyCost", dir: "desc", page: 1, size: 25, id: "", status: "All", service: "All" };
+const defaults = { q: "", sort: "monthlyCost", dir: "desc", page: 1, size: 25, id: "", status: "All", service: "All", ids: "" };
 const schema = z.object({
   q: fallback(z.string(), "").default(""),
   sort: fallback(z.string(), "monthlyCost").default("monthlyCost"),
@@ -15,6 +15,7 @@ const schema = z.object({
   id: fallback(z.string(), "").default(""),
   status: fallback(z.string(), "All").default("All"),
   service: fallback(z.string(), "All").default("All"),
+  ids: fallback(z.string(), "").default(""),
 });
 
 export const Route = createFileRoute("/resources")({

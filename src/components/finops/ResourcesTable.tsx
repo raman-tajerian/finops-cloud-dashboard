@@ -17,7 +17,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export type SortKey = "name" | "provider" | "service" | "region" | "environment" | "team" | "monthlyCost" | "cpuAvg" | "memAvg" | "status";
-export interface TableSearch { q: string; sort: string; dir: string; page: number; size: number; id: string; status: string; service: string }
+export interface TableSearch { q: string; sort: string; dir: string; page: number; size: number; id: string; status: string; service: string; ids?: string }
 
 const columns: { k: SortKey; label: string; num?: boolean }[] = [
   { k: "name", label: "Name" }, { k: "provider", label: "Provider" }, { k: "service", label: "Service" }, { k: "region", label: "Region" },
@@ -40,6 +40,7 @@ export function normalizeTable(s: TableSearch) {
     status: ["Running", "Idle", "Warning"].includes(s.status) ? s.status : "All",
     service: s.service || "All",
     id: s.id,
+    ids: (s.ids ?? "").split(",").filter(Boolean).slice(0, 200),
   } as const;
 }
 
@@ -68,10 +69,10 @@ export function ResourcesWorkspace({ search, setSearch }: { search: TableSearch;
   const services = useMemo(() => [...new Set(items.map((r) => r.service))].sort(), [items]);
   const filtered = useMemo(() => {
     const needle = s.q.toLowerCase();
-    const rows = items.filter((r) => (s.status === "All" || r.status === s.status) && (s.service === "All" || r.service === s.service) && (!needle || `${r.name} ${r.id} ${r.service} ${r.region} ${r.team} ${r.sku}`.toLowerCase().includes(needle)));
+    const rows = items.filter((r) => (!s.ids.length || s.ids.includes(r.id)) && (s.status === "All" || r.status === s.status) && (s.service === "All" || r.service === s.service) && (!needle || `${r.name} ${r.id} ${r.service} ${r.region} ${r.team} ${r.sku}`.toLowerCase().includes(needle)));
     const dir = s.dir === "asc" ? 1 : -1;
     return rows.sort((a, b) => { const x = a[s.sort], y = b[s.sort]; return (typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y))) * dir; });
-  }, [items, s.q, s.status, s.service, s.sort, s.dir]);
+  }, [items, s.q, s.status, s.service, s.sort, s.dir, s.ids]);
   const pages = Math.max(1, Math.ceil(filtered.length / s.size));
   const page = Math.min(s.page, pages);
   const rows = filtered.slice((page - 1) * s.size, page * s.size);
@@ -132,6 +133,12 @@ export function ResourcesWorkspace({ search, setSearch }: { search: TableSearch;
           </div>
         </div>
 
+        {s.ids.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 border-y border-border bg-secondary px-4 py-2 text-sm">
+            <span>Showing {s.ids.length} resource{s.ids.length > 1 ? "s" : ""} from a recommendation</span>
+            <Button size="sm" variant="ghost" className="ml-auto h-10" onClick={() => setSearch({ ids: "", page: 1 })}>Show all resources</Button>
+          </div>
+        )}
         {selected.size > 0 && (
           <div role="toolbar" aria-label="Bulk actions" className="flex flex-wrap items-center gap-2 border-y border-border bg-secondary px-4 py-2">
             <span className="text-sm">{selected.size} selected</span>
@@ -144,7 +151,7 @@ export function ResourcesWorkspace({ search, setSearch }: { search: TableSearch;
         )}
 
         {filtered.length === 0 ? (
-          <div className="p-4"><EmptyState icon={Server} title="No resources match these filters or this search." action="Clear search and quick filters" onAction={() => { setText(""); setSearch({ q: "", status: "All", service: "All", page: 1 }); }} /></div>
+          <div className="p-4"><EmptyState icon={Server} title="No resources match these filters or this search." action="Clear search and quick filters" onAction={() => { setText(""); setSearch({ q: "", status: "All", service: "All", ids: "", page: 1 }); }} /></div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[960px] text-left text-sm">
