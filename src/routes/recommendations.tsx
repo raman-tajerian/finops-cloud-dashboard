@@ -11,7 +11,7 @@ const schema = z.object({
   effort: fallback(z.string(), "All").default("All"),
   risk: fallback(z.string(), "All").default("All"),
   status: fallback(z.string(), "All").default("All"),
-  sort: fallback(z.enum(["savings-desc", "savings-asc"]), "savings-desc").default("savings-desc"),
+  sort: fallback(z.string(), "savings-desc").default("savings-desc"),
 });
 
 export const Route = createFileRoute("/recommendations")({
