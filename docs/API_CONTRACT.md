@@ -47,3 +47,13 @@ Query: global filters. Returns `ScenarioDto` — eligible spend for the simulato
 ## POST /api/anomaly-analysis
 Body: `{ anomalyId: string, note?: string, filters?: { range, providers[], env, team } }` (same filters as the URL).
 Context is built by `buildAnomalyContext()` from the master dataset — the same aggregate as Overview, so the total, anomaly list, amounts and percentages match Overview for the same filters. Streams plain-text markdown; errors are appended as `[[ERROR]]message`.
+
+## GET /api/v1/savings
+Query: global filters. Returns `SavingsDto`: `items` (SavingItemDto — category, effort, risk, confidence, resourceIds), `total`, `target` (= 60% of total), `tracker` (6 months; realized values are seeded demo data, current month potential = open savings), `rules`.
+Categories (first matching rule wins, so a resource is counted once): Idle resources (`rightsizeSaving`, 100%), Unused volumes and IPs (idle storage, 100%), Right-sizing (`rightsizeSaving`, 40%), Scheduling (non-prod compute × 12/24 × 70%), Reserved / Savings Plans (prod compute, CPU ≥ 40% → × 30% × 50%), Storage tiering (Standard/Hot × 35% × 40%). Items group by category + service + team. Overview "Savings opportunity" = `total`.
+
+## GET /api/v1/alerts
+Query: global filters. Returns `AlertsDto`:
+- `scopes`: per scope (All, each provider, team and environment) `spent` = Overview total spend for the period, `forecast` = Overview end-of-month forecast, `defaultAmount` = 105% × Q3 ÷ 3.
+- `anomalies`: the same anomalies as Overview with expected (14-day baseline × 3 days), actual (last 3 days), % deviation, impact, probable cause (fixed mapping per service) and a 21-day series with a ±15% expected band.
+Budget creation, alert rules and anomaly statuses are client-side demo state only.
