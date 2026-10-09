@@ -232,7 +232,7 @@ function AnomalyDrawer({ row, onClose }: { row: AnomalyRowDto | null; onClose: (
                     <CartesianGrid vertical={false} stroke="var(--border)" />
                     <XAxis dataKey="day" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} interval={4} />
                     <YAxis width={52} tickFormatter={(v: number) => `$${v >= 1000 ? `${Math.round(v / 100) / 10}k` : v}`} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={tip} formatter={(v: number | number[]) => (Array.isArray(v) ? `${fmtUSD(v[0]!)} – ${fmtUSD(v[1]!)}` : fmtUSD(v))} />
+                    <Tooltip contentStyle={tip} formatter={(v) => (Array.isArray(v) ? `${fmtUSD(Number(v[0]))} – ${fmtUSD(Number(v[1]))}` : fmtUSD(Number(v)))} />
                     <Area dataKey="band" name="Expected band" stroke="none" fill="var(--chart-2)" fillOpacity={0.25} />
                     <Line dataKey="actual" name="Actual" stroke="var(--chart-3)" strokeWidth={2} dot={false} />
                   </ComposedChart>
