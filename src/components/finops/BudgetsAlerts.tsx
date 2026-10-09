@@ -46,10 +46,8 @@ function Workspace({ d }: { d: AlertsDto }) {
   return (
     <div className="grid gap-6">
       <BudgetCards d={d} />
-      <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-        <AlertRules />
-        <Anomalies rows={d.anomalies} />
-      </div>
+      <Anomalies rows={d.anomalies} />
+      <AlertRules />
     </div>
   );
 }

@@ -19,3 +19,5 @@
 - Every card sits in a CardBoundary (DataGate includes one) and routes use the router's defaultErrorComponent — one failure never takes down a page.
 - Per-resource savings come only from rightsizeSaving() in src/data/aggregate.ts — recommendations and the resource drawer must show identical numbers.
 - Carbon estimates come only from carbonTons()/buildSustainability() in src/data/aggregate.ts — Overview and Sustainability must reconcile exactly.
+- Savings categories come only from savingRule()/buildRecommendations() in src/data/aggregate.ts (first matching rule wins) — Recommendations and Overview "Savings opportunity" must reconcile exactly.
+- Session-only demo state (recommendation statuses, budgets, alert rules, anomaly statuses) lives in src/lib/session-store.ts — keeps demo actions out of the data layer.
