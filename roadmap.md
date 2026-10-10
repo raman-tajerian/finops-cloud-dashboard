@@ -16,3 +16,5 @@
 - [x] Phase 2a: master dataset, error boundaries, one-row filter bar, Overview KPIs/trend/movers, Cost Explorer.
 - [x] Phase 2b: Resources page (advanced table, bulk actions, detail drawer, URL state).
 - [x] Sustainability page.
+
+- [ ] Security & Compliance page (brief: Do_NOT_change_the_visual_theme_or_remove_pasted-3.md) — waiting for go-ahead
