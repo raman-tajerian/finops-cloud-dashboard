@@ -6,9 +6,12 @@ export interface RecState { status: RecStatus; team?: string; reason?: string }
 export interface SessionBudget { id: string; name: string; scope: string; amount: number; period: "monthly" | "quarterly"; thresholds: number[]; channels: string[]; demo: boolean }
 export interface AlertRule { id: string; name: string; condition: string; channel: string; enabled: boolean }
 export type AnomalyStatus = "New" | "Investigating" | "Resolved";
+export type FindingSessionStatus = "Open" | "In progress" | "Resolved" | "Accepted risk";
+export interface FindingState { status: FindingSessionStatus; reason?: string }
 
-interface State { recs: Record<string, RecState>; budgets: SessionBudget[]; rules: AlertRule[]; anomalies: Record<string, AnomalyStatus> }
+interface State { recs: Record<string, RecState>; budgets: SessionBudget[]; rules: AlertRule[]; anomalies: Record<string, AnomalyStatus>; findings: Record<string, FindingState> }
 let state: State = {
+  findings: {},
   recs: {},
   budgets: [],
   rules: [
