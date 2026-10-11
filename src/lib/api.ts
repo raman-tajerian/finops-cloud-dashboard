@@ -4,7 +4,8 @@ import { buildDashboard, buildExplore, buildResourceDetail, buildResources, buil
 import type { Filters } from "@/lib/filters";
 import { buildAlerts, buildSavings } from "@/data/budgets";
 import { buildBudget, buildKubernetes, buildScenario } from "@/data/platformOps";
-import type { AlertsDto, SavingsDto, BudgetDto, KubernetesDto, ScenarioDto, DashboardDto, ExploreDto, GroupBy, ResourceDetailDto, ResourcesDto, SustainabilityDto } from "@/types/finops";
+import { buildSecurity } from "@/data/security";
+import type { AlertsDto, SavingsDto, BudgetDto, KubernetesDto, ScenarioDto, DashboardDto, ExploreDto, GroupBy, ResourceDetailDto, ResourcesDto, SecurityDto, SustainabilityDto } from "@/types/finops";
 
 const base = (import.meta.env["VITE_API_BASE_URL"] as string | undefined)?.replace(/\/$/, "");
 export const dataSource: "live" | "demo" = base ? "live" : "demo";
@@ -30,4 +31,5 @@ export const api = {
   getScenario: (f: Filters) => call<ScenarioDto>(`/scenario?${qs(f)}`, () => buildScenario(masterResources, f)),
   getSavings: (f: Filters) => call<SavingsDto>(`/savings?${qs(f)}`, () => buildSavings(masterResources, f)),
   getAlerts: (f: Filters) => call<AlertsDto>(`/alerts?${qs(f)}`, () => buildAlerts(masterResources, f)),
+  getSecurity: (f: Filters) => call<SecurityDto>(`/security?${qs(f)}`, () => buildSecurity(masterResources, f)),
 };

@@ -108,3 +108,21 @@ export interface K8sClusterDto { id: string; name: string; provider: CloudProvid
 export interface KubernetesDto { clusters: K8sClusterDto[]; totalCost: number }
 export interface BudgetDto { spendToDate: number; forecastEom: number; dayOfMonth: number; monthDays: number; previousQuarterSpend: number; defaultBudget: number; period: string }
 export interface ScenarioDto { baseline: number; days: number; computeSpend: number; migrateSpend: number; rightsizeEligible: number; riDiscount: number; migrateFrom: string; migrateTo: string; costRatio: number; intensityFrom: number; intensityTo: number; kwhPerUsd: number }
+
+/* ---------- Security & compliance ---------- */
+export type Severity = "Critical" | "High" | "Medium" | "Low";
+export type FindingStatus = "Open" | "In progress" | "Resolved" | "Accepted risk";
+export type FindingRule = "ssh-open" | "public-bucket" | "unencrypted-db" | "iam-overpermissive" | "unused-keys" | "no-mfa-root" | "outdated-k8s";
+export interface SecurityFindingDto {
+  id: string; rule: FindingRule; severity: Severity; title: string;
+  resourceId: string | null; provider: CloudProvider; detected: string; status: FindingStatus;
+  description: string; impact: string; steps: string[]; snippet: string;
+}
+export interface ComplianceControlDto { id: string; name: string; rules: FindingRule[] }
+export interface ComplianceFrameworkDto { id: string; name: string; controls: ComplianceControlDto[] }
+/** GET /api/v1/security */
+export interface SecurityDto {
+  findings: SecurityFindingDto[]; score: number;
+  scoreTrend: { month: string; score: number }[];
+  frameworks: ComplianceFrameworkDto[]; weights: Record<Severity, number>;
+}
