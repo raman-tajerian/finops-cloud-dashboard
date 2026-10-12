@@ -7,7 +7,7 @@ import { DATA_END_DATE, mulberry32 } from "./resources";
 import { filterResources } from "./aggregate";
 
 /** Score weights per severity — the formula documented in the UI: score = 100 − Σ weight(open finding), clamped at 0. */
-export const SEVERITY_WEIGHTS: Record<Severity, number> = { Critical: 10, High: 5, Medium: 2, Low: 1 };
+export const SEVERITY_WEIGHTS: Record<Severity, number> = { Critical: 8, High: 4, Medium: 1.5, Low: 0.5 };
 export const SEVERITY_ORDER: Severity[] = ["Critical", "High", "Medium", "Low"];
 
 interface RuleMeta { severity: Severity; title: string; description: string; impact: string; steps: string[]; snippet: string }
@@ -75,12 +75,12 @@ const BUCKET_SERVICES = new Set(["S3", "Blob"]);
 const DB_SERVICES = new Set(["RDS", "SQL DB"]);
 const K8S_SERVICES = new Set(["EKS", "AKS", "GKE"]);
 /** Selection rates per resource-level rule (documented; applied with a seeded PRNG over the full dataset). */
-export const RULE_RATES: Partial<Record<FindingRule, number>> = { "ssh-open": 0.12, "public-bucket": 0.1, "unencrypted-db": 0.15, "outdated-k8s": 0.25 };
+export const RULE_RATES: Partial<Record<FindingRule, number>> = { "ssh-open": 0.06, "public-bucket": 0.05, "unencrypted-db": 0.08, "outdated-k8s": 0.2 };
 /** Fixed account-level finding counts per provider (documented). */
 export const ACCOUNT_COUNTS: Record<string, Partial<Record<FindingRule, number>>> = {
-  AWS: { "iam-overpermissive": 2, "unused-keys": 2, "no-mfa-root": 1 },
-  Azure: { "iam-overpermissive": 1, "unused-keys": 2, "no-mfa-root": 1 },
-  GCP: { "iam-overpermissive": 1, "unused-keys": 1, "no-mfa-root": 1 },
+  AWS: { "iam-overpermissive": 1, "unused-keys": 1 },
+  Azure: { "iam-overpermissive": 1, "unused-keys": 1, "no-mfa-root": 1 },
+  GCP: { "iam-overpermissive": 1, "unused-keys": 1 },
 };
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -120,7 +120,7 @@ export function filterFindings(findings: SecurityFindingDto[], all: MasterResour
 /** Statuses that count as "open" for the score and compliance checks. */
 export const isOpenFinding = (s: FindingStatus) => s === "Open" || s === "In progress";
 
-/** Security score 0–100 = 100 − weighted open findings (Critical 10, High 5, Medium 2, Low 1), clamped at 0. */
+/** Security score 0–100 = 100 − weighted open findings (Critical 8, High 4, Medium 1.5, Low 0.5), clamped at 0. */
 export function securityScore(findings: Pick<SecurityFindingDto, "severity" | "status">[]): number {
   const open = findings.filter((x) => isOpenFinding(x.status));
   return Math.max(0, 100 - open.reduce((a, x) => a + SEVERITY_WEIGHTS[x.severity], 0));
