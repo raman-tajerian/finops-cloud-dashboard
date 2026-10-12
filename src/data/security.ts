@@ -7,7 +7,7 @@ import { DATA_END_DATE, mulberry32 } from "./resources";
 import { filterResources } from "./aggregate";
 
 /** Score weights per severity — the formula documented in the UI: score = 100 − Σ weight(open finding), clamped at 0. */
-export const SEVERITY_WEIGHTS: Record<Severity, number> = { Critical: 10, High: 5, Medium: 2, Low: 1 };
+export const SEVERITY_WEIGHTS: Record<Severity, number> = { Critical: 8, High: 4, Medium: 1.5, Low: 0.5 };
 export const SEVERITY_ORDER: Severity[] = ["Critical", "High", "Medium", "Low"];
 
 interface RuleMeta { severity: Severity; title: string; description: string; impact: string; steps: string[]; snippet: string }
@@ -75,12 +75,12 @@ const BUCKET_SERVICES = new Set(["S3", "Blob"]);
 const DB_SERVICES = new Set(["RDS", "SQL DB"]);
 const K8S_SERVICES = new Set(["EKS", "AKS", "GKE"]);
 /** Selection rates per resource-level rule (documented; applied with a seeded PRNG over the full dataset). */
-export const RULE_RATES: Partial<Record<FindingRule, number>> = { "ssh-open": 0.12, "public-bucket": 0.1, "unencrypted-db": 0.15, "outdated-k8s": 0.25 };
+export const RULE_RATES: Partial<Record<FindingRule, number>> = { "ssh-open": 0.06, "public-bucket": 0.05, "unencrypted-db": 0.08, "outdated-k8s": 0.2 };
 /** Fixed account-level finding counts per provider (documented). */
 export const ACCOUNT_COUNTS: Record<string, Partial<Record<FindingRule, number>>> = {
-  AWS: { "iam-overpermissive": 2, "unused-keys": 2, "no-mfa-root": 1 },
-  Azure: { "iam-overpermissive": 1, "unused-keys": 2, "no-mfa-root": 1 },
-  GCP: { "iam-overpermissive": 1, "unused-keys": 1, "no-mfa-root": 1 },
+  AWS: { "iam-overpermissive": 1, "unused-keys": 1 },
+  Azure: { "iam-overpermissive": 1, "unused-keys": 1, "no-mfa-root": 1 },
+  GCP: { "iam-overpermissive": 1, "unused-keys": 1 },
 };
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -120,7 +120,7 @@ export function filterFindings(findings: SecurityFindingDto[], all: MasterResour
 /** Statuses that count as "open" for the score and compliance checks. */
 export const isOpenFinding = (s: FindingStatus) => s === "Open" || s === "In progress";
 
-/** Security score 0–100 = 100 − weighted open findings (Critical 10, High 5, Medium 2, Low 1), clamped at 0. */
+/** Security score 0–100 = 100 − weighted open findings (Critical 8, High 4, Medium 1.5, Low 0.5), clamped at 0. */
 export function securityScore(findings: Pick<SecurityFindingDto, "severity" | "status">[]): number {
   const open = findings.filter((x) => isOpenFinding(x.status));
   return Math.max(0, 100 - open.reduce((a, x) => a + SEVERITY_WEIGHTS[x.severity], 0));
@@ -131,54 +131,55 @@ const fw = (id: string, name: string, controls: [string, string, FindingRule[]][
 });
 /** Fixed control lists; each control maps to one or more finding rules and fails if any mapped finding is open. */
 export const COMPLIANCE_FRAMEWORKS: ComplianceFrameworkDto[] = [
+  // Illustrative, simplified controls — not an audit. Controls with no mapped rule have no simulated check and pass.
   fw("cis", "CIS Foundations", [
     ["cis-1.5", "MFA enabled for the root account", ["no-mfa-root"]],
     ["cis-1.12", "No unused credentials older than 90 days", ["unused-keys"]],
-    ["cis-1.16", "IAM policies least-privilege", ["iam-overpermissive"]],
-    ["cis-2.1", "Storage buckets not publicly accessible", ["public-bucket"]],
-    ["cis-2.2", "Storage encryption at rest", ["public-bucket"]],
+    ["cis-1.16", "IAM policies least-privilege", []],
+    ["cis-2.1", "Storage buckets not publicly accessible", []],
+    ["cis-2.2", "Storage encryption at rest", ["unencrypted-db"]],
     ["cis-3.1", "Database storage encrypted", ["unencrypted-db"]],
     ["cis-4.1", "No unrestricted SSH ingress", ["ssh-open"]],
-    ["cis-4.2", "No unrestricted RDP ingress", ["ssh-open"]],
-    ["cis-5.1", "Network ACLs restrict inbound", ["ssh-open"]],
-    ["cis-7.1", "Kubernetes clusters on supported versions", ["outdated-k8s"]],
+    ["cis-4.2", "No unrestricted RDP ingress", []],
+    ["cis-5.1", "Network ACLs restrict inbound", []],
+    ["cis-7.1", "Kubernetes clusters on supported versions", []],
   ]),
   fw("soc2", "SOC 2", [
     ["cc6.1", "Logical access restricted (MFA)", ["no-mfa-root"]],
-    ["cc6.2", "Credentials rotated and decommissioned", ["unused-keys"]],
+    ["cc6.2", "Credentials rotated and decommissioned", []],
     ["cc6.6", "Boundary protection of network services", ["ssh-open"]],
     ["cc6.7", "Transmission and storage restricted", ["public-bucket"]],
-    ["cc6.8", "Unauthorized software prevented", ["iam-overpermissive"]],
-    ["cc7.1", "Vulnerabilities detected and remediated", ["outdated-k8s"]],
-    ["cc7.2", "Security events monitored", ["ssh-open"]],
-    ["cc8.1", "Changes authorized and tested", ["iam-overpermissive"]],
+    ["cc6.8", "Unauthorized software prevented", []],
+    ["cc7.1", "Vulnerabilities detected and remediated", []],
+    ["cc7.2", "Security events monitored", []],
+    ["cc8.1", "Changes authorized and tested", []],
     ["a1.2", "Data encrypted at rest", ["unencrypted-db"]],
-    ["c1.1", "Confidential data protected", ["public-bucket", "unencrypted-db"]],
+    ["c1.1", "Confidential data protected", ["unencrypted-db"]],
   ]),
   fw("iso27001", "ISO 27001", [
     ["a5.15", "Access control policy enforced", ["iam-overpermissive"]],
-    ["a5.17", "Authentication information managed", ["unused-keys", "no-mfa-root"]],
-    ["a5.18", "Access rights reviewed", ["iam-overpermissive"]],
+    ["a5.17", "Authentication information managed", ["unused-keys"]],
+    ["a5.18", "Access rights reviewed", []],
     ["a8.2", "Privileged access restricted", ["no-mfa-root"]],
-    ["a8.3", "Information access restriction", ["public-bucket"]],
-    ["a8.9", "Configuration management", ["ssh-open"]],
-    ["a8.12", "Data leakage prevention", ["public-bucket"]],
-    ["a8.16", "Monitoring activities", ["ssh-open"]],
-    ["a8.20", "Network security", ["ssh-open"]],
+    ["a8.3", "Information access restriction", []],
+    ["a8.9", "Configuration management", []],
+    ["a8.12", "Data leakage prevention", []],
+    ["a8.16", "Monitoring activities", []],
+    ["a8.20", "Network security", []],
     ["a8.24", "Use of cryptography", ["unencrypted-db"]],
-    ["a8.32", "Change management", ["outdated-k8s"]],
+    ["a8.32", "Change management", []],
   ]),
   fw("gdpr", "GDPR", [
     ["art5.1f", "Integrity and confidentiality of data", ["public-bucket"]],
-    ["art25", "Data protection by design and default", ["public-bucket", "unencrypted-db"]],
+    ["art25", "Data protection by design and default", ["unencrypted-db"]],
     ["art32.1a", "Encryption of personal data at rest", ["unencrypted-db"]],
     ["art32.1b", "Confidentiality of systems and services", ["ssh-open"]],
-    ["art32.1c", "Availability and resilience", ["outdated-k8s"]],
+    ["art32.1c", "Availability and resilience", []],
     ["art32.1d", "Regular testing and evaluation", ["outdated-k8s"]],
-    ["art32.2", "Risk-appropriate security level", ["iam-overpermissive"]],
-    ["art32.4", "Access limited to instructed personnel", ["no-mfa-root", "unused-keys"]],
-    ["art33", "Breach notification readiness", ["ssh-open"]],
-    ["art35", "Data protection impact assessment", ["public-bucket"]],
+    ["art32.2", "Risk-appropriate security level", []],
+    ["art32.4", "Access limited to instructed personnel", []],
+    ["art33", "Breach notification readiness", []],
+    ["art35", "Data protection impact assessment", []],
   ]),
 ];
 
