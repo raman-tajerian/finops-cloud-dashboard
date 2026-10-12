@@ -57,3 +57,11 @@ Query: global filters. Returns `AlertsDto`:
 - `scopes`: per scope (All, each provider, team and environment) `spent` = Overview total spend for the period, `forecast` = Overview end-of-month forecast, `defaultAmount` = 105% × Q3 ÷ 3.
 - `anomalies`: the same anomalies as Overview with expected (14-day baseline × 3 days), actual (last 3 days), % deviation, impact, probable cause (fixed mapping per service) and a 21-day series with a ±15% expected band.
 Budget creation, alert rules and anomaly statuses are client-side demo state only.
+
+## GET /api/v1/security
+Query: global filters. Returns `SecurityDto` (`src/types/finops.ts`). Findings are simulated — no real scanning takes place.
+- Resource-level rules (seeded PRNG over the full dataset, then filtered): Open SSH to 0.0.0.0/0 (EC2/Azure VM/GCP Compute, ~12%, Critical), Public storage bucket (S3/Blob, ~10%, High), Unencrypted database (RDS/SQL DB, ~15%, High), Outdated Kubernetes version (EKS/AKS/GKE, ~25%, Low). Each references an existing resource id.
+- Account-level rules (fixed counts, reference the provider): Over-permissive IAM role (4, Medium), Unused IAM access key > 90 days (5, Medium), Missing MFA on root account (1 per provider, Critical).
+- `score` = 100 − weighted open findings (Critical 10, High 5, Medium 2, Low 1), clamped at 0. `scoreTrend` is 6 months of seeded demo history; the current month equals the computed score.
+- `frameworks`: CIS, SOC 2, ISO 27001 and GDPR — fixed control lists (≥10 each); a control fails if any open finding of a mapped rule exists.
+Finding statuses (In progress / Resolved / Accepted risk) are client-side session demo state; the client recomputes score and compliance with the overlay.
