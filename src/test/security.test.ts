@@ -39,7 +39,7 @@ describe("security findings", () => {
 
   it("account-level findings have no resource id and a valid provider", () => {
     const account = buildFindings(masterResources).filter((f) => !f.resourceId);
-    expect(account.length).toBe(12); // 4 IAM roles + 5 unused keys + 3 root MFA
+    expect(account.length).toBe(7); // 3 IAM roles + 3 unused keys + 1 root MFA
     for (const f of account) expect(["AWS", "Azure", "GCP"]).toContain(f.provider);
   });
 
@@ -49,12 +49,12 @@ describe("security findings", () => {
     expect(score).toBe(Math.max(0, 100 - weighted));
   });
 
-  it("resolving a Critical finding raises the score by exactly 10 in the default state", () => {
+  it("resolving a Critical finding raises the score by exactly 8 in the default state", () => {
     const { findings, score } = buildSecurity(masterResources, defaultFilters);
     const critical = findings.find((x) => x.severity === "Critical" && x.status === "Open");
     expect(critical).toBeDefined();
     const after = findings.map((x) => (x.id === critical!.id ? { ...x, status: "Resolved" as FindingStatus } : x));
-    expect(securityScore(after)).toBe(score + 10);
+    expect(securityScore(after)).toBe(score + 8);
   });
 
   it.each(combos)("per framework: pass + fail = controls, and a control fails only if a mapped open finding exists (%#)", (f) => {
@@ -65,6 +65,20 @@ describe("security findings", () => {
       expect(r.passed + r.failed).toBe(fw.controls.length);
       const openRules = new Set(findings.filter((x) => x.status === "Open" || x.status === "In progress").map((x) => x.rule));
       for (const c of r.controls) expect(c.passed).toBe(!c.rules.some((rule) => openRules.has(rule)));
+    }
+  });
+
+  it("default state is realistic: 12–16 open, score 60–75, 60–80% controls passing", () => {
+    const { findings, score, frameworks } = buildSecurity(masterResources, defaultFilters);
+    const open = findings.filter((x) => x.status === "Open" || x.status === "In progress").length;
+    expect(open).toBeGreaterThanOrEqual(12);
+    expect(open).toBeLessThanOrEqual(16);
+    expect(score).toBeGreaterThanOrEqual(60);
+    expect(score).toBeLessThanOrEqual(75);
+    for (const fw of frameworks) {
+      const r = complianceResult(fw, findings);
+      expect(r.passed / r.total).toBeGreaterThanOrEqual(0.6);
+      expect(r.passed / r.total).toBeLessThanOrEqual(0.8);
     }
   });
 
