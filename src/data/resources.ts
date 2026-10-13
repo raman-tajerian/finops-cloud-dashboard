@@ -2,7 +2,9 @@
 import type { Category, CloudProvider, Environment, MasterResource, ServiceName, Team } from "@/types/finops";
 
 /** Last day included in the dataset. "Today" for all period math. */
-export const DATA_END_DATE = new Date(Date.UTC(2026, 9, 25));
+/** Fixed demo "today" — the daily history ends here; all date logic (MTD, 7d, forecasts, detected dates, snooze) is based on it. */
+export const DEMO_TODAY = new Date(Date.UTC(2026, 9, 12));
+export const DATA_END_DATE = DEMO_TODAY;
 export const HISTORY_DAYS = 184;
 
 /** Business volumes (not costs) used for unit economics, per 30 days. */
