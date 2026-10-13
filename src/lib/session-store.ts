@@ -2,7 +2,7 @@
 import { useSyncExternalStore } from "react";
 
 export type RecStatus = "Open" | "In progress" | "Done" | "Ignored" | "Snoozed";
-export interface RecState { status: RecStatus; team?: string; reason?: string }
+export interface RecState { status: RecStatus; team?: string; reason?: string; snoozedUntil?: string }
 export interface SessionBudget { id: string; name: string; scope: string; amount: number; period: "monthly" | "quarterly"; thresholds: number[]; channels: string[]; demo: boolean }
 export interface AlertRule { id: string; name: string; condition: string; channel: string; enabled: boolean }
 export type AnomalyStatus = "New" | "Investigating" | "Resolved";

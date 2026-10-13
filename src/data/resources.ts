@@ -79,3 +79,8 @@ export const masterResources: MasterResource[] = build();
 /** ISO date (YYYY-MM-DD) for a history index. */
 export const dayAt = (index: number) => new Date(DATA_END_DATE.getTime() - (HISTORY_DAYS - 1 - index) * 86_400_000);
 export const dayLabel = (index: number) => dayAt(index).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+
+/** Snooze end date (ISO yyyy-mm-dd) computed from DEMO_TODAY, never the real clock. */
+export const SNOOZE_OPTIONS = [7, 30] as const;
+export const snoozeUntil = (days: number) => new Date(DEMO_TODAY.getTime() + days * 86_400_000).toISOString().slice(0, 10);
+export const fmtDemoDate = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });

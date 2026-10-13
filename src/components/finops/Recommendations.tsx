@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { fmtUSD } from "@/lib/finops-data";
 import { useSavings } from "@/lib/queries";
 import { teams } from "@/lib/filters";
+import { fmtDemoDate, snoozeUntil, SNOOZE_OPTIONS } from "@/data/resources";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { recStatus, setSession, useSession, type RecStatus } from "@/lib/session-store";
 import type { Level, SavingCategory, SavingItemDto, SavingsDto } from "@/types/finops";
 import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, TableToggle } from "./States";
@@ -40,7 +42,7 @@ function Workspace({ d, search, setSearch }: { d: SavingsDto; search: RecSearch;
   const st = (id: string) => recStatus(recs, id);
   const open = d.items.filter((i) => st(i.id) === "Open" || st(i.id) === "In progress").reduce((a, b) => a + b.savings, 0);
   const done = d.items.filter((i) => st(i.id) === "Done").reduce((a, b) => a + b.savings, 0);
-  const setStatus = (id: string, status: RecStatus, extra: { team?: string; reason?: string } = {}) => setSession((s) => ({ ...s, recs: { ...s.recs, [id]: { ...s.recs[id], status, ...extra } } }));
+  const setStatus = (id: string, status: RecStatus, extra: { team?: string; reason?: string; snoozedUntil?: string } = {}) => setSession((s) => ({ ...s, recs: { ...s.recs, [id]: { ...s.recs[id], status, ...extra } } }));
 
   const list = d.items
     .filter((i) => (search.cat === "All" || i.category === search.cat) && (search.effort === "All" || i.effort === search.effort) && (search.risk === "All" || i.risk === search.risk) && (search.status === "All" || st(i.id) === search.status))
@@ -85,7 +87,7 @@ function Workspace({ d, search, setSearch }: { d: SavingsDto; search: RecSearch;
                 return (
                   <li key={i.id} className={`flex flex-col gap-3 py-4 lg:flex-row lg:items-center ${s === "Ignored" || s === "Snoozed" ? "opacity-60" : ""}`}>
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-medium">{i.title}</p><Pill c={statusTone[s]}>{s}</Pill>{recs[i.id]?.team && <Pill c="bg-secondary text-muted-foreground">{recs[i.id]!.team}</Pill>}</div>
+                      <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-medium">{i.title}</p><Pill c={statusTone[s]}>{s}</Pill>{s === "Snoozed" && recs[i.id]?.snoozedUntil && <Pill c="bg-secondary text-muted-foreground">Snoozed until {fmtDemoDate(recs[i.id]!.snoozedUntil!)} · Demo</Pill>}{recs[i.id]?.team && <Pill c="bg-secondary text-muted-foreground">{recs[i.id]!.team}</Pill>}</div>
                       <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         <span>{i.category}</span>
                         <Link to="/resources" search={{ ids: i.resourceIds.join(",") } as never} className="underline-offset-2 hover:underline">{i.resourceIds.length} resource{i.resourceIds.length > 1 ? "s" : ""}</Link>
@@ -101,7 +103,7 @@ function Workspace({ d, search, setSearch }: { d: SavingsDto; search: RecSearch;
                       {s === "In progress" && <Button size="sm" variant="secondary" className="h-10" onClick={() => { setStatus(i.id, "Done"); toast.success("Marked done (demo)"); }}><Check />Done</Button>}
                       {(s === "Open" || s === "In progress") && <>
                         <Button size="icon" variant="ghost" className="size-10" aria-label="Assign to team" onClick={() => setAssign(i)}><UserPlus /></Button>
-                        <Button size="icon" variant="ghost" className="size-10" aria-label="Snooze" onClick={() => { setStatus(i.id, "Snoozed"); toast("Snoozed for 7 days (demo)"); }}><BellOff /></Button>
+                        <DropdownMenu><DropdownMenuTrigger asChild><Button size="icon" variant="ghost" className="size-10" aria-label="Snooze"><BellOff /></Button></DropdownMenuTrigger><DropdownMenuContent align="end">{SNOOZE_OPTIONS.map((d) => <DropdownMenuItem key={d} onSelect={() => { const until = snoozeUntil(d); setStatus(i.id, "Snoozed", { snoozedUntil: until }); toast(`Snoozed until ${fmtDemoDate(until)} (demo)`); }}>Snooze {d} days</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>
                         <Button size="icon" variant="ghost" className="size-10" aria-label="Ignore" onClick={() => setIgnore(i)}><EyeOff /></Button>
                       </>}
                       {(s === "Ignored" || s === "Snoozed" || s === "Done") && <Button size="sm" variant="ghost" className="h-10" onClick={() => setStatus(i.id, "Open")}>Reopen</Button>}
