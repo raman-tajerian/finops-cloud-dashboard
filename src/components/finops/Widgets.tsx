@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Activity, ArrowDownRight, ArrowUpRight, Check, ChevronRight, CircleAlert, Cpu, Database, MemoryStick, Search, Server, Sparkles } from "lucide-react";
 import { allocation, fmtUSD, type CostPoint, type ResourceStatus } from "@/lib/finops-data";
-import { useDashboardData } from "@/lib/queries";
+import { useDashboardData, useResources } from "@/lib/queries";
+import { Link } from "@tanstack/react-router";
+import { CardSkeleton, ErrorState } from "@/components/finops/States";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
@@ -103,15 +105,17 @@ export function Allocation() {
 
 const statusStyle: Record<ResourceStatus, string> = { Running: "bg-success-soft text-success", Idle: "bg-muted text-muted-foreground", Warning: "bg-warning-soft text-warning" };
 
-export function ResourceTable() {
-  const resources = useDashboardData().resources;
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState<"All" | ResourceStatus>("All");
-  const rows = useMemo(() => resources.filter((item) => (status === "All" || item.status === status) && `${item.name} ${item.type} ${item.region}`.toLowerCase().includes(query.toLowerCase())), [query, status, resources]);
+/** Overview "Top 10 resources by cost" — same rows (useResources → GET /api/v1/resources) as the Resources page. */
+export function TopResourcesCard() {
+  const q = useResources();
+  if (q.isPending) return <CardSkeleton h="h-72" />;
+  if (q.isError) return <ErrorState message="Couldn't load resources" onRetry={() => q.refetch()} />;
+  const rows = [...q.data.items].sort((x, y) => y.monthlyCost - x.monthlyCost).slice(0, 10);
   return (
     <article id="resources" className="organic-card h-full overflow-hidden">
-      <div className="p-6 md:p-8"><div className="flex flex-wrap items-end gap-3"><div><Label>Resource inventory</Label><h2 className="mt-2 text-xl font-medium">Cloud estate</h2></div><label className="ml-auto flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-input bg-secondary px-3 py-2 sm:max-w-56"><Search className="size-4 text-muted-foreground" /><input className="w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search…" /></label><select value={status} onChange={(event) => setStatus(event.target.value as typeof status)} className="rounded-xl border border-input bg-secondary px-3 py-2 text-sm outline-none"><option>All</option><option>Running</option><option>Idle</option><option>Warning</option></select></div></div>
-      <div className="max-h-[372px] overflow-auto"><table className="w-full min-w-[640px] text-left text-xs"><thead className="sticky top-0 bg-card font-mono text-[10px] text-muted-foreground"><tr><th className="px-6 py-3 font-medium">Resource</th><th className="px-4 py-3 font-medium">Provider</th><th className="px-4 py-3 font-medium">Cost / mo</th><th className="px-6 py-3 font-medium">Status</th></tr></thead><tbody>{rows.map((item) => <tr key={item.id} className="group border-t border-border transition-[background-color,transform] duration-150 hover:bg-secondary"><td className="px-6 py-4"><p className="font-medium transition-transform duration-150 group-hover:translate-x-0.5">{item.name}</p><p className="mt-1 text-[10px] text-muted-foreground">{item.type} · {item.region}</p></td><td className="px-4 py-4 text-muted-foreground">{item.provider}</td><td className="metric-numbers px-4 py-4">{fmtUSD(item.monthlyCost)}</td><td className="px-6 py-4"><span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 ${statusStyle[item.status]}`}><i className="size-1.5 rounded-full bg-current" />{item.status}</span></td></tr>)}{rows.length === 0 && <tr><td colSpan={4} className="px-6 py-10 text-center text-muted-foreground">No matching resources</td></tr>}</tbody></table></div>
+      <div className="flex flex-wrap items-end gap-3 p-6 md:p-8"><div><Label>Resource inventory</Label><h2 className="mt-2 text-xl font-medium">Top 10 resources by cost</h2></div><Link to="/resources" className="ml-auto inline-flex h-10 items-center gap-1 text-sm text-primary underline-offset-2 hover:underline">View all resources <ChevronRight className="size-4" /></Link></div>
+      {rows.length === 0 ? <div className="px-6 pb-10 text-center text-sm text-muted-foreground">No resources match the current filters</div> :
+      <div className="overflow-auto"><table className="w-full min-w-[640px] text-left text-xs"><thead className="bg-card font-mono text-[10px] text-muted-foreground"><tr><th className="px-6 py-3 font-medium">Resource</th><th className="px-4 py-3 font-medium">Provider</th><th className="px-4 py-3 font-medium">Cost / mo</th><th className="px-6 py-3 font-medium">Status</th></tr></thead><tbody>{rows.map((item) => <tr key={item.id} className="border-t border-border hover:bg-secondary"><td className="px-6 py-4"><p className="font-medium">{item.name}</p><p className="mt-1 text-[10px] text-muted-foreground">{item.service} · {item.region}</p></td><td className="px-4 py-4 text-muted-foreground">{item.provider}</td><td className="metric-numbers px-4 py-4">{fmtUSD(item.monthlyCost)}</td><td className="px-6 py-4"><span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 ${statusStyle[item.status]}`}><i className="size-1.5 rounded-full bg-current" />{item.status}</span></td></tr>)}</tbody></table></div>}
     </article>
   );
 }

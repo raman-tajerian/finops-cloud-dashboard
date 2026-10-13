@@ -2,7 +2,9 @@
 import type { Category, CloudProvider, Environment, MasterResource, ServiceName, Team } from "@/types/finops";
 
 /** Last day included in the dataset. "Today" for all period math. */
-export const DATA_END_DATE = new Date(Date.UTC(2026, 9, 25));
+/** Fixed demo "today" — the daily history ends here; all date logic (MTD, 7d, forecasts, detected dates, snooze) is based on it. */
+export const DEMO_TODAY = new Date(Date.UTC(2026, 9, 12));
+export const DATA_END_DATE = DEMO_TODAY;
 export const HISTORY_DAYS = 184;
 
 /** Business volumes (not costs) used for unit economics, per 30 days. */
@@ -77,3 +79,8 @@ export const masterResources: MasterResource[] = build();
 /** ISO date (YYYY-MM-DD) for a history index. */
 export const dayAt = (index: number) => new Date(DATA_END_DATE.getTime() - (HISTORY_DAYS - 1 - index) * 86_400_000);
 export const dayLabel = (index: number) => dayAt(index).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+
+/** Snooze end date (ISO yyyy-mm-dd) computed from DEMO_TODAY, never the real clock. */
+export const SNOOZE_OPTIONS = [7, 30] as const;
+export const snoozeUntil = (days: number) => new Date(DEMO_TODAY.getTime() + days * 86_400_000).toISOString().slice(0, 10);
+export const fmtDemoDate = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });

@@ -120,7 +120,7 @@ export function Shell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <main className="mx-auto w-full max-w-[1540px] min-w-0 space-y-6 p-4 pb-24 md:p-8 md:pb-24">{children}</main>
-        <footer className="mx-auto flex max-w-[1540px] flex-wrap gap-3 px-4 pb-8 text-xs text-muted-foreground md:px-8"><span>NimbusOps v0.4.0</span><span>·</span><span>{dataSource === "live" ? "Live data" : "Demo data — all figures are simulated"}</span></footer>
+        <footer className="mx-auto flex max-w-[1540px] flex-wrap gap-3 px-4 pb-8 text-xs text-muted-foreground md:px-8"><span>NimbusOps v0.4.0</span><span>·</span><span>{dataSource === "live" ? "Live data" : "Demo data — all figures are simulated"}</span><span>·</span><span>Demo data as of 12 Oct 2026</span></footer>
       </div>
 
       <CommandDialog open={palette} onOpenChange={setPalette}>

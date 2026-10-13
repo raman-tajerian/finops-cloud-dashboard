@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { ResourceTable } from "@/components/finops/Widgets";
+import { TopResourcesCard } from "@/components/finops/Widgets";
 import { BudgetForecast, WhatIfSimulator } from "@/components/finops/Operations";
 import { AnomalyStrip, CostDistribution, DetailDrawer, K8sHealth, SavingsFeed, type Detail } from "@/components/finops/Platform";
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
@@ -46,7 +46,7 @@ function Index() {
         <div className="min-w-0 xl:col-span-12"><DataGate h="h-24"><AnomalyAnalyst /></DataGate></div>
         <div className="min-w-0 xl:col-span-8"><DataGate h="h-72"><SavingsFeed /></DataGate></div>
         <div className="min-w-0 xl:col-span-4"><CardBoundary label="Budget forecast"><BudgetForecast /></CardBoundary></div>
-        <div className="min-w-0 xl:col-span-12"><DataGate h="h-72"><ResourceTable /></DataGate></div>
+        <div className="min-w-0 xl:col-span-12"><CardBoundary label="Top resources"><TopResourcesCard /></CardBoundary></div>
       </section>
       <DetailDrawer detail={detail} onClose={() => setDetail(null)} />
     </>
