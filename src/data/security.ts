@@ -75,7 +75,7 @@ const BUCKET_SERVICES = new Set(["S3", "Blob"]);
 const DB_SERVICES = new Set(["RDS", "SQL DB"]);
 const K8S_SERVICES = new Set(["EKS", "AKS", "GKE"]);
 /** Selection rates per resource-level rule (documented; applied with a seeded PRNG over the full dataset). */
-export const RULE_RATES: Partial<Record<FindingRule, number>> = { "ssh-open": 0.06, "public-bucket": 0.05, "unencrypted-db": 0.2, "outdated-k8s": 0.2 };
+export const RULE_RATES: Partial<Record<FindingRule, number>> = { "ssh-open": 0.06, "public-bucket": 0.05, "unencrypted-db": 0.08, "outdated-k8s": 0.2 };
 /** Fixed account-level finding counts per provider (documented). */
 export const ACCOUNT_COUNTS: Record<string, Partial<Record<FindingRule, number>>> = {
   AWS: { "iam-overpermissive": 1, "unused-keys": 1 },
@@ -99,12 +99,20 @@ export function buildFindings(all: MasterResource[]): SecurityFindingDto[] {
       description: meta.description, impact: meta.impact, steps: meta.steps, snippet: meta.snippet,
     });
   };
+  // Each resource-level rule draws one seeded number per eligible resource; selected when draw < rate.
+  // Guarantee: if a rule has eligible resources but no draw fell under the rate, the resource with the lowest draw is selected.
+  const ELIGIBLE: [FindingRule, Set<string>][] = [["ssh-open", COMPUTE_SERVICES], ["public-bucket", BUCKET_SERVICES], ["unencrypted-db", DB_SERVICES], ["outdated-k8s", K8S_SERVICES]];
+  const best = new Map<FindingRule, { r: MasterResource; d: number }>();
+  const hit = new Set<FindingRule>();
   for (const r of all) {
-    if (COMPUTE_SERVICES.has(r.service) && rnd() < RULE_RATES["ssh-open"]!) push("ssh-open", r, r.provider);
-    if (BUCKET_SERVICES.has(r.service) && rnd() < RULE_RATES["public-bucket"]!) push("public-bucket", r, r.provider);
-    if (DB_SERVICES.has(r.service) && rnd() < RULE_RATES["unencrypted-db"]!) push("unencrypted-db", r, r.provider);
-    if (K8S_SERVICES.has(r.service) && rnd() < RULE_RATES["outdated-k8s"]!) push("outdated-k8s", r, r.provider);
+    for (const [rule, services] of ELIGIBLE) {
+      if (!services.has(r.service)) continue;
+      const d = rnd();
+      if (d < RULE_RATES[rule]!) { push(rule, r, r.provider); hit.add(rule); }
+      else if (!best.has(rule) || d < best.get(rule)!.d) best.set(rule, { r, d });
+    }
   }
+  for (const [rule] of ELIGIBLE) if (!hit.has(rule) && best.has(rule)) { const { r } = best.get(rule)!; push(rule, r, r.provider); }
   for (const provider of ["AWS", "Azure", "GCP"] as CloudProvider[])
     for (const [rule, count] of Object.entries(ACCOUNT_COUNTS[provider] ?? {}) as [FindingRule, number][])
       for (let n = 1; n <= count; n++) push(rule, null, provider, count > 1 ? n : undefined);

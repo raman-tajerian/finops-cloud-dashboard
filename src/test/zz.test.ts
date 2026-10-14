@@ -1,0 +1,2 @@
+import {it} from "vitest";import { masterResources } from "@/data/resources";import { buildSecurity,complianceResult } from "@/data/security";import { defaultFilters } from "@/lib/filters";
+it("x",()=>{const s=buildSecurity(masterResources,defaultFilters);const c:any={};s.findings.forEach(f=>c[f.rule]=(c[f.rule]||0)+1);console.log("NN "+s.findings.length+" "+s.score+" "+JSON.stringify(c));s.frameworks.forEach(fw=>{const r=complianceResult(fw,s.findings);console.log("NN",fw.id,r.passed,r.failed,r.notAssessed)})});
