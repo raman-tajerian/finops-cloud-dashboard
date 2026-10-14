@@ -65,3 +65,10 @@ Query: global filters. Returns `SecurityDto` (`src/types/finops.ts`). Findings a
 - `score` = 100 − weighted open findings (Critical 10, High 5, Medium 2, Low 1), clamped at 0. `scoreTrend` is 6 months of seeded demo history; the current month equals the computed score.
 - `frameworks`: CIS, SOC 2, ISO 27001 and GDPR — fixed control lists (≥10 each); a control fails if any open finding of a mapped rule exists.
 Finding statuses (In progress / Resolved / Accepted risk) are client-side session demo state; the client recomputes score and compliance with the overlay.
+
+## Demo "as of" date
+
+All demo responses are computed relative to a fixed `DEMO_TODAY = 2026-10-12` (UTC, `src/data/resources.ts`). The daily history ends on that day — no data point is later. Month-to-date, Last 7 days, forecasts, anomaly windows, security `detected` dates and recommendation snooze dates (7 or 30 days, session-only) are all derived from it. A live C# API should return its own as-of date.
+
+### Security compliance controls
+`complianceResult` returns a per-control `status` of `pass`, `fail` or `not-assessed` (no mapped finding rule). `passed + failed + notAssessed = total`; the pass percentage uses assessed controls only. Score values are shown with one decimal.

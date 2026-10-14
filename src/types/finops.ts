@@ -73,7 +73,7 @@ export interface MasterResource {
   id: string; name: string; provider: CloudProvider; service: ServiceName; category: Category; sku: string; region: string;
   environment: Environment; team: Team; tags: { app: string; costCenter: string };
   monthlyCost: number; cpuAvg: number; memAvg: number; status: "Running" | "Idle" | "Warning";
-  /** Daily cost, oldest first; last entry = DATA_END_DATE. */
+  /** Daily cost, oldest first; last entry = DEMO_TODAY (2026-10-12). */
   daily: number[];
 }
 
