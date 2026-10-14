@@ -21,3 +21,4 @@
 - Carbon estimates come only from carbonTons()/buildSustainability() in src/data/aggregate.ts — Overview and Sustainability must reconcile exactly.
 - Savings categories come only from savingRule()/buildRecommendations() in src/data/aggregate.ts (first matching rule wins) — Recommendations and Overview "Savings opportunity" must reconcile exactly.
 - Session-only demo state (recommendation statuses, budgets, alert rules, anomaly statuses) lives in src/lib/session-store.ts — keeps demo actions out of the data layer.
+- All demo date logic uses DEMO_TODAY in src/data/resources.ts (history ends there; never the real clock) — keeps windows, forecasts and snooze dates deterministic.
