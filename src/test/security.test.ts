@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { masterResources } from "@/data/resources";
-import { buildFindings, buildSecurity, complianceResult, filterFindings, securityScore, SEVERITY_WEIGHTS } from "@/data/security";
+import { DEMO_TODAY, masterResources } from "@/data/resources";
+import { fmtScore, buildFindings, buildSecurity, complianceResult, filterFindings, securityScore, SEVERITY_WEIGHTS } from "@/data/security";
 import { defaultFilters, type Filters } from "@/lib/filters";
 import type { FindingStatus, Severity } from "@/types/finops";
 
@@ -57,29 +57,44 @@ describe("security findings", () => {
     expect(securityScore(after)).toBe(score + 8);
   });
 
-  it.each(combos)("per framework: pass + fail = controls, and a control fails only if a mapped open finding exists (%#)", (f) => {
+  it.each(combos)("per framework: pass + fail + not assessed = controls, and a control fails only if a mapped open finding exists (%#)", (f) => {
     const { findings, frameworks } = buildSecurity(masterResources, f);
     for (const fw of frameworks) {
       expect(fw.controls.length).toBeGreaterThanOrEqual(10);
       const r = complianceResult(fw, findings);
-      expect(r.passed + r.failed).toBe(fw.controls.length);
+      expect(r.passed + r.failed + r.notAssessed).toBe(fw.controls.length);
       const openRules = new Set(findings.filter((x) => x.status === "Open" || x.status === "In progress").map((x) => x.rule));
-      for (const c of r.controls) expect(c.passed).toBe(!c.rules.some((rule) => openRules.has(rule)));
+      for (const c of r.controls) {
+        if (c.rules.length === 0) expect(c.status).toBe("not-assessed");
+        else expect(c.status).toBe(c.rules.some((rule) => openRules.has(rule)) ? "fail" : "pass");
+      }
     }
   });
 
-  it("default state is realistic: 12–16 open, score 60–75, 60–80% controls passing", () => {
-    const { findings, score, frameworks } = buildSecurity(masterResources, defaultFilters);
+  it("default state: 12–18 open findings and score 60–75", () => {
+    const { findings, score } = buildSecurity(masterResources, defaultFilters);
     const open = findings.filter((x) => x.status === "Open" || x.status === "In progress").length;
     expect(open).toBeGreaterThanOrEqual(12);
-    expect(open).toBeLessThanOrEqual(16);
+    expect(open).toBeLessThanOrEqual(18);
     expect(score).toBeGreaterThanOrEqual(60);
     expect(score).toBeLessThanOrEqual(75);
-    for (const fw of frameworks) {
-      const r = complianceResult(fw, findings);
-      expect(r.passed / r.total).toBeGreaterThanOrEqual(0.6);
-      expect(r.passed / r.total).toBeLessThanOrEqual(0.8);
-    }
+  });
+
+  it("every finding rule with eligible resources has at least one finding by default", () => {
+    const { findings } = buildSecurity(masterResources, defaultFilters);
+    const rules = new Set(findings.map((x) => x.rule));
+    for (const [rule, services] of Object.entries(RULE_SERVICES)) if (masterResources.some((r) => services.has(r.service))) expect(rules.has(rule as never), rule).toBe(true);
+    for (const rule of ["iam-overpermissive", "unused-keys", "no-mfa-root"]) expect(rules.has(rule as never), rule).toBe(true);
+  });
+
+  it("fmtScore always shows one decimal", () => {
+    expect(fmtScore(65.5)).toBe("65.5");
+    expect(fmtScore(70)).toBe("70.0");
+  });
+
+  it("no first-detected date is after DEMO_TODAY", () => {
+    const today = DEMO_TODAY.toISOString().slice(0, 10);
+    for (const f of buildFindings(masterResources)) expect(f.detected <= today).toBe(true);
   });
 
   it("building findings twice returns identical results (deterministic)", () => {

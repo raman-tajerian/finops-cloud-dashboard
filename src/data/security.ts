@@ -99,12 +99,20 @@ export function buildFindings(all: MasterResource[]): SecurityFindingDto[] {
       description: meta.description, impact: meta.impact, steps: meta.steps, snippet: meta.snippet,
     });
   };
+  // Each resource-level rule draws one seeded number per eligible resource; selected when draw < rate.
+  // Guarantee: if a rule has eligible resources but no draw fell under the rate, the resource with the lowest draw is selected.
+  const ELIGIBLE: [FindingRule, Set<string>][] = [["ssh-open", COMPUTE_SERVICES], ["public-bucket", BUCKET_SERVICES], ["unencrypted-db", DB_SERVICES], ["outdated-k8s", K8S_SERVICES]];
+  const best = new Map<FindingRule, { r: MasterResource; d: number }>();
+  const hit = new Set<FindingRule>();
   for (const r of all) {
-    if (COMPUTE_SERVICES.has(r.service) && rnd() < RULE_RATES["ssh-open"]!) push("ssh-open", r, r.provider);
-    if (BUCKET_SERVICES.has(r.service) && rnd() < RULE_RATES["public-bucket"]!) push("public-bucket", r, r.provider);
-    if (DB_SERVICES.has(r.service) && rnd() < RULE_RATES["unencrypted-db"]!) push("unencrypted-db", r, r.provider);
-    if (K8S_SERVICES.has(r.service) && rnd() < RULE_RATES["outdated-k8s"]!) push("outdated-k8s", r, r.provider);
+    for (const [rule, services] of ELIGIBLE) {
+      if (!services.has(r.service)) continue;
+      const d = rnd();
+      if (d < RULE_RATES[rule]!) { push(rule, r, r.provider); hit.add(rule); }
+      else if (!best.has(rule) || d < best.get(rule)!.d) best.set(rule, { r, d });
+    }
   }
+  for (const [rule] of ELIGIBLE) if (!hit.has(rule) && best.has(rule)) { const { r } = best.get(rule)!; push(rule, r, r.provider); }
   for (const provider of ["AWS", "Azure", "GCP"] as CloudProvider[])
     for (const [rule, count] of Object.entries(ACCOUNT_COUNTS[provider] ?? {}) as [FindingRule, number][])
       for (let n = 1; n <= count; n++) push(rule, null, provider, count > 1 ? n : undefined);
@@ -183,15 +191,24 @@ export const COMPLIANCE_FRAMEWORKS: ComplianceFrameworkDto[] = [
   ]),
 ];
 
-/** Per-framework pass/fail; a control fails only if an open finding of a mapped rule exists. */
+/** One shared score formatter: always one decimal (e.g. 65.5, 70.0). */
+export const fmtScore = (n: number) => n.toFixed(1);
+
+/** Per-framework result. Controls with no mapped rule are "not assessed" and excluded from the pass percentage;
+ *  an assessed control fails only if an open finding of a mapped rule exists. passed + failed + notAssessed = total. */
 export function complianceResult(framework: ComplianceFrameworkDto, findings: Pick<SecurityFindingDto, "rule" | "status" | "id" | "title" | "severity">[]) {
   const openRules = new Set(findings.filter((x) => isOpenFinding(x.status)).map((x) => x.rule));
   const controls = framework.controls.map((c) => {
-    const failed = c.rules.some((r) => openRules.has(r));
-    return { ...c, passed: !failed, findings: failed ? findings.filter((x) => c.rules.includes(x.rule) && isOpenFinding(x.status)) : [] };
+    const assessed = c.rules.length > 0;
+    const failed = assessed && c.rules.some((r) => openRules.has(r));
+    const status: "pass" | "fail" | "not-assessed" = !assessed ? "not-assessed" : failed ? "fail" : "pass";
+    return { ...c, status, passed: status === "pass", findings: failed ? findings.filter((x) => c.rules.includes(x.rule) && isOpenFinding(x.status)) : [] };
   });
-  const failed = controls.filter((c) => !c.passed).length;
-  return { controls, passed: controls.length - failed, failed, total: controls.length };
+  const failed = controls.filter((c) => c.status === "fail").length;
+  const notAssessed = controls.filter((c) => c.status === "not-assessed").length;
+  const passed = controls.length - failed - notAssessed;
+  const assessed = passed + failed;
+  return { controls, passed, failed, notAssessed, assessed, total: controls.length, passPct: assessed ? (passed / assessed) * 100 : 0 };
 }
 
 /** Full security payload for one filter combination: GET /api/v1/security */
