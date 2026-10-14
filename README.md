@@ -4,6 +4,11 @@ A multi-cloud cost and infrastructure dashboard that shows where cloud money goe
 
 **Live demo:** https://finops-cloud-dashboard.lovable.app
 
+
+
+
+
+
 ## Demo vs live data
 
 All figures in the live demo are **simulated**. The data comes from a seeded, deterministic dataset of 61 fictional resources, so every number is consistent across pages (for example, total spend is identical on Overview, Cost Explorer and Resources for the same filters).
