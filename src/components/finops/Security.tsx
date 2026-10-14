@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDownUp, Check, Copy, ExternalLink, Search, ShieldAlert, ShieldCheck } from "lucide-react";
-import { complianceResult, isOpenFinding, SEVERITY_ORDER, securityScore, RULE_META } from "@/data/security";
+import { complianceResult, fmtScore, isOpenFinding, SEVERITY_ORDER, securityScore, RULE_META } from "@/data/security";
 import type { FindingStatus, SecurityDto, SecurityFindingDto, Severity } from "@/types/finops";
 import { useSecurity } from "@/lib/queries";
 import { setSession, useSession, type FindingSessionStatus } from "@/lib/session-store";
@@ -77,21 +77,21 @@ function ScoreCard({ trend }: { trend: SecurityDto["scoreTrend"] }) {
         <TableToggle on={asTable} onChange={setAsTable} />
       </div>
       <div className="mt-4 flex items-center gap-6">
-        <svg viewBox="0 0 120 120" className="size-28 shrink-0" role="img" aria-label={`Security score ${score} of 100`}>
+        <svg viewBox="0 0 120 120" className="size-28 shrink-0" role="img" aria-label={`Security score ${fmtScore(score)} of 100`}>
           <circle cx="60" cy="60" r={R} fill="none" strokeWidth="10" className="stroke-secondary" />
           <circle cx="60" cy="60" r={R} fill="none" strokeWidth="10" strokeLinecap="round" className="stroke-primary transition-[stroke-dashoffset] duration-700" strokeDasharray={C} strokeDashoffset={C * (1 - score / 100)} transform="rotate(-90 60 60)" />
-          <text x="60" y="66" textAnchor="middle" className="fill-foreground font-display text-2xl">{score}</text>
+          <text x="60" y="66" textAnchor="middle" className="fill-foreground font-display text-2xl">{fmtScore(score)}</text>
         </svg>
         <div className="min-w-0 flex-1">
           {asTable ? (
-            <DataTableView caption="Security score trend, last 6 months" columns={["Month", "Score"]} rows={trend.map((t) => [t.month, t.score])} />
+            <DataTableView caption="Security score trend, last 6 months" columns={["Month", "Score"]} rows={trend.map((t) => [t.month, fmtScore(t.score)])} />
           ) : (
             <div className="h-28">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={trend} margin={{ top: 4, right: 4, bottom: 0, left: 4 }}>
                   <XAxis dataKey="month" tickLine={false} axisLine={false} fontSize={11} stroke="var(--muted-foreground)" />
                   <YAxis hide domain={[0, 100]} />
-                  <Tooltip formatter={(v) => [`${v}`, "Score"]} cursor={{ fill: "var(--secondary)" }} contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", background: "var(--card)", fontSize: 12 }} />
+                  <Tooltip formatter={(v) => [fmtScore(Number(v)), "Score"]} cursor={{ fill: "var(--secondary)" }} contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", background: "var(--card)", fontSize: 12 }} />
                   <Bar dataKey="score" radius={[6, 6, 0, 0]}>{trend.map((t, i) => <Cell key={t.month} fill={i === trend.length - 1 ? "var(--primary)" : "var(--chart-2)"} />)}</Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -116,8 +116,8 @@ function ComplianceCards({ findings, frameworks }: { findings: SecurityFindingDt
         {results.map(({ fw, r }) => (
           <button key={fw.id} onClick={() => setOpen(open === fw.id ? null : fw.id)} aria-expanded={open === fw.id} className={`rounded-xl border p-4 text-left transition-colors ${open === fw.id ? "border-foreground/40 bg-secondary" : "border-border hover:bg-secondary/50"}`}>
             <p className="text-sm font-semibold">{fw.name}</p>
-            <p className="metric-numbers mt-1 text-xs text-muted-foreground"><span className="text-success">{r.passed} pass</span> · <span className={r.failed ? "text-destructive" : ""}>{r.failed} fail</span> of {r.total}</p>
-            <Progress value={(r.passed / r.total) * 100} className="mt-3 h-1.5" />
+            <p className="metric-numbers mt-1 text-xs text-muted-foreground"><span className="text-success">{r.passed}</span> of {r.assessed} assessed controls passing ({r.notAssessed} not assessed)</p>
+            <Progress value={r.passPct} className="mt-3 h-1.5" />
           </button>
         ))}
       </div>
@@ -130,8 +130,8 @@ function ComplianceCards({ findings, frameworks }: { findings: SecurityFindingDt
               {active.r.controls.map((c) => (
                 <tr key={c.id} className="border-t border-border align-top">
                   <td className="px-4 py-2"><span className="font-mono text-xs text-muted-foreground">{c.id}</span> · {c.name}</td>
-                  <td className="px-4 py-2">{c.passed ? <StatusBadge tone="success">Pass</StatusBadge> : <StatusBadge tone="critical">Fail</StatusBadge>}</td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground">{c.passed ? "—" : c.findings.map((f) => f.title).join("; ")}</td>
+                  <td className="px-4 py-2">{c.status === "pass" ? <StatusBadge tone="success">Pass</StatusBadge> : c.status === "fail" ? <StatusBadge tone="critical">Fail</StatusBadge> : <StatusBadge tone="idle">Not assessed</StatusBadge>}</td>
+                  <td className="px-4 py-2 text-xs text-muted-foreground">{c.status !== "fail" ? "—" : c.findings.map((f) => f.title).join("; ")}</td>
                 </tr>
               ))}
             </tbody>

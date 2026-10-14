@@ -75,7 +75,7 @@ const BUCKET_SERVICES = new Set(["S3", "Blob"]);
 const DB_SERVICES = new Set(["RDS", "SQL DB"]);
 const K8S_SERVICES = new Set(["EKS", "AKS", "GKE"]);
 /** Selection rates per resource-level rule (documented; applied with a seeded PRNG over the full dataset). */
-export const RULE_RATES: Partial<Record<FindingRule, number>> = { "ssh-open": 0.06, "public-bucket": 0.05, "unencrypted-db": 0.08, "outdated-k8s": 0.2 };
+export const RULE_RATES: Partial<Record<FindingRule, number>> = { "ssh-open": 0.06, "public-bucket": 0.05, "unencrypted-db": 0.2, "outdated-k8s": 0.2 };
 /** Fixed account-level finding counts per provider (documented). */
 export const ACCOUNT_COUNTS: Record<string, Partial<Record<FindingRule, number>>> = {
   AWS: { "iam-overpermissive": 1, "unused-keys": 1 },
@@ -183,15 +183,24 @@ export const COMPLIANCE_FRAMEWORKS: ComplianceFrameworkDto[] = [
   ]),
 ];
 
-/** Per-framework pass/fail; a control fails only if an open finding of a mapped rule exists. */
+/** One shared score formatter: always one decimal (e.g. 65.5, 70.0). */
+export const fmtScore = (n: number) => n.toFixed(1);
+
+/** Per-framework result. Controls with no mapped rule are "not assessed" and excluded from the pass percentage;
+ *  an assessed control fails only if an open finding of a mapped rule exists. passed + failed + notAssessed = total. */
 export function complianceResult(framework: ComplianceFrameworkDto, findings: Pick<SecurityFindingDto, "rule" | "status" | "id" | "title" | "severity">[]) {
   const openRules = new Set(findings.filter((x) => isOpenFinding(x.status)).map((x) => x.rule));
   const controls = framework.controls.map((c) => {
-    const failed = c.rules.some((r) => openRules.has(r));
-    return { ...c, passed: !failed, findings: failed ? findings.filter((x) => c.rules.includes(x.rule) && isOpenFinding(x.status)) : [] };
+    const assessed = c.rules.length > 0;
+    const failed = assessed && c.rules.some((r) => openRules.has(r));
+    const status: "pass" | "fail" | "not-assessed" = !assessed ? "not-assessed" : failed ? "fail" : "pass";
+    return { ...c, status, passed: status === "pass", findings: failed ? findings.filter((x) => c.rules.includes(x.rule) && isOpenFinding(x.status)) : [] };
   });
-  const failed = controls.filter((c) => !c.passed).length;
-  return { controls, passed: controls.length - failed, failed, total: controls.length };
+  const failed = controls.filter((c) => c.status === "fail").length;
+  const notAssessed = controls.filter((c) => c.status === "not-assessed").length;
+  const passed = controls.length - failed - notAssessed;
+  const assessed = passed + failed;
+  return { controls, passed, failed, notAssessed, assessed, total: controls.length, passPct: assessed ? (passed / assessed) * 100 : 0 };
 }
 
 /** Full security payload for one filter combination: GET /api/v1/security */
