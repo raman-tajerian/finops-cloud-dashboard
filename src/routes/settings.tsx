@@ -6,10 +6,10 @@ import { PageHeader } from "@/components/finops/States";
 export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
-      { title: "Settings — NimbusOps" },
-      { name: "description", content: "Workspace, team and preferences." },
-      { property: "og:title", content: "Settings — NimbusOps" },
-      { property: "og:description", content: "Workspace, team and preferences." },
+      { title: "Settings — Fern" },
+      { name: "description", content: "Fern — Multi-cloud cost and sustainability dashboard. Workspace, team and preferences." },
+      { property: "og:title", content: "Settings — Fern" },
+      { property: "og:description", content: "Fern — Multi-cloud cost and sustainability dashboard. Workspace, team and preferences." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

@@ -76,7 +76,7 @@ export function CostExplorer({ state, views, setViews, setState }: { state: Expl
   if (q.isError) return <ErrorState message="We couldn't load cost data. Try again." onRetry={() => q.refetch()} />;
   const d = q.data;
   const exportAs = (kind: "csv" | "json") => {
-    const stamp = `nimbusops-${state.group}-${filters.range}`;
+    const stamp = `fern-${state.group}-${filters.range}`;
     if (kind === "csv") download(`${stamp}.csv`, toCsv(d.rows, state.group), "text/csv");
     else download(`${stamp}.json`, JSON.stringify({ filters, groupBy: state.group, total: d.total, previousTotal: d.previousTotal, rows: d.rows.map(({ spark: _s, ...r }) => r) }, null, 2), "application/json");
     toast.success(`Exported ${kind.toUpperCase()}`);

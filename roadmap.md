@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Rename product and demo workspace everywhere, update metadata and documentation, verify no old names remain, and run all tests without changing design or behavior.
+
 - [x] Apply the selected organic dark dashboard direction.
 - [x] Add budget forecasting controls and indicators.
 - [x] Add an actionable savings workflow.

@@ -44,7 +44,7 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
     const rows = services.map((s) => ({ service: s.name, cost: s.value }));
     const body = kind === "JSON" ? JSON.stringify({ filters, rows }, null, 2) : ["service,cost", ...rows.map((r) => `${r.service},${r.cost}`)].join("\n");
     const url = URL.createObjectURL(new Blob([body], { type: kind === "JSON" ? "application/json" : "text/csv" }));
-    const a = Object.assign(document.createElement("a"), { href: url, download: `nimbusops-report.${kind.toLowerCase()}` });
+    const a = Object.assign(document.createElement("a"), { href: url, download: `fern-report.${kind.toLowerCase()}` });
     a.click(); URL.revokeObjectURL(url);
     toast.success(`${kind} report exported`);
   };
@@ -291,10 +291,10 @@ export function SavingsFeed() {
                 <div className="rounded-xl bg-success-soft p-4"><Label>This action</Label><p className="metric-numbers mt-1 text-xl text-success">{fmtUSD(confirm.savings)}/mo</p></div>
                 <div className="rounded-xl bg-secondary p-4"><Label>All open actions</Label><p className="metric-numbers mt-1 text-xl">{fmtUSD(pending)}/mo</p></div>
               </div>
-              <div><Label>CLI preview</Label><pre className="mt-2 overflow-x-auto rounded-xl border border-border bg-background p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">{`$ nimbus remediate --id ${confirm.id} \\
+              <div><Label>CLI preview</Label><pre className="mt-2 overflow-x-auto rounded-xl border border-border bg-background p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">{`$ fern remediate --id ${confirm.id} \\
     --team ${confirm.team.toLowerCase()} --dry-run=false
 ✓ plan: ${confirm.detail}`}</pre></div>
-              <div><Label>Terraform preview</Label><pre className="mt-2 overflow-x-auto rounded-xl border border-border bg-background p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">{`resource "nimbus_optimization" "${confirm.id}" {
+              <div><Label>Terraform preview</Label><pre className="mt-2 overflow-x-auto rounded-xl border border-border bg-background p-3 font-mono text-[11px] leading-relaxed text-muted-foreground">{`resource "fern_optimization" "${confirm.id}" {
   action      = "apply"
   owner_team  = "${confirm.team}"
   max_savings = ${confirm.savings}

@@ -13,10 +13,10 @@ import { AnomalyAnalyst } from "@/components/finops/AnomalyAnalyst";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "NimbusOps — Cloud & FinOps Management Platform" },
-      { name: "description", content: "Multi-cloud spend, anomalies, unit economics, savings and Kubernetes health in one workspace." },
-      { property: "og:title", content: "NimbusOps — Cloud & FinOps Management Platform" },
-      { property: "og:description", content: "Multi-cloud spend, anomalies, unit economics, savings and Kubernetes health in one workspace." },
+      { title: "Fern — Multi-cloud cost and sustainability dashboard" },
+      { name: "description", content: "Multi-cloud cost and sustainability dashboard" },
+      { property: "og:title", content: "Fern — Multi-cloud cost and sustainability dashboard" },
+      { property: "og:description", content: "Multi-cloud cost and sustainability dashboard" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

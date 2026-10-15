@@ -21,10 +21,10 @@ export const Route = createFileRoute("/security")({
   search: { middlewares: [stripSearchParams(defaults)] },
   head: () => ({
     meta: [
-      { title: "Security & Compliance — NimbusOps" },
-      { name: "description", content: "Findings and compliance posture across clouds." },
-      { property: "og:title", content: "Security & Compliance — NimbusOps" },
-      { property: "og:description", content: "Findings and compliance posture across clouds." },
+      { title: "Security & Compliance — Fern" },
+      { name: "description", content: "Fern — Multi-cloud cost and sustainability dashboard. Findings and compliance posture across clouds." },
+      { property: "og:title", content: "Security & Compliance — Fern" },
+      { property: "og:description", content: "Fern — Multi-cloud cost and sustainability dashboard. Findings and compliance posture across clouds." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

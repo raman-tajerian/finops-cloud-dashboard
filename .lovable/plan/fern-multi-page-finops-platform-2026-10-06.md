@@ -1,11 +1,11 @@
-# NimbusOps: multi-page FinOps platform
+# Fern: multi-page FinOps platform
 
 The brief covers more than 11 new pages plus a full data layer, so the work is split into four phases. Each phase ships working and is checked on desktop and mobile before the next one starts. The dark matte look, all existing features and the AI anomaly analyst stay.
 
 ## Phase 1: Foundation and design fixes (Part A + B1–B2 + C1)
 - Tighten design tokens to the brief's values (#0B0C0E background, #16181D cards, #262930 borders, #9CA3AF text). Use one card style and one type scale, and give each provider a fixed color (AWS amber, Azure blue, GCP emerald).
 - Shared building blocks: KpiCard, ChartCard, DataTable, DetailDrawer, StatusBadge (icon plus text), EmptyState, ErrorState (with Retry) and skeletons.
-- Sidebar that collapses to icons, with groups (Analyze / Optimize / Govern / Admin). It becomes a drawer on mobile. Also: workspace switcher "Acme Corp – Production", user menu, breadcrumbs, a notification bell with unread count and "mark all read", and a Cmd/Ctrl+K command palette.
+- Sidebar that collapses to icons, with groups (Analyze / Optimize / Govern / Admin). It becomes a drawer on mobile. Also: workspace switcher "Fjord Labs – Production", user menu, breadcrumbs, a notification bell with unread count and "mark all read", and a Cmd/Ctrl+K command palette.
 - Global filters kept in the page address: date range including a custom calendar, providers, environment, team. They show as removable chips with "Reset all", and collapse into a bottom sheet on mobile.
 - Data layer: typed mock data with seeded random values in `src/data`, types in `src/types`, and an API client in `src/lib/api.ts`. The client uses mock data with a 300–800 ms delay, or calls the real API when `VITE_API_BASE_URL` is set. All fetching goes through TanStack Query. Endpoints are documented in `docs/API_CONTRACT.md`, and a "Demo data / Live" label is shown.
 - Accessibility: visible focus ring, aria labels, aria-live on numbers, a "View as table" option on charts, 40px touch targets, and reduced-motion support.

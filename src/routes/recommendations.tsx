@@ -19,10 +19,10 @@ export const Route = createFileRoute("/recommendations")({
   search: { middlewares: [stripSearchParams(defaults)] },
   head: () => ({
     meta: [
-      { title: "Recommendations — NimbusOps" },
-      { name: "description", content: "Savings actions ranked by impact." },
-      { property: "og:title", content: "Recommendations — NimbusOps" },
-      { property: "og:description", content: "Savings actions ranked by impact." },
+      { title: "Recommendations — Fern" },
+      { name: "description", content: "Fern — Multi-cloud cost and sustainability dashboard. Savings actions ranked by impact." },
+      { property: "og:title", content: "Recommendations — Fern" },
+      { property: "og:description", content: "Fern — Multi-cloud cost and sustainability dashboard. Savings actions ranked by impact." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
