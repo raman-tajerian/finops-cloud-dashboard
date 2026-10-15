@@ -198,3 +198,26 @@ html { scroll-padding-top: 64px; }
 @layer base {
   :where(a, button, input, textarea, select, [role="button"], [tabindex]):focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 }
+
+/* Fjord Labs hero pattern: soft rounded rects + quarter circles from chart tokens, ~10% opacity, purely decorative. */
+@utility hero-pattern {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.11;
+  background-image:
+    radial-gradient(circle at 0 100%, var(--chart-1) 0 22px, transparent 23px),
+    radial-gradient(circle at 100% 0, var(--chart-2) 0 18px, transparent 19px),
+    linear-gradient(var(--chart-6), var(--chart-6)),
+    linear-gradient(var(--chart-3), var(--chart-3));
+  background-size: 120px 96px, 120px 96px, 120px 96px, 120px 96px;
+  background-position: 0 0, 60px 0, 30px 58px, 92px 40px;
+  background-repeat: repeat, repeat, no-repeat, no-repeat;
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 55%, transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 55%, transparent 100%);
+  border-radius: 1.25rem;
+  animation: hero-fade 350ms ease-out both;
+  @media (prefers-reduced-motion: reduce) { animation: none; }
+}
+@keyframes hero-fade { from { opacity: 0 } to { opacity: 0.11 } }
