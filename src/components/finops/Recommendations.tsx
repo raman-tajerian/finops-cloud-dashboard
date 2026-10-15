@@ -178,14 +178,14 @@ function Rules({ d }: { d: SavingsDto }) {
 
 function snippet(i: SavingItemDto) {
   return `# ${i.title}
-resource "nimbus_optimization" "${i.id}" {
+resource "fern_optimization" "${i.id}" {
   category    = "${i.category}"
   owner_team  = "${i.team}"
   resources   = [${i.resourceIds.map((r) => `"${r}"`).join(", ")}]
   est_savings = ${i.savings}
 }
 
-$ nimbus optimize apply --id ${i.id} --dry-run`;
+$ fern optimize apply --id ${i.id} --dry-run`;
 }
 
 function ReviewDrawer({ item, onClose }: { item: SavingItemDto | null; onClose: () => void }) {

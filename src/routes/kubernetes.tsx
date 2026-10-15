@@ -9,10 +9,10 @@ import { KubernetesWorkspace } from "@/components/finops/Operations";
 export const Route = createFileRoute("/kubernetes")({
   head: () => ({
     meta: [
-      { title: "Kubernetes — NimbusOps" },
-      { name: "description", content: "Cluster health, utilization and live automation events." },
-      { property: "og:title", content: "Kubernetes — NimbusOps" },
-      { property: "og:description", content: "Cluster health, utilization and live automation events." },
+      { title: "Kubernetes — Fern" },
+      { name: "description", content: "Fern — Multi-cloud cost and sustainability dashboard. Cluster health, utilization and live automation events." },
+      { property: "og:title", content: "Kubernetes — Fern" },
+      { property: "og:description", content: "Fern — Multi-cloud cost and sustainability dashboard. Cluster health, utilization and live automation events." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

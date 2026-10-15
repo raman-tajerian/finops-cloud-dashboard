@@ -6,10 +6,10 @@ import { PageHeader } from "@/components/finops/States";
 export const Route = createFileRoute("/integrations")({
   head: () => ({
     meta: [
-      { title: "Integrations — NimbusOps" },
-      { name: "description", content: "Cloud accounts and tool connections." },
-      { property: "og:title", content: "Integrations — NimbusOps" },
-      { property: "og:description", content: "Cloud accounts and tool connections." },
+      { title: "Integrations — Fern" },
+      { name: "description", content: "Fern — Multi-cloud cost and sustainability dashboard. Cloud accounts and tool connections." },
+      { property: "og:title", content: "Integrations — Fern" },
+      { property: "og:description", content: "Fern — Multi-cloud cost and sustainability dashboard. Cloud accounts and tool connections." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

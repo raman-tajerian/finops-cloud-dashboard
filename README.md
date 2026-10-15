@@ -1,4 +1,6 @@
-# ClarityCloud: Cloud & FinOps Dashboard
+# Fern
+
+Multi-cloud cost and sustainability dashboard
 
 A multi-cloud cost and infrastructure dashboard that shows where cloud money goes, where it is wasted and how much can be saved. Built as a portfolio project to demonstrate frontend architecture, data modelling and a backend-ready design.
 

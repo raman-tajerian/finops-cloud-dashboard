@@ -86,7 +86,7 @@ export function ResourcesWorkspace({ search, setSearch }: { search: TableSearch;
 
   const exportSelected = () => {
     const url = URL.createObjectURL(new Blob([toCsv(selectedRows)], { type: "text/csv" }));
-    const a = Object.assign(document.createElement("a"), { href: url, download: `nimbusops-resources-${selectedRows.length}.csv` });
+    const a = Object.assign(document.createElement("a"), { href: url, download: `fern-resources-${selectedRows.length}.csv` });
     document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     toast.success(`Exported ${selectedRows.length} resources`);
   };
