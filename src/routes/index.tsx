@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { FjordLogo } from "@/components/brand";
 import { useState } from "react";
 import { TopResourcesCard } from "@/components/finops/Widgets";
 import { BudgetForecast, WhatIfSimulator } from "@/components/finops/Operations";
@@ -29,8 +30,9 @@ function Index() {
   return (
     <>
       <div className="reveal-up"><CardBoundary label="Anomaly banner"><AnomalyStrip onOpen={setDetail} /></CardBoundary></div>
-      <div className="reveal-up reveal-delay-1 flex flex-wrap items-end justify-between gap-4">
-        <div className="pt-6"><p className="text-xs text-muted-foreground">Cloud & FinOps platform · <ResourceCount /> resources</p><h1 className="mt-2 font-display text-[32px] font-normal leading-tight tracking-tight">Good afternoon, Raman.</h1></div>
+      <div className="reveal-up reveal-delay-1 relative isolate flex flex-wrap items-end justify-between gap-4 overflow-hidden rounded-[1.25rem] px-1 pb-2">
+        <div aria-hidden className="hero-pattern" />
+        <div className="relative z-10 pt-6"><FjordLogo size={24} className="mb-3" /><p className="text-xs text-muted-foreground">Cloud & FinOps platform · <ResourceCount /> resources</p><h1 className="mt-2 font-display text-[32px] font-normal leading-tight tracking-tight">Good afternoon, Raman.</h1></div>
       </div>
       <div className="reveal-up reveal-delay-2"><GlobalFilters /></div>
       <div className="reveal-up reveal-delay-3"><DataGate h="h-16"><OverviewKpis /></DataGate></div>
