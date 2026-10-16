@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { AccentBand, FjordAvatar, FjordLogo } from "@/components/brand";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Bell, ChevronsLeft, ChevronsUpDown, Cloud, LogOut, Menu, Radar, Search, User, X } from "lucide-react";
 import { toast } from "sonner";
@@ -43,8 +44,8 @@ export function Shell({ children }: { children: ReactNode }) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex h-11 w-full min-w-0 items-center gap-3 rounded-xl px-2 text-left hover:bg-secondary">
-              <span className="grid size-8 shrink-0 place-items-center rounded-[10px] bg-primary text-primary-foreground"><Cloud className="size-4" /></span>
-              {!collapsed && <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">Fjord Labs</span><span className="block truncate text-xs text-muted-foreground">Production</span></span>}
+              <FjordAvatar size={32} />
+              {!collapsed && <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold tracking-[0.02em]">Fjord <span className="font-normal text-muted-foreground">Labs</span></span><span className="block truncate text-xs text-muted-foreground">Production</span></span>}
               {!collapsed && <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />}
             </button>
           </DropdownMenuTrigger>
@@ -84,6 +85,7 @@ export function Shell({ children }: { children: ReactNode }) {
       {open && <button className="fixed inset-0 z-40 bg-background/80 lg:hidden" onClick={() => setOpen(false)} aria-label="Close menu overlay" />}
 
       <div className="min-w-0">
+        <AccentBand className="h-1.5" />
         <header className="sticky top-0 z-30 flex min-h-16 items-center gap-2 border-b border-border bg-background/80 px-4 backdrop-blur-xl md:px-8">
           <Button variant="ghost" size="icon" className="size-10 lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu"><Menu /></Button>
           <nav aria-label="Breadcrumb" className="min-w-0 truncate text-sm"><span className="text-muted-foreground">Fjord Labs</span><span className="px-2 text-muted-foreground">/</span><span className="font-medium">{current.label}</span></nav>
@@ -120,7 +122,8 @@ export function Shell({ children }: { children: ReactNode }) {
           </div>
         </header>
         <main className="mx-auto w-full max-w-[1540px] min-w-0 space-y-6 p-4 pb-24 md:p-8 md:pb-24">{children}</main>
-        <footer className="mx-auto flex max-w-[1540px] flex-wrap gap-3 px-4 pb-8 text-xs text-muted-foreground md:px-8"><span>Fern v0.4.0</span><span>·</span><span>{dataSource === "live" ? "Live data" : "Demo data — all figures are simulated"}</span><span>·</span><span>Demo data as of 12 Oct 2026</span></footer>
+        <div className="mx-auto max-w-[1540px] px-4 md:px-8"><AccentBand className="h-1 rounded-full overflow-hidden" /></div>
+        <footer className="mx-auto flex max-w-[1540px] flex-wrap items-center gap-3 px-4 pb-8 pt-4 text-xs text-muted-foreground md:px-8"><FjordLogo size={16} /><span>·</span><span>Fern v0.4.0</span><span>·</span><span>{dataSource === "live" ? "Live data" : "Demo data — all figures are simulated"}</span><span>·</span><span>Demo data as of 12 Oct 2026</span></footer>
       </div>
 
       <CommandDialog open={palette} onOpenChange={setPalette}>
