@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { AccentBand, FjordAvatar, FjordLogo } from "@/components/brand";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Bell, ChevronsLeft, ChevronsUpDown, Cloud, LogOut, Menu, Radar, Search, User, X } from "lucide-react";
+import { Bell, ChevronsLeft, ChevronsUpDown, LogOut, Menu, Radar, Search, User, X } from "lucide-react";
 import { toast } from "sonner";
 import { navGroups, navItems } from "@/lib/nav";
 import { dataSource } from "@/lib/api";
