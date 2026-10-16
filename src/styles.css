@@ -5,6 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-brand-burgundy: var(--brand-burgundy);
+  --color-brand-mustard: var(--brand-mustard);
+  --color-brand-sand: var(--brand-sand);
+  --color-brand-ink: var(--brand-ink);
   --font-sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Instrument Serif", Georgia, serif;
   --font-mono: "Geist", system-ui, sans-serif;
@@ -90,6 +94,10 @@
   --chart-4: #C99A3E;
   --chart-5: #B98B8B;
   --chart-6: #D9CDBB;
+  --brand-burgundy: #7A1F3D;
+  --brand-mustard: #D9A441;
+  --brand-sand: #E8D8C0;
+  --brand-ink: #1F2421;
   --shadow-card: 0 1px 2px rgb(31 36 33 / 4%), 0 8px 24px rgb(31 36 33 / 4%);
 }
 
@@ -198,24 +206,3 @@ html { scroll-padding-top: 64px; }
 @layer base {
   :where(a, button, input, textarea, select, [role="button"], [tabindex]):focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 }
-
-/* Fjord Labs hero pattern: soft rounded rects + quarter circles from chart tokens, ~10% opacity, purely decorative. */
-@utility hero-pattern {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.12;
-  background-image:
-    radial-gradient(circle at 0 100%, var(--chart-1) 0 20px, transparent 21px),
-    radial-gradient(circle at 100% 0, var(--chart-2) 0 16px, transparent 17px),
-    radial-gradient(circle at 50% 50%, var(--chart-3) 0 5px, transparent 6px);
-  background-size: 112px 88px, 112px 88px, 112px 88px;
-  background-position: 0 0, 56px 0, 28px 44px;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 35%, black 75%);
-  mask-image: linear-gradient(90deg, transparent 0%, transparent 35%, black 75%);
-  border-radius: 1.25rem;
-  animation: hero-fade 350ms ease-out both;
-  @media (prefers-reduced-motion: reduce) { animation: none; }
-}
-@keyframes hero-fade { from { opacity: 0 } to { opacity: 0.12 } }
