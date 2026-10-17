@@ -9,8 +9,12 @@ export type AnomalyStatus = "New" | "Investigating" | "Resolved";
 export type FindingSessionStatus = "Open" | "In progress" | "Resolved" | "Accepted risk";
 export interface FindingState { status: FindingSessionStatus; reason?: string }
 
-interface State { recs: Record<string, RecState>; budgets: SessionBudget[]; rules: AlertRule[]; anomalies: Record<string, AnomalyStatus>; findings: Record<string, FindingState> }
+export interface PastReport { id: string; template: string; title: string; format: string; range: string; created: string; content: string }
+export interface ScheduleRow { id: string; template: string; cadence: "weekly" | "monthly"; recipients: string[]; format: string; enabled: boolean }
+export interface DemoSettings { profile?: { name: string; email: string; title: string }; workspace?: { name: string; currency: string; timezone: string }; members?: import("@/types/finops").MemberDto[]; mappings?: import("@/types/finops").TagMappingDto[]; keys?: import("@/types/finops").ApiKeyDto[]; notify: Record<string, boolean>; density: "compact" | "comfortable" }
+interface State { reports: PastReport[]; schedules: ScheduleRow[]; integrations: Record<string, "Connected" | "Not connected">; settings: DemoSettings; recs: Record<string, RecState>; budgets: SessionBudget[]; rules: AlertRule[]; anomalies: Record<string, AnomalyStatus>; findings: Record<string, FindingState> }
 let state: State = {
+  reports: [], schedules: [], integrations: {}, settings: { notify: {}, density: "comfortable" },
   findings: {},
   recs: {},
   budgets: [],
