@@ -5,6 +5,10 @@ import type { Filters } from "@/lib/filters";
 import { buildAlerts, buildSavings } from "@/data/budgets";
 import { buildBudget, buildKubernetes, buildScenario } from "@/data/platformOps";
 import { buildSecurity } from "@/data/security";
+import { buildReport } from "@/data/reports";
+import { buildIntegrations } from "@/data/integrations";
+import { buildSettings } from "@/data/settings";
+import type { IntegrationsDto, ReportDto, ReportTemplateId, SettingsDto } from "@/types/finops";
 import type { AlertsDto, SavingsDto, BudgetDto, KubernetesDto, ScenarioDto, DashboardDto, ExploreDto, GroupBy, ResourceDetailDto, ResourcesDto, SecurityDto, SustainabilityDto } from "@/types/finops";
 
 const base = (import.meta.env["VITE_API_BASE_URL"] as string | undefined)?.replace(/\/$/, "");
@@ -31,5 +35,8 @@ export const api = {
   getScenario: (f: Filters) => call<ScenarioDto>(`/scenario?${qs(f)}`, () => buildScenario(masterResources, f)),
   getSavings: (f: Filters) => call<SavingsDto>(`/savings?${qs(f)}`, () => buildSavings(masterResources, f)),
   getAlerts: (f: Filters) => call<AlertsDto>(`/alerts?${qs(f)}`, () => buildAlerts(masterResources, f)),
+  getReport: (f: Filters, template: ReportTemplateId) => call<ReportDto>(`/reports/${template}?${qs(f)}`, () => buildReport(masterResources, f, template)),
+  getIntegrations: () => call<IntegrationsDto>(`/integrations`, () => buildIntegrations(masterResources)),
+  getSettings: () => call<SettingsDto>(`/settings`, () => buildSettings()),
   getSecurity: (f: Filters) => call<SecurityDto>(`/security?${qs(f)}`, () => buildSecurity(masterResources, f)),
 };

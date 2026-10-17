@@ -126,3 +126,21 @@ export interface SecurityDto {
   scoreTrend: { month: string; score: number }[];
   frameworks: ComplianceFrameworkDto[]; weights: Record<Severity, number>;
 }
+
+// ---- Reports, integrations, settings (demo) ----
+export type ReportTemplateId = "executive" | "team" | "savings" | "security";
+export type ReportFormat = "PDF" | "CSV" | "JSON";
+export interface ReportTemplateMeta { id: ReportTemplateId; name: string; description: string; sections: string[] }
+export interface ReportSection { title: string; columns: string[]; rows: (string | number)[][] }
+export interface ReportDto { template: ReportTemplateId; title: string; range: string; filters: unknown; generatedAt: string; totals: Record<string, number>; sections: ReportSection[] }
+export type IntegrationKind = "cloud" | "kubernetes" | "chat" | "dev" | "ops";
+export type IntegrationStatus = "Connected" | "Not connected" | "Error";
+export type CredentialKind = "aws-role-arn" | "azure-sp-id" | "gcp-project-id" | "none";
+export interface IntegrationDto { id: string; name: string; kind: IntegrationKind; status: IntegrationStatus; lastSync: string | null; credential: CredentialKind; permissions: string[] }
+export interface SyncRunDto { id: string; integration: string; started: string; status: "Success" | "Failed" | "Partial"; durationSec: number; records: number }
+export interface IntegrationsDto { integrations: IntegrationDto[]; history: SyncRunDto[] }
+export type MemberRole = "Admin" | "Editor" | "Viewer";
+export interface MemberDto { id: string; name: string; email: string; role: MemberRole; lastActive: string }
+export interface TagMappingDto { id: string; tagKey: string; tagValue: string; team: string }
+export interface ApiKeyDto { id: string; name: string; masked: string; created: string; lastUsed: string | null }
+export interface SettingsDto { profile: { name: string; email: string; title: string }; workspace: { name: string; currency: string; timezone: string }; members: MemberDto[]; mappings: TagMappingDto[]; keys: ApiKeyDto[]; channels: string[]; events: string[] }

@@ -67,3 +67,10 @@ export function useSecurity() {
   const { filters } = useGlobalFilters();
   return useQuery({ queryKey: ["security", filters], queryFn: () => api.getSecurity(filters), placeholderData: keepPreviousData, staleTime: 60_000 });
 }
+
+export function useIntegrations() {
+  return useQuery({ queryKey: ["integrations"], queryFn: () => api.getIntegrations(), staleTime: 60_000 });
+}
+export function useSettings() {
+  return useQuery({ queryKey: ["settings"], queryFn: () => api.getSettings(), staleTime: 60_000 });
+}
