@@ -39,7 +39,7 @@ export function OverviewKpis() {
         const d = pctDelta(it.k), up = d > 0, good = it.goodWhenUp ? up : !up;
         return (
           <Link key={it.label} to={it.to} className="organic-card subtle-lift group flex h-full flex-col p-5">
-            <div className="flex items-center justify-between gap-2"><p className="truncate text-[13px] text-muted-foreground">{it.label}</p><span className="flex shrink-0 items-center gap-2"><span aria-hidden className="size-4 rounded-full bg-brand-mustard" /><ChevronRight className="size-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></span></div>
+            <div className="flex items-center justify-between gap-2"><p className="truncate text-[13px] text-muted-foreground">{it.label}</p><ChevronRight className="size-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></div>
             <div className="mt-2 flex items-end justify-between gap-2">
               <p className="font-display whitespace-nowrap text-[32px] leading-none tracking-tight tabular-nums" aria-live="polite"><CountUp value={it.k.value} format={it.f} /></p>
               <Spark data={it.k.spark} color={it.color} className="h-8 w-20" />
