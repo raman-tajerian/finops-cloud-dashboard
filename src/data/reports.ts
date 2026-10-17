@@ -41,7 +41,7 @@ export function buildReport(all: MasterResource[], f: Filters, template: ReportT
   const sec = buildSecurity(all, f);
   const open = sec.findings.filter((x) => isOpenFinding(x.status));
   return { ...base, totals: { score: sec.score, openFindings: open.length, critical: open.filter((x) => x.severity === "Critical").length, high: open.filter((x) => x.severity === "High").length },
-    sections: [{ title: "Open findings", columns: ["ID", "Severity", "Title", "Provider", "First detected"], rows: open.map((x) => [x.id, x.severity, x.title, x.provider, x.firstDetected]) }] };
+    sections: [{ title: "Open findings", columns: ["ID", "Severity", "Title", "Provider", "First detected"], rows: open.map((x) => [x.id, x.severity, x.title, x.provider, x.detected]) }] };
 }
 
 const cell = (v: string | number) => { const s = String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
