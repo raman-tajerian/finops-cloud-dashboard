@@ -21,7 +21,7 @@ export function buildReport(all: MasterResource[], f: Filters, template: ReportT
   if (template === "executive") {
     const d = buildDashboard(all, f), p = buildExplore(all, f, "provider"), s = buildSavings(all, f);
     const cats = new Map<string, number>();
-    for (const i of s.items) cats.set(i.category, (cats.get(i.category) ?? 0) + i.saving);
+    for (const i of s.items) cats.set(i.category, (cats.get(i.category) ?? 0) + i.savings);
     return { ...base, totals: { totalSpend: r2(d.overview.totalSpend.value), forecastEom: r2(d.overview.forecastEom.value), savingsOpportunity: r2(d.overview.savings.value), activeAnomalies: d.overview.anomalies.value },
       sections: [
         { title: "Spend by provider", columns: ["Provider", "Spend", "Previous", "Change %"], rows: p.rows.map((x) => [x.name, r2(x.current), r2(x.previous), r2(x.changePct)]) },
@@ -36,7 +36,7 @@ export function buildReport(all: MasterResource[], f: Filters, template: ReportT
   if (template === "savings") {
     const s = buildSavings(all, f);
     return { ...base, totals: { totalSavings: r2(s.total), target: r2(s.target), items: s.items.length },
-      sections: [{ title: "Open savings items", columns: ["Title", "Category", "Resources", "Monthly saving", "Effort", "Risk"], rows: s.items.map((i) => [i.title, i.category, i.resourceIds.length, r2(i.saving), i.effort, i.risk]) }] };
+      sections: [{ title: "Open savings items", columns: ["Title", "Category", "Resources", "Monthly saving", "Effort", "Risk"], rows: s.items.map((i) => [i.title, i.category, i.resourceIds.length, r2(i.savings), i.effort, i.risk]) }] };
   }
   const sec = buildSecurity(all, f);
   const open = sec.findings.filter((x) => isOpenFinding(x.status));
