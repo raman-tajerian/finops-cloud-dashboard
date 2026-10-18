@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { FjordLogo } from "@/components/brand";
-import { FileText } from "lucide-react";
-import { ComingSoon } from "@/components/finops/States";
 import { PageHeader } from "@/components/finops/States";
+import { ReportsWorkspace } from "@/components/finops/Reports";
 
 export const Route = createFileRoute("/reports")({
   head: () => ({
@@ -23,7 +22,7 @@ function ReportsPage() {
     <>
       <FjordLogo size={32} />
       <PageHeader title="Reports" description="Generate, download and schedule cost reports" />
-      <ComingSoon icon={FileText} what="Reports" />
+      <ReportsWorkspace />
     </>
   );
 }

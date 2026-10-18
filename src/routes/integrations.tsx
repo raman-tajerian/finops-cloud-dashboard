@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Plug } from "lucide-react";
-import { ComingSoon } from "@/components/finops/States";
 import { PageHeader } from "@/components/finops/States";
+import { IntegrationsWorkspace } from "@/components/finops/Integrations";
 
 export const Route = createFileRoute("/integrations")({
   head: () => ({
@@ -21,7 +20,7 @@ function IntegrationsPage() {
   return (
     <>
       <PageHeader title="Integrations" description="Cloud accounts and tool connections" />
-      <ComingSoon icon={Plug} what="Integrations" />
+      <IntegrationsWorkspace />
     </>
   );
 }

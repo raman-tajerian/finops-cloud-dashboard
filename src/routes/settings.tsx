@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Settings } from "lucide-react";
-import { ComingSoon } from "@/components/finops/States";
+import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { PageHeader } from "@/components/finops/States";
+import { SettingsWorkspace, SETTINGS_TABS } from "@/components/finops/Settings";
+
+const schema = z.object({ tab: fallback(z.string(), "profile").default("profile"), dialog: fallback(z.string(), "").default("") });
 
 export const Route = createFileRoute("/settings")({
+  validateSearch: zodValidator(schema),
   head: () => ({
     meta: [
       { title: "Settings — Fern" },
@@ -18,10 +22,15 @@ export const Route = createFileRoute("/settings")({
 });
 
 function SettingsPage() {
+  const { tab, dialog } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const safeTab = SETTINGS_TABS.some(([v]) => v === tab) ? tab : "profile";
   return (
     <>
       <PageHeader title="Settings" description="Workspace, team and preferences" />
-      <ComingSoon icon={Settings} what="Settings" />
+      <SettingsWorkspace tab={safeTab} dialog={dialog}
+        onTab={(t) => navigate({ search: (p) => ({ ...p, tab: t, dialog: "" }), replace: true })}
+        onDialog={(d) => navigate({ search: (p) => ({ ...p, dialog: d }), replace: true })} />
     </>
   );
 }
