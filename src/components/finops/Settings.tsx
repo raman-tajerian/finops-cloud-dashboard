@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Copy, Pencil, Plus, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useSettings } from "@/lib/queries";
-import { setSession, useSession } from "@/lib/session-store";
+import { setSession, useSession, type DemoSettings } from "@/lib/session-store";
 import { isEmail } from "@/lib/validators";
 import { fakeKey } from "@/data/settings";
 import { DEMO_TODAY, fmtDemoDate } from "@/data/resources";
@@ -53,7 +53,7 @@ export function SettingsWorkspace({ tab, dialog, onTab, onDialog }: { tab: strin
   );
 }
 
-type Saver = (patch: Partial<ReturnType<typeof useSession<import("@/lib/session-store").DemoSettings>>>, msg?: string) => void;
+type Saver = (patch: Partial<DemoSettings>, msg?: string) => void;
 
 function FormCard({ fields, value, validate, onSave }: { fields: [string, string][]; value: Record<string, string>; validate: (v: Record<string, string>) => Record<string, string> | null; onSave: (v: Record<string, string>) => void }) {
   const [v, setV] = useState(value);
