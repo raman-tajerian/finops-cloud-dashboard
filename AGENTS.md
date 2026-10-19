@@ -22,3 +22,4 @@
 - Savings categories come only from savingRule()/buildRecommendations() in src/data/aggregate.ts (first matching rule wins) — Recommendations and Overview "Savings opportunity" must reconcile exactly.
 - Session-only demo state (recommendation statuses, budgets, alert rules, anomaly statuses) lives in src/lib/session-store.ts — keeps demo actions out of the data layer.
 - All demo date logic uses DEMO_TODAY in src/data/resources.ts (history ends there; never the real clock) — keeps windows, forecasts and snooze dates deterministic.
+- Reports, Integrations and Settings are pure builders in src/data (reports.ts, integrations.ts, settings.ts) with format-only validators in src/lib/validators.ts — report totals reuse page aggregates so they reconcile.

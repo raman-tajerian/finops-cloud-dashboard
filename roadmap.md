@@ -14,7 +14,8 @@
 - [x] Foundation follow-up: URL filters, query-backed cards, states, table views, coming-soon pages.
 - [ ] Phase 2: Overview, Cost Explorer, Resources, Sustainability pages.
 - [ ] Phase 3: Recommendations, Kubernetes, Security, Budgets, Scenario simulator.
-- [ ] Phase 4: Reports, Integrations, Settings, shortcuts, tests, polish.
+- [x] Phase 4: Reports, Integrations, Settings, tests.
+- [ ] Keyboard shortcuts (not requested yet)
 - [x] Phase 2a: master dataset, error boundaries, one-row filter bar, Overview KPIs/trend/movers, Cost Explorer.
 - [x] Phase 2b: Resources page (advanced table, bulk actions, detail drawer, URL state).
 - [x] Sustainability page.

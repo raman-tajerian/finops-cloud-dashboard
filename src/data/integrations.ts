@@ -32,7 +32,7 @@ export function buildIntegrations(all: MasterResource[]): IntegrationsDto {
   const history: SyncRunDto[] = [];
   const live = integrations.filter((i) => i.status !== "Not connected");
   for (let n = 0; n < 24; n++) {
-    const it = live[n % live.length];
+    const it = live[n % live.length]!;
     const fail = it.status === "Error" ? rnd() < 0.7 : rnd() < 0.08;
     history.push({ id: `sync-${String(n + 1).padStart(3, "0")}`, integration: it.name, started: iso(n * 90 + Math.round(rnd() * 40)), status: fail ? "Failed" : rnd() < 0.1 ? "Partial" : "Success", durationSec: Math.round(8 + rnd() * 160), records: fail ? 0 : Math.round(200 + rnd() * 9000) });
   }

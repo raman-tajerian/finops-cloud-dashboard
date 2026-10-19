@@ -25,7 +25,7 @@ export function IntegrationsWorkspace() {
   const [active, setActive] = useState<IntegrationDto | null>(null);
   if (q.isPending) return <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"><CardSkeleton h="h-16" /><CardSkeleton h="h-16" /><CardSkeleton h="h-16" /></div>;
   if (q.isError) return <ErrorState message="We couldn't load integrations." onRetry={() => q.refetch()} />;
-  const list = q.data.integrations.map((i) => (overrides[i.id] ? { ...i, status: overrides[i.id] } : i));
+  const list = q.data.integrations.map((i) => { const o = overrides[i.id]; return o ? { ...i, status: o } : i; });
   if (!list.length) return <EmptyState icon={Plug} title="No integrations available." action="Retry" onAction={() => q.refetch()} />;
   return (
     <div className="space-y-8">
