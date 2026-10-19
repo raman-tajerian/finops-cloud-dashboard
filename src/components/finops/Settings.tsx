@@ -33,8 +33,8 @@ export function SettingsWorkspace({ tab, dialog, onTab, onDialog }: { tab: strin
     <Tabs value={tab} onValueChange={onTab} className="space-y-4">
       <div className="overflow-x-auto"><TabsList className="w-max">{SETTINGS_TABS.map(([v, l]) => <TabsTrigger key={v} value={v}>{l}</TabsTrigger>)}</TabsList></div>
       <p className="flex items-center gap-2 text-xs text-muted-foreground"><Demo /> Changes are kept for this session only.</p>
-      <TabsContent value="profile"><FormCard fields={[["name", "Name"], ["email", "Email"], ["title", "Title"]]} value={d.profile} validate={(v) => (isEmail(v.email) ? null : { email: "Enter a valid email." })} onSave={(v) => save({ profile: v as SettingsDto["profile"] })} /></TabsContent>
-      <TabsContent value="workspace"><FormCard fields={[["name", "Workspace name"], ["currency", "Currency"], ["timezone", "Timezone"]]} value={d.workspace} validate={(v) => (v.name.trim() ? null : { name: "Name is required." })} onSave={(v) => save({ workspace: v as SettingsDto["workspace"] })} /></TabsContent>
+      <TabsContent value="profile"><FormCard fields={[["name", "Name"], ["email", "Email"], ["title", "Title"]]} value={d.profile} validate={(v) => (isEmail(v["email"] ?? "") ? null : { email: "Enter a valid email." })} onSave={(v) => save({ profile: v as SettingsDto["profile"] })} /></TabsContent>
+      <TabsContent value="workspace"><FormCard fields={[["name", "Workspace name"], ["currency", "Currency"], ["timezone", "Timezone"]]} value={d.workspace} validate={(v) => ((v["name"] ?? "").trim() ? null : { name: "Name is required." })} onSave={(v) => save({ workspace: v as SettingsDto["workspace"] })} /></TabsContent>
       <TabsContent value="members"><Members d={d} open={dialog === "invite"} onOpen={(o) => onDialog(o ? "invite" : "")} save={save} /></TabsContent>
       <TabsContent value="allocation"><Allocation rows={d.mappings} save={save} /></TabsContent>
       <TabsContent value="notifications">
@@ -71,7 +71,7 @@ function Members({ d, open, onOpen, save }: { d: SettingsDto; open: boolean; onO
   const invite = () => {
     if (!isEmail(email)) return setErr("Enter a valid email address.");
     if (d.members.some((m) => m.email === email.trim())) return setErr("This person is already a member.");
-    save({ members: [...d.members, { id: `m-${d.members.length + 1}`, name: email.split("@")[0], email: email.trim(), role, lastActive: "Invited" }] }, `Invite recorded for ${email} (demo, not sent)`);
+    save({ members: [...d.members, { id: `m-${d.members.length + 1}`, name: email.split("@")[0] ?? email, email: email.trim(), role, lastActive: "Invited" }] }, `Invite recorded for ${email} (demo, not sent)`);
     setEmail(""); setErr(null); onOpen(false);
   };
   return (
@@ -108,8 +108,8 @@ function Allocation({ rows, save }: { rows: TagMappingDto[]; save: Saver }) {
   };
   return (
     <div className="space-y-3">
-      <div className="flex justify-end"><Button onClick={() => setEdit({ id: `t-${rows.length + 1}-${rows.at(-1)?.id ?? "0"}`, tagKey: "costCenter", tagValue: "", team: teams[0] })}><Plus className="size-4" />Add mapping</Button></div>
-      {rows.length === 0 ? <EmptyState icon={Users} title="No tag mappings." action="Add mapping" onAction={() => setEdit({ id: "t-1", tagKey: "costCenter", tagValue: "", team: teams[0] })} /> : (
+      <div className="flex justify-end"><Button onClick={() => setEdit({ id: `t-${rows.length + 1}-${rows.at(-1)?.id ?? "0"}`, tagKey: "costCenter", tagValue: "", team: "Platform" })}><Plus className="size-4" />Add mapping</Button></div>
+      {rows.length === 0 ? <EmptyState icon={Users} title="No tag mappings." action="Add mapping" onAction={() => setEdit({ id: "t-1", tagKey: "costCenter", tagValue: "", team: "Platform" })} /> : (
         <div className="organic-card overflow-x-auto"><table className="w-full min-w-[480px] text-sm">
           <thead className="text-left text-xs text-muted-foreground"><tr><th className="px-4 py-2 font-medium">Tag key</th><th className="px-4 py-2 font-medium">Tag value</th><th className="px-4 py-2 font-medium">Team</th><th className="px-4 py-2" /></tr></thead>
           <tbody>{rows.map((r) => <tr key={r.id} className="border-t border-border"><td className="px-4 py-2">{r.tagKey}</td><td className="px-4 py-2">{r.tagValue}</td><td className="px-4 py-2">{r.team}</td>
