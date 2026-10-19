@@ -72,3 +72,12 @@ All demo responses are computed relative to a fixed `DEMO_TODAY = 2026-10-12` (U
 
 ### Security compliance controls
 `complianceResult` returns a per-control `status` of `pass`, `fail` or `not-assessed` (no mapped finding rule). `passed + failed + notAssessed = total`; the pass percentage uses assessed controls only. Score values are shown with one decimal.
+
+## GET /api/v1/reports/{template}
+`template` = executive | team | savings | security. Query: range, providers, env, team. Returns `ReportDto` { template, title, range, generatedAt, totals, sections[{title, columns, rows}] }. Totals come from the same aggregates as Overview, Cost Explorer, Recommendations and Security.
+
+## GET /api/v1/integrations
+Returns `IntegrationsDto` { integrations: IntegrationDto[], history: SyncRunDto[] }. Cloud providers are Connected when present in the dataset. Demo: simulated, no credentials stored.
+
+## GET /api/v1/settings
+Returns `SettingsDto` { profile, workspace, members, mappings, keys (masked only), channels, events }. Demo: changes are session-only.
