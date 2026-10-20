@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Sparkles, Square } from "lucide-react";
-import { fmtUSD } from "@/lib/finops-data";
+import { fmtMoney } from "@/lib/finops-data";
 import { useDashboardData } from "@/lib/queries";
 import { useGlobalFilters } from "@/lib/filters";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ export function AnomalyAnalyst() {
         {list.map((a) => (
           <button key={a.id} onClick={() => setId(a.id)} disabled={busy} className={`rounded-xl border p-3 text-left transition-colors ${id === a.id ? "border-foreground/40 bg-secondary" : "border-border hover:bg-secondary/50"}`}>
             <p className="text-sm font-medium">{a.title}</p>
-            <p className="metric-numbers mt-1 text-xs text-muted-foreground"><span className="text-destructive">+{a.change}%</span> · {fmtUSD(a.impact)} · {a.since}</p>
+            <p className="metric-numbers mt-1 text-xs text-muted-foreground"><span className="text-destructive">+{a.change}%</span> · {fmtMoney(a.impact)} · {a.since}</p>
           </button>
         ))}
       </div>

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDown, ArrowUp, Ban, ChevronLeft, ChevronRight, Columns3, Download, Lightbulb, Rows3, Search, Server, Tag, Users } from "lucide-react";
 import { toast } from "sonner";
-import { fmtUSD } from "@/lib/finops-data";
+import { fmtMoney } from "@/lib/finops-data";
 import { teams } from "@/lib/filters";
 import { useResource, useResources } from "@/lib/queries";
 import { CardSkeleton, DataTableView, EmptyState, ErrorState, StatusBadge, TableToggle } from "./States";
@@ -101,8 +101,8 @@ export function ResourcesWorkspace({ search, setSearch }: { search: TableSearch;
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-3">
         <Stat label="Resources" value={d.count.toLocaleString("en-US")} />
-        <Stat label="Monthly cost (last 30 days)" value={fmtUSD(d.monthlyTotal)} />
-        <Stat label="Spend in selected period" value={fmtUSD(d.periodTotal)} />
+        <Stat label="Monthly cost (last 30 days)" value={fmtMoney(d.monthlyTotal)} />
+        <Stat label="Spend in selected period" value={fmtMoney(d.periodTotal)} />
       </div>
 
       <article className="organic-card overflow-hidden">
@@ -228,7 +228,7 @@ const Stat = ({ label, value }: { label: string; value: string }) => (
 function Cell({ k, r, py, num }: { k: SortKey; r: ResourceRow; py: string; num?: boolean | undefined }) {
   const cls = `px-3 ${py} ${num ? "metric-numbers text-right" : ""}`;
   if (k === "name") return <td className={`sticky left-12 z-10 max-w-[220px] bg-card px-3 ${py} group-hover:bg-secondary`}><p className="truncate font-medium">{r.name}</p><p className="truncate text-[11px] text-muted-foreground">{r.sku}</p></td>;
-  if (k === "monthlyCost") return <td className={cls}>{fmtUSD(r.monthlyCost)}</td>;
+  if (k === "monthlyCost") return <td className={cls}>{fmtMoney(r.monthlyCost)}</td>;
   if (k === "cpuAvg" || k === "memAvg") return <td className={`${cls} ${k === "cpuAvg" && r.cpuAvg < 25 ? "text-warning" : ""}`}>{r[k]}%</td>;
   if (k === "status") return <td className={cls}><StatusBadge tone={tone[r.status]}>{r.status}</StatusBadge></td>;
   return <td className={`${cls} whitespace-nowrap text-muted-foreground`}>{r[k]}</td>;
@@ -256,7 +256,7 @@ function ResourceDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               <div className="rounded-xl bg-success-soft p-4 text-sm">
                 <p className="flex items-center gap-2 font-medium text-success"><Lightbulb className="size-4" />Right-sizing suggestion</p>
                 <p className="mt-1">{d.rightsizing.action}. CPU avg {d.resource.cpuAvg}%.</p>
-                {d.rightsizing.saving > 0 && <p className="metric-numbers mt-1">Est. saving {fmtUSD(d.rightsizing.saving)}/mo</p>}
+                {d.rightsizing.saving > 0 && <p className="metric-numbers mt-1">Est. saving {fmtMoney(d.rightsizing.saving)}/mo</p>}
               </div>
             )}
             <Tabs defaultValue="overview">
@@ -265,7 +265,7 @@ function ResourceDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               </TabsList>
               <TabsContent value="overview">
                 <dl className="divide-y divide-border">
-                  {([["Status", <StatusBadge key="s" tone={tone[d.resource.status]}>{d.resource.status}</StatusBadge>], ["Monthly cost", fmtUSD(d.resource.monthlyCost)], ["Environment", d.resource.environment], ["Team", d.resource.team], ["Region", d.resource.region], ["CPU avg", `${d.resource.cpuAvg}%`], ["Memory avg", `${d.resource.memAvg}%`], ["Resource ID", d.resource.id]] as [string, ReactNode][]).map(([k, v]) => (
+                  {([["Status", <StatusBadge key="s" tone={tone[d.resource.status]}>{d.resource.status}</StatusBadge>], ["Monthly cost", fmtMoney(d.resource.monthlyCost)], ["Environment", d.resource.environment], ["Team", d.resource.team], ["Region", d.resource.region], ["CPU avg", `${d.resource.cpuAvg}%`], ["Memory avg", `${d.resource.memAvg}%`], ["Resource ID", d.resource.id]] as [string, ReactNode][]).map(([k, v]) => (
                     <div key={k} className="flex justify-between gap-4 py-3 text-sm"><dt className="text-muted-foreground">{k}</dt><dd className="metric-numbers text-right">{v}</dd></div>
                   ))}
                 </dl>

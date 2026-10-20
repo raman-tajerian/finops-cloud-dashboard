@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Area, ComposedChart, CartesianGrid, Line, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDownRight, ArrowUpRight, ChevronRight, Minus } from "lucide-react";
-import { fmtUSD } from "@/lib/finops-data";
+import { fmtMoney } from "@/lib/finops-data";
 import { useDashboardData } from "@/lib/queries";
 import { DataTableView, TableToggle } from "./States";
 import { CountUp } from "./Insights";
@@ -22,13 +22,13 @@ const pctDelta = (k: KpiValue) => (k.previous ? ((k.value - k.previous) / k.prev
 
 export function OverviewKpis() {
   const o = useDashboardData().overview;
-  const money = (n: number) => fmtUSD(n);
+  const money = (n: number) => fmtMoney(n);
   const items: { label: string; k: KpiValue; f: (n: number) => string; to: To; goodWhenUp?: boolean; color: string }[] = [
     { label: "Total spend", k: o.totalSpend, f: money, to: "/cost-explorer", color: "var(--chart-1)" },
     { label: "Forecast end of month", k: o.forecastEom, f: money, to: "/budgets", color: "var(--chart-1)" },
-    { label: "Daily burn rate", k: o.dailyBurn, f: (n) => `${fmtUSD(n)}/d`, to: "/cost-explorer", color: "var(--chart-2)" },
-    { label: "Savings opportunity", k: o.savings, f: (n) => `${fmtUSD(n)}/mo`, to: "/recommendations", goodWhenUp: true, color: "var(--success)" },
-    { label: `Idle waste · ${o.idleCount} res.`, k: o.idleWaste, f: (n) => `${fmtUSD(n)}/mo`, to: "/resources", color: "var(--chart-3)" },
+    { label: "Daily burn rate", k: o.dailyBurn, f: (n) => `${fmtMoney(n)}/d`, to: "/cost-explorer", color: "var(--chart-2)" },
+    { label: "Savings opportunity", k: o.savings, f: (n) => `${fmtMoney(n)}/mo`, to: "/recommendations", goodWhenUp: true, color: "var(--success)" },
+    { label: `Idle waste · ${o.idleCount} res.`, k: o.idleWaste, f: (n) => `${fmtMoney(n)}/mo`, to: "/resources", color: "var(--chart-3)" },
     { label: "Active anomalies", k: o.anomalies, f: (n) => `${Math.round(n)}`, to: "/budgets", color: "var(--destructive)" },
     { label: "Cost per active user", k: o.costPerUser, f: (n) => `$${n.toFixed(4)}`, to: "/cost-explorer", color: "var(--chart-4)" },
     { label: "Cost per API request", k: o.costPerRequest, f: (n) => `$${n.toFixed(6)}`, to: "/cost-explorer", color: "var(--chart-4)" },
@@ -68,13 +68,13 @@ export function CostTrendCard() {
         <div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><DrillLink to="/cost-explorer">Explore</DrillLink></div>
       </div>
       <div className="mt-4 h-72">
-        {asTable ? <DataTableView caption="Daily cost by provider with forecast" columns={["Day", ...providers, "Forecast", "Band", "Anomaly"]} rows={trend.map((t) => [t.day, ...providers.map((p) => (t.total ? fmtUSD(t[p]) : "—")), t.forecast === null ? "—" : fmtUSD(t.forecast), t.band ? `${fmtUSD(t.band[0])} – ${fmtUSD(t.band[1])}` : "—", t.anomaly ?? ""])} /> :
+        {asTable ? <DataTableView caption="Daily cost by provider with forecast" columns={["Day", ...providers, "Forecast", "Band", "Anomaly"]} rows={trend.map((t) => [t.day, ...providers.map((p) => (t.total ? fmtMoney(t[p]) : "—")), t.forecast === null ? "—" : fmtMoney(t.forecast), t.band ? `${fmtMoney(t.band[0])} – ${fmtMoney(t.band[1])}` : "—", t.anomaly ?? ""])} /> :
         <ResponsiveContainer>
           <ComposedChart data={data} margin={{ left: -6, right: 8, top: 8 }}>
             <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} />
             <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} minTickGap={24} />
             <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(Number(v) / 1000).toFixed(1)}k`} />
-            <Tooltip contentStyle={tip} formatter={(v, n) => [Array.isArray(v) ? `${fmtUSD(Number(v[0]))} – ${fmtUSD(Number(v[1]))}` : fmtUSD(Number(v)), String(n)]} />
+            <Tooltip contentStyle={tip} formatter={(v, n) => [Array.isArray(v) ? `${fmtMoney(Number(v[0]))} – ${fmtMoney(Number(v[1]))}` : fmtMoney(Number(v)), String(n)]} />
             {providers.map((p) => <Area key={p} dataKey={p} stackId="p" stroke={colors[p]} fill={colors[p]} fillOpacity={0.1} strokeWidth={1.5} animationDuration={700} />)}
             <Area dataKey="band" name="95% band" stroke="none" fill="var(--muted-foreground)" fillOpacity={0.12} />
             <Line dataKey="forecast" name="Forecast" stroke="var(--muted-foreground)" strokeDasharray="5 4" dot={false} strokeWidth={1.5} connectNulls />
@@ -100,7 +100,7 @@ export function TopMovers() {
           <li key={m.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-secondary">
             {inc ? <ArrowUpRight className="size-3.5 text-warning" /> : <ArrowDownRight className="size-3.5 text-success" />}
             <span className="min-w-0 flex-1 truncate">{m.name}<span className="ml-1 text-[11px] text-muted-foreground">{m.provider} {m.service}</span></span>
-            <span className={`metric-numbers text-xs ${inc ? "text-warning" : "text-success"}`}>{inc ? "+" : "−"}{fmtUSD(Math.abs(m.delta))}</span>
+            <span className={`metric-numbers text-xs ${inc ? "text-warning" : "text-success"}`}>{inc ? "+" : "−"}{fmtMoney(Math.abs(m.delta))}</span>
           </li>
         ))}</ul>
     </div>

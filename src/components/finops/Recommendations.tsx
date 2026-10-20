@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BellOff, Check, Copy, EyeOff, Lightbulb, PlayCircle, UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import { fmtUSD } from "@/lib/finops-data";
+import { fmtMoney } from "@/lib/finops-data";
 import { useSavings } from "@/lib/queries";
 import { teams } from "@/lib/filters";
 import { fmtDemoDate, snoozeUntil, SNOOZE_OPTIONS } from "@/data/resources";
@@ -53,16 +53,16 @@ function Workspace({ d, search, setSearch }: { d: SavingsDto; search: RecSearch;
     <div className="grid gap-6">
       <section className="organic-card p-6 md:p-8" aria-label="Savings summary">
         <div className="grid gap-6 sm:grid-cols-3">
-          <div><p className="text-[13px] text-muted-foreground">Open savings</p><p className="mt-1 font-display text-[30px] leading-none tabular-nums">{fmtUSD(open)}<span className="text-base text-muted-foreground">/mo</span></p></div>
-          <div><p className="flex items-center gap-2 text-[13px] text-muted-foreground">Done this session <Demo /></p><p className="mt-1 font-display text-[30px] leading-none tabular-nums text-success">{fmtUSD(done)}</p></div>
-          <div><p className="text-[13px] text-muted-foreground">Monthly target</p><p className="mt-1 font-display text-[30px] leading-none tabular-nums">{fmtUSD(d.target)}</p></div>
+          <div><p className="text-[13px] text-muted-foreground">Open savings</p><p className="mt-1 font-display text-[30px] leading-none tabular-nums">{fmtMoney(open)}<span className="text-base text-muted-foreground">/mo</span></p></div>
+          <div><p className="flex items-center gap-2 text-[13px] text-muted-foreground">Done this session <Demo /></p><p className="mt-1 font-display text-[30px] leading-none tabular-nums text-success">{fmtMoney(done)}</p></div>
+          <div><p className="text-[13px] text-muted-foreground">Monthly target</p><p className="mt-1 font-display text-[30px] leading-none tabular-nums">{fmtMoney(d.target)}</p></div>
         </div>
         <div className="mt-6">
           <div className="mb-2 flex justify-between text-xs text-muted-foreground"><span>Progress toward target</span><span className="tabular-nums">{d.target ? Math.round((done / d.target) * 100) : 0}%</span></div>
           <div className="h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={d.target ? Math.round((done / d.target) * 100) : 0} aria-valuemin={0} aria-valuemax={100}>
             <div className="h-full rounded-full bg-success transition-all duration-500" style={{ width: `${d.target ? Math.min(100, (done / d.target) * 100) : 0}%` }} />
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">Target = {Math.round(d.targetShare * 100)}% of total potential ({fmtUSD(d.total)}/mo). Statuses are demo-only and reset when you reload.</p>
+          <p className="mt-2 text-xs text-muted-foreground">Target = {Math.round(d.targetShare * 100)}% of total potential ({fmtMoney(d.total)}/mo). Statuses are demo-only and reset when you reload.</p>
         </div>
       </section>
 
@@ -96,7 +96,7 @@ function Workspace({ d, search, setSearch }: { d: SavingsDto; search: RecSearch;
                         <span className="tabular-nums">{i.confidence}% confidence</span>
                       </p>
                     </div>
-                    <p className="metric-numbers shrink-0 text-sm font-medium">{fmtUSD(i.savings)}/mo</p>
+                    <p className="metric-numbers shrink-0 text-sm font-medium">{fmtMoney(i.savings)}/mo</p>
                     <div className="flex shrink-0 flex-wrap gap-1.5">
                       <Button size="sm" className="h-10" onClick={() => setReview(i)}>Review</Button>
                       {s === "Open" && <Button size="sm" variant="secondary" className="h-10" onClick={() => { setStatus(i.id, "In progress"); toast("Marked in progress (demo)"); }}><PlayCircle />In progress</Button>}
@@ -146,13 +146,13 @@ function Tracker({ d, open }: { d: SavingsDto; open: number }) {
         <TableToggle on={table} onChange={setTable} />
       </div>
       <div className="mt-4 h-60">
-        {table ? <DataTableView caption="Savings per month" columns={["Month", "Realized (demo)", "Potential"]} rows={data.map((m) => [m.month, fmtUSD(m.realized), fmtUSD(m.potential)])} /> : (
+        {table ? <DataTableView caption="Savings per month" columns={["Month", "Realized (demo)", "Potential"]} rows={data.map((m) => [m.month, fmtMoney(m.realized), fmtMoney(m.potential)])} /> : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ left: 0, right: 8, top: 4 }}>
               <CartesianGrid vertical={false} stroke="var(--border)" />
               <XAxis dataKey="month" tickFormatter={(v: string) => v.slice(0, 3)} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
               <YAxis width={48} tickFormatter={(v: number) => `$${Math.round(v / 1000)}k`} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={tip} formatter={(v) => fmtUSD(Number(v))} cursor={{ fill: "var(--secondary)" }} />
+              <Tooltip contentStyle={tip} formatter={(v) => fmtMoney(Number(v))} cursor={{ fill: "var(--secondary)" }} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
               <Bar dataKey="potential" name="Potential" fill="var(--chart-2)" radius={[6, 6, 0, 0]} />
               <Bar dataKey="realized" name="Realized (demo)" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
@@ -196,7 +196,7 @@ function ReviewDrawer({ item, onClose }: { item: SavingItemDto | null; onClose: 
           <SheetHeader><SheetTitle>{item.title}</SheetTitle><SheetDescription>{item.category} · {item.detail}</SheetDescription></SheetHeader>
           <div className="space-y-5 px-4 pb-6">
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-success-soft p-4"><p className="text-xs text-muted-foreground">Estimated saving</p><p className="metric-numbers mt-1 text-xl text-success">{fmtUSD(item.savings)}/mo</p></div>
+              <div className="rounded-xl bg-success-soft p-4"><p className="text-xs text-muted-foreground">Estimated saving</p><p className="metric-numbers mt-1 text-xl text-success">{fmtMoney(item.savings)}/mo</p></div>
               <div className="rounded-xl bg-secondary p-4"><p className="text-xs text-muted-foreground">Effort · Risk · Confidence</p><p className="mt-1 text-sm font-medium">{item.effort} · {item.risk} · {item.confidence}%</p></div>
             </div>
             <div>

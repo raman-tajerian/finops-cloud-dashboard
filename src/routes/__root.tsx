@@ -81,7 +81,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   validateSearch: zodValidator(filterSearchSchema),
-  search: { middlewares: [retainSearchParams(["range", "providers", "env", "team"]), stripSearchParams(defaultFilters)] },
+  search: { middlewares: [retainSearchParams(["range", "providers", "env", "team", "cur"]), stripSearchParams({ ...defaultFilters, cur: "USD" })] },
   head: () => ({
     meta: [
       { charSet: "utf-8" },

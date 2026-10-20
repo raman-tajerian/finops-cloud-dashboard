@@ -58,5 +58,5 @@ export const alerts: Alert[] = [
   { id: "a3", severity: "warning", title: "RDS instance without automated backups", detail: "orders-postgres-primary has retention set to 0 days." },
 ];
 
-export const fmtUSD = (n: number) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+// Shared money formatter lives in src/data/currency.ts (converts USD → active currency at display time).
+export { fmtMoney, fmtMoneyCompact } from "@/data/currency";
