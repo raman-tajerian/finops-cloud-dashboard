@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Area, ComposedChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BellRing, Pencil, Plus, Trash2, Wallet } from "lucide-react";
 import { toast } from "sonner";
-import { fmtUSD } from "@/lib/finops-data";
+import { fmtMoney } from "@/lib/finops-data";
 import { useAlerts } from "@/lib/queries";
 import { budgetTone } from "@/lib/scenario";
 import { parseAmount, scopeKey, validateBudget } from "@/data/budgets";
@@ -71,7 +71,7 @@ function BudgetCards({ d }: { d: AlertsDto }) {
             return (
               <article key={c.id} className="rounded-2xl border border-border bg-card p-5">
                 <div className="flex items-start justify-between gap-2"><div className="min-w-0"><p className="truncate text-sm font-medium">{c.name}</p><p className="text-xs text-muted-foreground">{scopeLabel(c.s.scope)} · {c.period}</p></div><div className="flex shrink-0 items-center gap-1.5">{c.demo && <Demo />}<StatusBadge tone={tone}>{pct.toFixed(0)}%</StatusBadge></div></div>
-                <dl className="mt-4 grid grid-cols-3 gap-2 text-xs"><div><dt className="text-muted-foreground">Budget / mo</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtUSD(c.amount)}</dd></div><div><dt className="text-muted-foreground">Spent</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtUSD(c.s.spent)}</dd></div><div><dt className="text-muted-foreground">Forecast</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtUSD(c.s.forecast)}</dd></div></dl>
+                <dl className="mt-4 grid grid-cols-3 gap-2 text-xs"><div><dt className="text-muted-foreground">Budget / mo</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtMoney(c.amount)}</dd></div><div><dt className="text-muted-foreground">Spent</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtMoney(c.s.spent)}</dd></div><div><dt className="text-muted-foreground">Forecast</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtMoney(c.s.forecast)}</dd></div></dl>
                 <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label={`${c.name} forecast vs budget`} aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
                   <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, pct)}%`, background: toneColor[tone] }} />
                 </div>
@@ -194,8 +194,8 @@ function Anomalies({ rows }: { rows: AnomalyRowDto[] }) {
               <tr key={r.id} className="cursor-pointer border-t border-border hover:bg-secondary/50" onClick={() => setOpen(r)} tabIndex={0} onKeyDown={(e) => e.key === "Enter" && setOpen(r)}>
                 <td className="py-3 pr-3 whitespace-nowrap">{r.date}</td>
                 <td className="py-3 pr-3"><p className="font-medium">{r.provider} {r.service}</p><p className="text-xs text-muted-foreground">{r.resourceId}</p></td>
-                <td className="metric-numbers py-3 text-right">{fmtUSD(r.expected)}</td>
-                <td className="metric-numbers py-3 text-right">{fmtUSD(r.actual)}</td>
+                <td className="metric-numbers py-3 text-right">{fmtMoney(r.expected)}</td>
+                <td className="metric-numbers py-3 text-right">{fmtMoney(r.actual)}</td>
                 <td className="metric-numbers py-3 text-right text-destructive">+{r.change}%</td>
                 <td className="py-3 pl-3 text-xs text-muted-foreground">{r.cause}</td>
                 <td className="py-3" onClick={(e) => e.stopPropagation()}>
@@ -220,17 +220,17 @@ function AnomalyDrawer({ row, onClose }: { row: AnomalyRowDto | null; onClose: (
     <Sheet open={!!row} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
         {row && (<>
-          <SheetHeader><SheetTitle>{row.title}</SheetTitle><SheetDescription>{row.date} · +{row.change}% · {fmtUSD(row.impact)}/mo impact</SheetDescription></SheetHeader>
+          <SheetHeader><SheetTitle>{row.title}</SheetTitle><SheetDescription>{row.date} · +{row.change}% · {fmtMoney(row.impact)}/mo impact</SheetDescription></SheetHeader>
           <div className="space-y-5 px-4 pb-6">
             <div className="flex items-center justify-between"><p className="text-sm font-medium">Expected band vs actual (21 days)</p><TableToggle on={table} onChange={setTable} /></div>
             <div className="h-64">
-              {table ? <DataTableView caption="Daily actual vs expected band" columns={["Day", "Actual", "Expected low", "Expected high"]} rows={row.series.map((p) => [p.day, fmtUSD(p.actual), fmtUSD(p.low), fmtUSD(p.high)])} /> : (
+              {table ? <DataTableView caption="Daily actual vs expected band" columns={["Day", "Actual", "Expected low", "Expected high"]} rows={row.series.map((p) => [p.day, fmtMoney(p.actual), fmtMoney(p.low), fmtMoney(p.high)])} /> : (
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={row.series.map((p) => ({ ...p, band: [p.low, p.high] }))} margin={{ left: 0, right: 8, top: 4 }}>
                     <CartesianGrid vertical={false} stroke="var(--border)" />
                     <XAxis dataKey="day" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} interval={4} />
                     <YAxis width={52} tickFormatter={(v: number) => `$${v >= 1000 ? `${Math.round(v / 100) / 10}k` : v}`} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={tip} formatter={(v) => (Array.isArray(v) ? `${fmtUSD(Number(v[0]))} – ${fmtUSD(Number(v[1]))}` : fmtUSD(Number(v)))} />
+                    <Tooltip contentStyle={tip} formatter={(v) => (Array.isArray(v) ? `${fmtMoney(Number(v[0]))} – ${fmtMoney(Number(v[1]))}` : fmtMoney(Number(v)))} />
                     <Area dataKey="band" name="Expected band" stroke="none" fill="var(--chart-2)" fillOpacity={0.25} />
                     <Line dataKey="actual" name="Actual" stroke="var(--chart-3)" strokeWidth={2} dot={false} />
                   </ComposedChart>
@@ -238,8 +238,8 @@ function AnomalyDrawer({ row, onClose }: { row: AnomalyRowDto | null; onClose: (
               )}
             </div>
             <dl className="grid grid-cols-2 gap-3 text-sm">
-              <div className="rounded-xl bg-secondary p-3"><dt className="text-xs text-muted-foreground">Expected (3 days)</dt><dd className="metric-numbers mt-1">{fmtUSD(row.expected)}</dd></div>
-              <div className="rounded-xl bg-destructive-soft p-3"><dt className="text-xs text-muted-foreground">Actual (3 days)</dt><dd className="metric-numbers mt-1 text-destructive">{fmtUSD(row.actual)}</dd></div>
+              <div className="rounded-xl bg-secondary p-3"><dt className="text-xs text-muted-foreground">Expected (3 days)</dt><dd className="metric-numbers mt-1">{fmtMoney(row.expected)}</dd></div>
+              <div className="rounded-xl bg-destructive-soft p-3"><dt className="text-xs text-muted-foreground">Actual (3 days)</dt><dd className="metric-numbers mt-1 text-destructive">{fmtMoney(row.actual)}</dd></div>
             </dl>
             <p className="text-sm"><span className="font-medium">Probable cause:</span> {row.cause}</p>
           </div>

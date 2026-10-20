@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode, type PointerEvent as RPE }
 import { animate, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { Area, ComposedChart, CartesianGrid, Line, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Calculator, Leaf, Move3d, TrendingUp } from "lucide-react";
-import { fmtUSD } from "@/lib/finops-data";
+import { fmtMoney } from "@/lib/finops-data";
 import { useDashboardData } from "@/lib/queries";
 import { DataTableView, TableToggle } from "./States";
 import type { TopoNodeDto as TopoNode } from "@/types/finops";
@@ -79,7 +79,7 @@ export function Topology3D() {
         <div><Label>Cloud topology</Label><p className="mt-1 text-[13px] text-muted-foreground">Regions, VPCs and clusters · drag to rotate</p></div>
         <div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><Move3d className="size-4 text-muted-foreground" /></div>
       </div>
-      {asTable ? <div className="mt-4 h-[300px]"><DataTableView caption="Cloud topology nodes" columns={["Node", "Type", "Health", "Cost / mo"]} rows={topoNodes.map((n) => [n.label, n.kind, n.health === "ok" ? "Healthy" : n.health, fmtUSD(n.cost)])} /></div> :
+      {asTable ? <div className="mt-4 h-[300px]"><DataTableView caption="Cloud topology nodes" columns={["Node", "Type", "Health", "Cost / mo"]} rows={topoNodes.map((n) => [n.label, n.kind, n.health === "ok" ? "Healthy" : n.health, fmtMoney(n.cost)])} /></div> :
       <div className="relative mt-4 flex-1 cursor-grab touch-none select-none active:cursor-grabbing"
         onPointerDown={(e) => { drag.current = { x: e.clientX, y: e.clientY }; e.currentTarget.setPointerCapture(e.pointerId); }}
         onPointerMove={(e) => { if (!drag.current) return; setYaw((y) => y + (e.clientX - drag.current!.x) * 0.008); setPitch((p) => Math.max(-1.2, Math.min(1.2, p + (e.clientY - drag.current!.y) * 0.006))); drag.current = { x: e.clientX, y: e.clientY }; }}
@@ -101,7 +101,7 @@ export function Topology3D() {
         {hover && (
           <div className="pointer-events-none absolute left-3 top-3 rounded-xl border border-border bg-popover px-3 py-2 text-xs animate-in fade-in">
             <p className="font-medium">{hover.label} <span className="text-muted-foreground">· {hover.kind}</span></p>
-            <p className="metric-numbers mt-0.5">{fmtUSD(hover.cost)}/mo · {hover.health === "ok" ? "healthy" : hover.health}</p>
+            <p className="metric-numbers mt-0.5">{fmtMoney(hover.cost)}/mo · {hover.health === "ok" ? "healthy" : hover.health}</p>
           </div>
         )}
       </div>}
@@ -160,13 +160,13 @@ export function AnomalyForecast() {
         <TableToggle on={asTable} onChange={setAsTable} />
       </div>
       <div className="mt-4 h-64">
-        {asTable ? <DataTableView caption="Daily spend vs forecast" columns={["Day", "Actual", "Forecast", "Band low", "Band high"]} rows={data.map((d) => [d.day, d.actual === null ? "—" : fmtUSD(d.actual), fmtUSD(d.forecast), fmtUSD(d.band[0]), fmtUSD(d.band[1])])} /> :
+        {asTable ? <DataTableView caption="Daily spend vs forecast" columns={["Day", "Actual", "Forecast", "Band low", "Band high"]} rows={data.map((d) => [d.day, d.actual === null ? "—" : fmtMoney(d.actual), fmtMoney(d.forecast), fmtMoney(d.band[0]), fmtMoney(d.band[1])])} /> :
         <ResponsiveContainer>
           <ComposedChart data={data} margin={{ left: -10, right: 8 }}>
             <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} />
             <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} interval={5} />
             <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${Math.round(Number(v) / 1000)}k`} />
-            <Tooltip contentStyle={tip} formatter={(v) => Array.isArray(v) ? `${fmtUSD(Number(v[0]))} – ${fmtUSD(Number(v[1]))}` : fmtUSD(Number(v))} />
+            <Tooltip contentStyle={tip} formatter={(v) => Array.isArray(v) ? `${fmtMoney(Number(v[0]))} – ${fmtMoney(Number(v[1]))}` : fmtMoney(Number(v))} />
             <Area dataKey="band" name="Confidence" stroke="none" fill="var(--chart-1)" fillOpacity={0.14} animationDuration={900} />
             <Line dataKey="forecast" name="Forecast" stroke="var(--muted-foreground)" strokeDasharray="4 4" dot={false} strokeWidth={1.2} animationDuration={900} />
             <Line dataKey="actual" name="Actual" stroke="var(--chart-2)" dot={false} strokeWidth={2} connectNulls={false} animationDuration={1100} />

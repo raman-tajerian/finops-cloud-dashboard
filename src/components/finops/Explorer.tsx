@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDown, ArrowUp, Bookmark, Download, FileJson, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
-import { fmtUSD } from "@/lib/finops-data";
+import { fmtMoney } from "@/lib/finops-data";
 import { useExplore } from "@/lib/queries";
 import { useGlobalFilters, type Filters } from "@/lib/filters";
 import { CardSkeleton, DataTableView, ErrorState, TableToggle } from "./States";
@@ -114,19 +114,19 @@ function ExplorerChart({ d, state }: { d: ExploreDto; state: ExplorerState }) {
     <CartesianGrid key="g" stroke="var(--border)" strokeDasharray="2 4" vertical={false} />,
     <XAxis key="x" dataKey="day" {...axis} minTickGap={24} />,
     <YAxis key="y" {...axis} tickFormatter={(v) => `$${(Number(v) / 1000).toFixed(1)}k`} />,
-    <Tooltip key="t" contentStyle={tip} formatter={(v, n) => [fmtUSD(Number(v)), String(n)]} />,
+    <Tooltip key="t" contentStyle={tip} formatter={(v, n) => [fmtMoney(Number(v)), String(n)]} />,
   ];
   const overlay = state.compare ? <Line key="prev" dataKey="previous" name="Previous period (total)" stroke="var(--foreground)" strokeOpacity={0.55} strokeDasharray="5 4" dot={false} strokeWidth={1.5} /> : null;
   return (
     <article className="organic-card p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><p className="font-mono text-[10px] text-muted-foreground">Spend by {groupLabels[state.group].toLowerCase()}</p>
-          <p className="metric-numbers mt-1 text-3xl">{fmtUSD(d.total)}</p>
-          <p className={`text-xs ${change > 0 ? "text-warning" : "text-success"}`}>{change > 0 ? "+" : ""}{change.toFixed(1)}% <span className="text-muted-foreground">vs {fmtUSD(d.previousTotal)} previous period</span></p></div>
+          <p className="metric-numbers mt-1 text-3xl">{fmtMoney(d.total)}</p>
+          <p className={`text-xs ${change > 0 ? "text-warning" : "text-success"}`}>{change > 0 ? "+" : ""}{change.toFixed(1)}% <span className="text-muted-foreground">vs {fmtMoney(d.previousTotal)} previous period</span></p></div>
         <TableToggle on={asTable} onChange={setAsTable} />
       </div>
       <div className="mt-6 h-[420px]" aria-live="polite">
-        {asTable ? <DataTableView caption={`Daily spend by ${state.group}`} columns={["Day", ...d.keys, "Total", ...(state.compare ? ["Previous"] : [])]} rows={d.series.map((s) => [String(s["day"]), ...d.keys.map((k) => fmtUSD(Number(s[k]))), fmtUSD(Number(s["total"])), ...(state.compare ? [fmtUSD(Number(s["previous"]))] : [])])} /> :
+        {asTable ? <DataTableView caption={`Daily spend by ${state.group}`} columns={["Day", ...d.keys, "Total", ...(state.compare ? ["Previous"] : [])]} rows={d.series.map((s) => [String(s["day"]), ...d.keys.map((k) => fmtMoney(Number(s[k]))), fmtMoney(Number(s["total"])), ...(state.compare ? [fmtMoney(Number(s["previous"]))] : [])])} /> :
         <ResponsiveContainer key={`${state.chart}-${state.group}`}>
           {state.chart === "bar" ? (
             <BarChart data={d.series}>{children}{d.keys.map((k, i) => <Bar key={k} dataKey={k} stackId="s" fill={col(i)} fillOpacity={0.85} />)}{overlay}</BarChart>
@@ -160,8 +160,8 @@ function ExplorerTable({ d, group }: { d: ExploreDto; group: GroupBy }) {
             {rows.map((r, i) => (
               <tr key={r.name} className="border-t border-border hover:bg-secondary">
                 <td className="sticky left-0 bg-card px-4 py-3 font-medium"><span className="mr-2 inline-block size-2 rounded-full" style={{ background: col(d.keys.indexOf(r.name)) }} />{r.name}</td>
-                <td className="metric-numbers px-4 py-3 text-right">{fmtUSD(r.current)}</td>
-                <td className="metric-numbers px-4 py-3 text-right text-muted-foreground">{fmtUSD(r.previous)}</td>
+                <td className="metric-numbers px-4 py-3 text-right">{fmtMoney(r.current)}</td>
+                <td className="metric-numbers px-4 py-3 text-right text-muted-foreground">{fmtMoney(r.previous)}</td>
                 <td className={`metric-numbers px-4 py-3 text-right ${r.changePct > 0 ? "text-warning" : "text-success"}`}>{r.changePct > 0 ? "+" : ""}{r.changePct.toFixed(1)}%</td>
                 <td className="metric-numbers px-4 py-3 text-right">{r.share.toFixed(1)}%</td>
                 <td className="px-4 py-2"><Spark data={r.spark} color={col(d.keys.indexOf(r.name))} className="h-7 w-24" /><span className="sr-only">row {i + 1}</span></td>
@@ -170,8 +170,8 @@ function ExplorerTable({ d, group }: { d: ExploreDto; group: GroupBy }) {
           </tbody>
           <tfoot><tr className="border-t border-input font-medium">
             <td className="sticky left-0 bg-card px-4 py-3">Total</td>
-            <td className="metric-numbers px-4 py-3 text-right">{fmtUSD(d.total)}</td>
-            <td className="metric-numbers px-4 py-3 text-right text-muted-foreground">{fmtUSD(d.previousTotal)}</td>
+            <td className="metric-numbers px-4 py-3 text-right">{fmtMoney(d.total)}</td>
+            <td className="metric-numbers px-4 py-3 text-right text-muted-foreground">{fmtMoney(d.previousTotal)}</td>
             <td className={`metric-numbers px-4 py-3 text-right ${totalChange > 0 ? "text-warning" : "text-success"}`}>{totalChange > 0 ? "+" : ""}{totalChange.toFixed(1)}%</td>
             <td className="metric-numbers px-4 py-3 text-right">100.0%</td><td />
           </tr></tfoot>
