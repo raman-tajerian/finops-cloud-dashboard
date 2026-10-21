@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { teams } from "@/lib/filters";
 import { useResource, useResources } from "@/lib/queries";
+import { useTableDensity } from "@/lib/density";
 import { CardSkeleton, DataTableView, EmptyState, ErrorState, StatusBadge, TableToggle } from "./States";
 import type { ResourceRow } from "@/types/finops";
 import { Button } from "@/components/ui/button";
