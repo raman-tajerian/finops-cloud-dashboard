@@ -96,7 +96,6 @@ export function ResourcesWorkspace({ search, setSearch }: { search: TableSearch;
     toast.success(bulk === "tag" ? `Tag "${bulkValue}" queued for ${n} resources (demo)` : bulk === "assign" ? `${n} resources assigned to ${bulkValue} (demo)` : `Stop requested for ${n} resources (demo)`);
     setBulk(null); setBulkValue(""); setSelected(new Set());
   };
-  const py = compact ? "py-1.5" : "py-3";
 
   return (
     <div className="space-y-4">
@@ -130,7 +129,7 @@ export function ResourcesWorkspace({ search, setSearch }: { search: TableSearch;
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="secondary" className="h-10 rounded-xl" aria-pressed={compact} onClick={() => setCompact((c) => !c)}><Rows3 /><span className="hidden sm:inline">{compact ? "Comfortable" : "Compact"}</span></Button>
+            <Button variant="secondary" className="h-10 rounded-xl" aria-pressed={compact} onClick={toggleDensity}><Rows3 /><span className="hidden sm:inline">{compact ? "Comfortable" : "Compact"}</span></Button>
           </div>
         </div>
 
