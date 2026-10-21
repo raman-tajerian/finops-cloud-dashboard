@@ -5,6 +5,7 @@ import { buildDashboard, buildExplore } from "./aggregate";
 import { buildSavings } from "./budgets";
 import { buildSecurity, isOpenFinding } from "./security";
 import { DEMO_TODAY } from "./resources";
+import { fmtMoney, getActiveCurrency, type Currency } from "./currency";
 
 export const REPORT_TEMPLATES: ReportTemplateMeta[] = [
   { id: "executive", name: "Executive summary", description: "Headline spend, forecast and savings for leadership.", sections: ["Headline KPIs (Overview)", "Spend by provider (Cost Explorer)", "Top savings categories (Recommendations)"] },
@@ -44,10 +45,16 @@ export function buildReport(all: MasterResource[], f: Filters, template: ReportT
     sections: [{ title: "Open findings", columns: ["ID", "Severity", "Title", "Provider", "First detected"], rows: open.map((x) => [x.id, x.severity, x.title, x.provider, x.detected]) }] };
 }
 
+// Money is stored in USD in the DTO and converted once, at export time, through the shared formatter.
+const NON_MONEY_TOTALS = new Set(["activeAnomalies", "items", "score", "openFindings", "critical", "high"]);
+const MONEY_COL = /spend|saving|cost|forecast|previous|target/i;
+const fmtCell = (v: string | number, money: boolean, cur: Currency) => (money && typeof v === "number" ? fmtMoney(v, cur) : v);
+
 const cell = (v: string | number) => { const s = String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
-export function reportToCsv(r: ReportDto): string {
-  const out: string[] = [`# ${r.title}`, `# Range: ${r.range}; generated ${r.generatedAt} (demo)`, "Metric,Value", ...Object.entries(r.totals).map(([k, v]) => `${k},${v}`)];
-  for (const s of r.sections) out.push("", `# ${s.title}`, s.columns.map(cell).join(","), ...s.rows.map((row) => row.map(cell).join(",")));
+export function reportToCsv(r: ReportDto, cur: Currency = getActiveCurrency()): string {
+  const out: string[] = [`# ${r.title}`, `# Range: ${r.range}; generated ${r.generatedAt} (demo); currency ${cur} (demo rates)`, "Metric,Value", ...Object.entries(r.totals).map(([k, v]) => `${k},${fmtCell(v, !NON_MONEY_TOTALS.has(k), cur)}`)];
+  for (const s of r.sections) out.push("", `# ${s.title}`, s.columns.map(cell).join(","), ...s.rows.map((row) => row.map((v, i) => cell(fmtCell(v, MONEY_COL.test(s.columns[i] ?? ""), cur))).join(",")));
   return out.join("\n");
 }
-export const reportToJson = (r: ReportDto) => JSON.stringify(r, null, 2);
+export const reportToJson = (r: ReportDto, cur: Currency = getActiveCurrency()) =>
+  JSON.stringify({ ...r, currency: cur, note: "Money values are stored in USD and converted at display time with fixed demo rates." }, null, 2);
