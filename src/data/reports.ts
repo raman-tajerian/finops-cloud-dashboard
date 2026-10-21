@@ -49,6 +49,10 @@ export function buildReport(all: MasterResource[], f: Filters, template: ReportT
 const NON_MONEY_TOTALS = new Set(["activeAnomalies", "items", "score", "openFindings", "critical", "high"]);
 const MONEY_COL = /spend|saving|cost|forecast|previous|target/i;
 const fmtCell = (v: string | number, money: boolean, cur: Currency) => (money && typeof v === "number" ? fmtMoney(v, cur) : v);
+// Shared by the CSV export and the print view so every export shows the same formatted values.
+export const isMoneyTotal = (key: string) => !NON_MONEY_TOTALS.has(key);
+export const isMoneyColumn = (name: string) => MONEY_COL.test(name);
+export const fmtReportCell = fmtCell;
 
 const cell = (v: string | number) => { const s = String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
 export function reportToCsv(r: ReportDto, cur: Currency = getActiveCurrency()): string {
