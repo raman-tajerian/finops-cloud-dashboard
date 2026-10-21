@@ -3,7 +3,7 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, P
 import { SlidersHorizontal, AlertTriangle, BellPlus, Bot, ChevronRight, Download, EyeOff, FileJson, FileSpreadsheet, FileText, UserPlus, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
-import { fmtMoney } from "@/lib/finops-data";
+import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { rangeLabels, type CloudId, type Env, type PlatformRange } from "@/lib/finops-platform-data";
 import { useDashboard, useDashboardData } from "@/lib/queries";
 import { allProviders, teams, type Filters, type Team } from "@/lib/filters";
@@ -153,9 +153,9 @@ export function DenseKpis({ onOpen }: { onOpen: (d: Detail) => void }) {
     { label: "Cost anomalies", n: k.anomalies.length, f: (n: number) => `${Math.round(n)} active`, value: "", pill: top ? <Pill tone="destructive">Critical</Pill> : <Pill tone="success">None</Pill>, color: "var(--destructive)", spark: o.anomalies.spark,
       subs: [["Top spike", top ? `+${top.change}% ${top.provider}` : "—"], ["Est. impact", s(k.anomalies.reduce((a, b) => a + b.impact, 0))]],
       detail: { title: "Cost anomalies", description: "Detected spend deviations from the 30-day baseline.", rows: k.anomalies.flatMap((a) => [[a.title, `+${a.change}%`], [`Impact · since ${a.since}`, fmtMoney(a.impact)]] as [string, string][]) } },
-    { label: "Unit economics", n: k.unit.perUser, f: (n: number) => `$${n.toFixed(3)}`, value: "", pill: <Pill tone="success">per active user</Pill>, color: "var(--chart-2)", spark: o.costPerUser.spark,
-      subs: [["Per API request", `$${k.unit.perRequest.toFixed(5)}`], ["Per deployment", `$${unitExtra.perDeployment.toFixed(2)}`], ["Per active session", `$${unitExtra.perSession.toFixed(3)}`], ["Active users", (k.unit.activeUsers / 1e6).toFixed(2) + "M"]],
-      detail: { title: "Unit economics", description: "Cloud cost normalized by business volume.", rows: [["Cost per active user", `$${k.unit.perUser.toFixed(4)}`], ["Cost per API request", `$${k.unit.perRequest.toFixed(6)}`], ["Cost per deployment", `$${unitExtra.perDeployment.toFixed(2)}`], ["Cost per active session", `$${unitExtra.perSession.toFixed(4)}`], ["Active users (30d)", k.unit.activeUsers.toLocaleString("en-US")], ["API requests (30d)", k.unit.requests.toLocaleString("en-US")]] } },
+    { label: "Unit economics", n: k.unit.perUser, f: (n: number) => fmtMoney(n, { decimals: 3 }), value: "", pill: <Pill tone="success">per active user</Pill>, color: "var(--chart-2)", spark: o.costPerUser.spark,
+      subs: [["Per API request", fmtMoney(k.unit.perRequest, { decimals: 5 })], ["Per deployment", fmtMoney(unitExtra.perDeployment, { decimals: 2 })], ["Per active session", fmtMoney(unitExtra.perSession, { decimals: 3 })], ["Active users", (k.unit.activeUsers / 1e6).toFixed(2) + "M"]],
+      detail: { title: "Unit economics", description: "Cloud cost normalized by business volume.", rows: [["Cost per active user", fmtMoney(k.unit.perUser, { decimals: 4 })], ["Cost per API request", fmtMoney(k.unit.perRequest, { decimals: 6 })], ["Cost per deployment", fmtMoney(unitExtra.perDeployment, { decimals: 2 })], ["Cost per active session", fmtMoney(unitExtra.perSession, { decimals: 4 })], ["Active users (30d)", k.unit.activeUsers.toLocaleString("en-US")], ["API requests (30d)", k.unit.requests.toLocaleString("en-US")]] } },
   ];
   return (
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -205,7 +205,7 @@ export function CostDistribution() {
         )}
         {!asTable && view === "region" && (
           <div key="region" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><BarChart data={d.regions}>
-            <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="region" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${Math.round(Number(v) / 1000)}k`} />
+            <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="region" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} cursor={{ fill: "var(--secondary)" }} formatter={(v, n) => [fmtMoney(Number(v)), String(n)]} />
             {providers.includes("AWS") && <Bar dataKey="AWS" stackId="a" fill="var(--aws)" />}
             {providers.includes("Azure") && <Bar dataKey="Azure" stackId="a" fill="var(--azure)" />}
@@ -223,7 +223,7 @@ export function CostDistribution() {
         {!asTable && view === "daily" && (
           <div key="daily" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><AreaChart data={daily}>
             <defs><linearGradient id="dg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="var(--chart-1)" stopOpacity={0.35} /><stop offset="1" stopColor="var(--chart-1)" stopOpacity={0} /></linearGradient></defs>
-            <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="day" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} interval={4} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(Number(v) / 1000).toFixed(1)}k`} />
+            <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="day" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} interval={4} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} formatter={(v) => [fmtMoney(Number(v)), "Spend"]} />
             <Area dataKey="spend" stroke="var(--chart-1)" strokeWidth={2} fill="url(#dg)" />
           </AreaChart></ResponsiveContainer></div>

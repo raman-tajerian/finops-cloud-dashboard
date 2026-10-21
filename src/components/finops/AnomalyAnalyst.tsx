@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Sparkles, Square } from "lucide-react";
-import { fmtMoney } from "@/lib/finops-data";
+import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useDashboardData } from "@/lib/queries";
 import { useGlobalFilters } from "@/lib/filters";
 import { Button } from "@/components/ui/button";

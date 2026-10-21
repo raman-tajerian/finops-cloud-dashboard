@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BellOff, Check, Copy, EyeOff, Lightbulb, PlayCircle, UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import { fmtMoney } from "@/lib/finops-data";
+import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useSavings } from "@/lib/queries";
 import { teams } from "@/lib/filters";
 import { fmtDemoDate, snoozeUntil, SNOOZE_OPTIONS } from "@/data/resources";
@@ -151,7 +151,7 @@ function Tracker({ d, open }: { d: SavingsDto; open: number }) {
             <BarChart data={data} margin={{ left: 0, right: 8, top: 4 }}>
               <CartesianGrid vertical={false} stroke="var(--border)" />
               <XAxis dataKey="month" tickFormatter={(v: string) => v.slice(0, 3)} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
-              <YAxis width={48} tickFormatter={(v: number) => `$${Math.round(v / 1000)}k`} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
+              <YAxis width={48} tickFormatter={(v: number) => fmtMoneyCompact(Number(v))} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={tip} formatter={(v) => fmtMoney(Number(v))} cursor={{ fill: "var(--secondary)" }} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
               <Bar dataKey="potential" name="Potential" fill="var(--chart-2)" radius={[6, 6, 0, 0]} />

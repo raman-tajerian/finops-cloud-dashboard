@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Area, ComposedChart, CartesianGrid, Line, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDownRight, ArrowUpRight, ChevronRight, Minus } from "lucide-react";
-import { fmtMoney } from "@/lib/finops-data";
+import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useDashboardData } from "@/lib/queries";
 import { DataTableView, TableToggle } from "./States";
 import { CountUp } from "./Insights";
@@ -30,8 +30,8 @@ export function OverviewKpis() {
     { label: "Savings opportunity", k: o.savings, f: (n) => `${fmtMoney(n)}/mo`, to: "/recommendations", goodWhenUp: true, color: "var(--success)" },
     { label: `Idle waste · ${o.idleCount} res.`, k: o.idleWaste, f: (n) => `${fmtMoney(n)}/mo`, to: "/resources", color: "var(--chart-3)" },
     { label: "Active anomalies", k: o.anomalies, f: (n) => `${Math.round(n)}`, to: "/budgets", color: "var(--destructive)" },
-    { label: "Cost per active user", k: o.costPerUser, f: (n) => `$${n.toFixed(4)}`, to: "/cost-explorer", color: "var(--chart-4)" },
-    { label: "Cost per API request", k: o.costPerRequest, f: (n) => `$${n.toFixed(6)}`, to: "/cost-explorer", color: "var(--chart-4)" },
+    { label: "Cost per active user", k: o.costPerUser, f: (n) => fmtMoney(n, { decimals: 4 }), to: "/cost-explorer", color: "var(--chart-4)" },
+    { label: "Cost per API request", k: o.costPerRequest, f: (n) => fmtMoney(n, { decimals: 6 }), to: "/cost-explorer", color: "var(--chart-4)" },
   ];
   return (
     <section aria-label="Key metrics" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -73,7 +73,7 @@ export function CostTrendCard() {
           <ComposedChart data={data} margin={{ left: -6, right: 8, top: 8 }}>
             <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} />
             <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} minTickGap={24} />
-            <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(Number(v) / 1000).toFixed(1)}k`} />
+            <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} formatter={(v, n) => [Array.isArray(v) ? `${fmtMoney(Number(v[0]))} – ${fmtMoney(Number(v[1]))}` : fmtMoney(Number(v)), String(n)]} />
             {providers.map((p) => <Area key={p} dataKey={p} stackId="p" stroke={colors[p]} fill={colors[p]} fillOpacity={0.1} strokeWidth={1.5} animationDuration={700} />)}
             <Area dataKey="band" name="95% band" stroke="none" fill="var(--muted-foreground)" fillOpacity={0.12} />

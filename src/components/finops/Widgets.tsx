@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Activity, ArrowDownRight, ArrowUpRight, Check, ChevronRight, CircleAlert, Cpu, Database, MemoryStick, Search, Server, Sparkles } from "lucide-react";
-import { allocation, fmtMoney, type CostPoint, type ResourceStatus } from "@/lib/finops-data";
+import { allocation, fmtMoney, fmtMoneyCompact, type CostPoint, type ResourceStatus } from "@/lib/finops-data";
 import { useDashboardData, useResources } from "@/lib/queries";
 import { Link } from "@tanstack/react-router";
 import { CardSkeleton, ErrorState } from "@/components/finops/States";
@@ -40,7 +40,7 @@ export function CostTrend({ data }: { data: CostPoint[] }) {
             <defs><linearGradient id="awsFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--aws)" stopOpacity={0.18} /><stop offset="1" stopColor="var(--aws)" stopOpacity={0} /></linearGradient></defs>
             <CartesianGrid stroke="var(--border)" vertical={false} />
             <XAxis dataKey="label" tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} minTickGap={28} />
-            <YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${Math.round(v / 1000)}k`} />
+            <YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tooltipStyle} formatter={(v) => fmtMoney(Number(v))} />
             <Area type="monotone" dataKey="aws" name="AWS" stroke="var(--aws)" strokeWidth={2} fill="url(#awsFill)" animationDuration={900} animationEasing="ease-out" />
             <Area type="monotone" dataKey="azure" name="Azure" stroke="var(--azure)" strokeWidth={2} fill="transparent" animationDuration={1050} animationEasing="ease-out" />

@@ -54,7 +54,7 @@ export const resources: CloudResource[] = [
 
 export const alerts: Alert[] = [
   { id: "a1", severity: "critical", title: "Unrestricted SSH access in Azure NSG", detail: "nsg-prod-westeu allows 0.0.0.0/0 on port 22." },
-  { id: "a2", severity: "warning", title: "3 unused EBS volumes detected", detail: "1.2 TB unattached in us-east-1 — ~$118/mo." },
+  { id: "a2", severity: "warning", title: "3 unused EBS volumes detected", detail: "1.2 TB unattached in us-east-1 — ~118 USD/mo." },
   { id: "a3", severity: "warning", title: "RDS instance without automated backups", detail: "orders-postgres-primary has retention set to 0 days." },
 ];
 
