@@ -3,6 +3,7 @@ import { Component, type ReactNode } from "react";
 import { AlertCircle, CheckCircle2, CircleDashed, OctagonAlert, TriangleAlert, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTableDensity } from "@/lib/density";
 
 export function PageHeader({ title, description, actions }: { title: string; description: string; actions?: ReactNode }) {
   return (
