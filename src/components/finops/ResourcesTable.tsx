@@ -57,7 +57,7 @@ export function ResourcesWorkspace({ search, setSearch }: { search: TableSearch;
   const q = useResources();
   const [text, setText] = useState(s.q);
   const [hidden, setHidden] = useState<Set<SortKey>>(new Set());
-  const [compact, setCompact] = useState(false);
+  const { compact, toggle: toggleDensity, py } = useTableDensity();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulk, setBulk] = useState<Bulk>(null);
   const [bulkValue, setBulkValue] = useState("");

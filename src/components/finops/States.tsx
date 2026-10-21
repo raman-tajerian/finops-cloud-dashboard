@@ -59,12 +59,13 @@ export function TableToggle({ on, onChange }: { on: boolean; onChange: (v: boole
   return <Button size="sm" variant="ghost" className="h-8 text-xs text-muted-foreground" aria-pressed={on} onClick={() => onChange(!on)}>{on ? "View as chart" : "View as table"}</Button>;
 }
 export function DataTableView({ columns, rows, caption }: { columns: string[]; rows: (string | number)[][]; caption: string }) {
+  const d = useTableDensity();
   return (
     <div className="h-full overflow-auto rounded-xl border border-border">
       <table className="w-full text-left text-sm">
         <caption className="sr-only">{caption}</caption>
-        <thead className="sticky top-0 bg-card text-xs text-muted-foreground"><tr>{columns.map((c) => <th key={c} scope="col" className="px-4 py-2 font-medium">{c}</th>)}</tr></thead>
-        <tbody>{rows.map((r, i) => <tr key={i} className="border-t border-border">{r.map((v, j) => <td key={j} className={`px-4 py-2 ${j ? "metric-numbers" : ""}`}>{v}</td>)}</tr>)}</tbody>
+        <thead className="sticky top-0 bg-card text-xs text-muted-foreground"><tr>{columns.map((c) => <th key={c} scope="col" className={`px-4 ${d.pyHead} font-medium`}>{c}</th>)}</tr></thead>
+        <tbody>{rows.map((r, i) => <tr key={i} className="border-t border-border">{r.map((v, j) => <td key={j} className={`px-4 ${d.py} ${j ? "metric-numbers" : ""}`}>{v}</td>)}</tr>)}</tbody>
       </table>
     </div>
   );
