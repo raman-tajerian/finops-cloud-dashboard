@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Area, ComposedChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BellRing, Pencil, Plus, Trash2, Wallet } from "lucide-react";
 import { toast } from "sonner";
-import { fmtMoney } from "@/lib/finops-data";
+import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useAlerts } from "@/lib/queries";
 import { budgetTone } from "@/lib/scenario";
 import { parseAmount, scopeKey, validateBudget } from "@/data/budgets";
@@ -229,7 +229,7 @@ function AnomalyDrawer({ row, onClose }: { row: AnomalyRowDto | null; onClose: (
                   <ComposedChart data={row.series.map((p) => ({ ...p, band: [p.low, p.high] }))} margin={{ left: 0, right: 8, top: 4 }}>
                     <CartesianGrid vertical={false} stroke="var(--border)" />
                     <XAxis dataKey="day" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} interval={4} />
-                    <YAxis width={52} tickFormatter={(v: number) => `$${v >= 1000 ? `${Math.round(v / 100) / 10}k` : v}`} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
+                    <YAxis width={52} tickFormatter={(v: number) => fmtMoneyCompact(Number(v))} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
                     <Tooltip contentStyle={tip} formatter={(v) => (Array.isArray(v) ? `${fmtMoney(Number(v[0]))} – ${fmtMoney(Number(v[1]))}` : fmtMoney(Number(v)))} />
                     <Area dataKey="band" name="Expected band" stroke="none" fill="var(--chart-2)" fillOpacity={0.25} />
                     <Line dataKey="actual" name="Actual" stroke="var(--chart-3)" strokeWidth={2} dot={false} />

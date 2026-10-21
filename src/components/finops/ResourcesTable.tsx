@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDown, ArrowUp, Ban, ChevronLeft, ChevronRight, Columns3, Download, Lightbulb, Rows3, Search, Server, Tag, Users } from "lucide-react";
 import { toast } from "sonner";
-import { fmtMoney } from "@/lib/finops-data";
+import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { teams } from "@/lib/filters";
 import { useResource, useResources } from "@/lib/queries";
 import { CardSkeleton, DataTableView, EmptyState, ErrorState, StatusBadge, TableToggle } from "./States";
@@ -273,10 +273,10 @@ function ResourceDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               <TabsContent value="cost">
                 <div className="flex items-center justify-between"><Label>Daily cost · last 90 days</Label><TableToggle on={costTable} onChange={setCostTable} /></div>
                 <div className="mt-3 h-64">
-                  {costTable ? <DataTableView caption="Daily cost" columns={["Day", "Cost"]} rows={d.cost.map((c) => [c.day, `$${c.cost.toFixed(2)}`])} /> :
+                  {costTable ? <DataTableView caption="Daily cost" columns={["Day", "Cost"]} rows={d.cost.map((c) => [c.day, fmtMoney(c.cost, { decimals: 2 })])} /> :
                   <ResponsiveContainer><AreaChart data={d.cost} margin={{ left: -6, right: 8 }}>
-                    <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} /><XAxis dataKey="day" {...axis} minTickGap={28} /><YAxis {...axis} width={48} tickFormatter={(v) => `$${Math.round(Number(v))}`} />
-                    <Tooltip contentStyle={tip} formatter={(v) => [`$${Number(v).toFixed(2)}`, "Cost"]} />
+                    <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} /><XAxis dataKey="day" {...axis} minTickGap={28} /><YAxis {...axis} width={48} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
+                    <Tooltip contentStyle={tip} formatter={(v) => [fmtMoney(Number(v), { decimals: 2 }), "Cost"]} />
                     <Area dataKey="cost" stroke="var(--chart-1)" fill="var(--chart-1)" fillOpacity={0.1} strokeWidth={1.5} />
                   </AreaChart></ResponsiveContainer>}
                 </div>

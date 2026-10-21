@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDown, ArrowUp, Bookmark, Download, FileJson, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
-import { fmtMoney } from "@/lib/finops-data";
+import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useExplore } from "@/lib/queries";
 import { useGlobalFilters, type Filters } from "@/lib/filters";
 import { CardSkeleton, DataTableView, ErrorState, TableToggle } from "./States";
@@ -113,7 +113,7 @@ function ExplorerChart({ d, state }: { d: ExploreDto; state: ExplorerState }) {
   const children = [
     <CartesianGrid key="g" stroke="var(--border)" strokeDasharray="2 4" vertical={false} />,
     <XAxis key="x" dataKey="day" {...axis} minTickGap={24} />,
-    <YAxis key="y" {...axis} tickFormatter={(v) => `$${(Number(v) / 1000).toFixed(1)}k`} />,
+    <YAxis key="y" {...axis} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />,
     <Tooltip key="t" contentStyle={tip} formatter={(v, n) => [fmtMoney(Number(v)), String(n)]} />,
   ];
   const overlay = state.compare ? <Line key="prev" dataKey="previous" name="Previous period (total)" stroke="var(--foreground)" strokeOpacity={0.55} strokeDasharray="5 4" dot={false} strokeWidth={1.5} /> : null;

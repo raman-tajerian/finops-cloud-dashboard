@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDown, ArrowUp, Boxes, Calculator, ChevronDown } from "lucide-react";
 import type { UseQueryResult } from "@tanstack/react-query";
-import { fmtMoney } from "@/lib/finops-data";
+import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useBudget, useKubernetes, useScenario } from "@/lib/queries";
 import { budgetTone, simulate } from "@/lib/scenario";
 import type { K8sClusterDto, K8sPodDto } from "@/types/finops";
@@ -56,7 +56,7 @@ function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
         </Select>
       </section>
       <section aria-label="Cluster metrics" className="grid gap-4 sm:grid-cols-3">
-        {[["Monthly cost", fmtMoney(c.monthlyCost), "Last 30 days"], ["Nodes", String(c.nodes), "max(3, cost / $350)"], ["Pod health", `${c.podsHealthy}/${c.podsTotal}`, `${c.podsFailed} failed or pending`]].map(([l, v, n]) => (
+        {[["Monthly cost", fmtMoney(c.monthlyCost), "Last 30 days"], ["Nodes", String(c.nodes), `max(3, cost / ${fmtMoney(350)})`], ["Pod health", `${c.podsHealthy}/${c.podsTotal}`, `${c.podsFailed} failed or pending`]].map(([l, v, n]) => (
           <div key={l} className="organic-card p-5"><p className="text-[13px] text-muted-foreground">{l}</p><p className="mt-2 font-display text-[32px] leading-none tracking-tight tabular-nums">{v}</p><p className="mt-3 text-xs text-muted-foreground">{n}</p></div>
         ))}
       </section>
@@ -69,7 +69,7 @@ function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
                 <BarChart data={c.namespaces} margin={{ left: 0, right: 8, top: 4 }}>
                   <CartesianGrid vertical={false} strokeDasharray="3 3" />
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} interval={0} />
-                  <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={52} tickFormatter={(v: number) => `$${(v / 1000).toFixed(1)}k`} />
+                  <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={52} tickFormatter={(v: number) => fmtMoneyCompact(Number(v))} />
                   <Tooltip contentStyle={tip} cursor={{ fill: "var(--muted)" }} formatter={(v) => fmtMoney(Number(v))} />
                   <Bar dataKey="cost" radius={[6, 6, 0, 0]}>{c.namespaces.map((n) => <Cell key={n.name} fill={n.overProvisioned ? "var(--chart-3)" : "var(--chart-1)"} />)}</Bar>
                 </BarChart>
@@ -149,7 +149,7 @@ function Simulator({ d }: { d: NonNullable<ReturnType<typeof useScenario>["data"
   const [l, setL] = useState({ ri: 0, migrate: 0, rightsize: 0 });
   const [asTable, setAsTable] = useState(false);
   const r = simulate(d, l);
-  const sign = (n: number) => (Math.abs(n) < 0.5 ? "$0" : n > 0 ? `−${fmtMoney(n)}` : `+${fmtMoney(-n)}`);
+  const sign = (n: number) => fmtMoney(n, { sign: true });
   const levers = [
     { k: "ri" as const, label: "Shift compute to Reserved Instances", save: r.ri },
     { k: "migrate" as const, label: `Migrate ${d.migrateFrom} → ${d.migrateTo}`, save: r.migrate },
