@@ -27,10 +27,11 @@ export const subscribeCurrency = (cb: () => void): (() => void) => {
   return () => subs.delete(cb);
 };
 
-export interface MoneyOpts { decimals?: number; sign?: boolean }
+export interface MoneyOpts { decimals?: number; sign?: boolean; currency?: Currency }
 
 /** One shared formatter for every money value in the app. Input is always USD. */
-export function fmtMoney(usd: number, cur: Currency = active, opts: MoneyOpts = {}): string {
+export function fmtMoney(usd: number, opts: MoneyOpts = {}): string {
+  const cur = opts.currency ?? active;
   const decimals = opts.decimals ?? 0;
   const formatted = new Intl.NumberFormat("en-US", {
     style: "currency",
