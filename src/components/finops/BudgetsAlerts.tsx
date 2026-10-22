@@ -135,7 +135,7 @@ function AlertRules() {
       <Title sub="Demo — changes last for this session only.">Alert rules</Title>
       {rules.length === 0 ? <div className="mt-5"><EmptyState icon={BellRing} title="No alert rules." action="Restore defaults" onAction={() => window.location.reload()} /></div> : (
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[480px] text-left text-sm">
+          <table className="density-table w-full min-w-[480px] text-left text-sm">
             <thead className="text-xs text-muted-foreground"><tr><th className="py-2 font-medium">Rule</th><th className="py-2 font-medium">Channel</th><th className="py-2 font-medium">Enabled</th><th className="py-2"><span className="sr-only">Actions</span></th></tr></thead>
             <tbody>{rules.map((r) => (
               <tr key={r.id} className="border-t border-border">
@@ -188,7 +188,7 @@ function Anomalies({ rows }: { rows: AnomalyRowDto[] }) {
       <Title sub="Same anomalies as Overview: last 3 days vs the prior 14-day baseline. Status is demo-only.">Anomalies · {rows.length}</Title>
       {rows.length === 0 ? <p className="mt-5 rounded-xl bg-secondary p-6 text-center text-sm text-muted-foreground">No active anomalies for the selected filters.</p> : (
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="density-table w-full min-w-[640px] text-left text-sm">
             <thead className="text-xs text-muted-foreground"><tr><th className="py-2 font-medium">Date</th><th className="py-2 font-medium">Service</th><th className="py-2 text-right font-medium">Expected</th><th className="py-2 text-right font-medium">Actual</th><th className="py-2 text-right font-medium">Deviation</th><th className="py-2 pl-3 font-medium">Probable cause</th><th className="py-2 font-medium">Status</th></tr></thead>
             <tbody>{rows.map((r) => (
               <tr key={r.id} className="cursor-pointer border-t border-border hover:bg-secondary/50" onClick={() => setOpen(r)} tabIndex={0} onKeyDown={(e) => e.key === "Enter" && setOpen(r)}>

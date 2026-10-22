@@ -38,7 +38,7 @@ export function SettingsWorkspace({ tab, dialog, onTab, onDialog }: { tab: strin
       <TabsContent value="members"><Members d={d} open={dialog === "invite"} onOpen={(o) => onDialog(o ? "invite" : "")} save={save} /></TabsContent>
       <TabsContent value="allocation"><Allocation rows={d.mappings} save={save} /></TabsContent>
       <TabsContent value="notifications">
-        <div className="organic-card overflow-x-auto p-2"><table className="w-full min-w-[420px] text-sm">
+        <div className="organic-card overflow-x-auto p-2"><table className="density-table w-full min-w-[420px] text-sm">
           <thead className="text-left text-xs text-muted-foreground"><tr><th className="px-3 py-2 font-medium">Event</th>{d.channels.map((c) => <th key={c} className="px-3 py-2 font-medium">{c}</th>)}</tr></thead>
           <tbody>{d.events.map((e) => <tr key={e} className="border-t border-border"><td className="px-3 py-2">{e}</td>{d.channels.map((c) => { const k = `${e}|${c}`; const on = ss.notify[k] ?? c === "Email"; return <td key={c} className="px-3 py-2"><Switch checked={on} aria-label={`${e} via ${c}`} onCheckedChange={(v) => setSession((s) => ({ ...s, settings: { ...s.settings, notify: { ...s.settings.notify, [k]: v } } }))} /></td>; })}</tr>)}</tbody>
         </table></div>
@@ -78,7 +78,7 @@ function Members({ d, open, onOpen, save }: { d: SettingsDto; open: boolean; onO
     <div className="space-y-3">
       <div className="flex justify-end"><Button onClick={() => onOpen(true)}><Plus className="size-4" />Invite member</Button></div>
       {d.members.length === 0 ? <EmptyState icon={Users} title="No members yet." action="Invite member" onAction={() => onOpen(true)} /> : (
-        <div className="organic-card overflow-x-auto"><table className="w-full min-w-[560px] text-sm">
+        <div className="organic-card overflow-x-auto"><table className="density-table w-full min-w-[560px] text-sm">
           <thead className="text-left text-xs text-muted-foreground"><tr><th className="px-4 py-2 font-medium">Name</th><th className="px-4 py-2 font-medium">Email</th><th className="px-4 py-2 font-medium">Role</th><th className="px-4 py-2 font-medium">Last active</th></tr></thead>
           <tbody>{d.members.map((m) => <tr key={m.id} className="border-t border-border"><td className="px-4 py-2 font-medium">{m.name}</td><td className="px-4 py-2">{m.email}</td>
             <td className="px-4 py-2"><Select value={m.role} onValueChange={(r) => save({ members: d.members.map((x) => x.id === m.id ? { ...x, role: r as MemberRole } : x) })}><SelectTrigger className="h-9 w-28" aria-label={`Role for ${m.name}`}><SelectValue /></SelectTrigger><SelectContent>{ROLES.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent></Select></td>
@@ -110,7 +110,7 @@ function Allocation({ rows, save }: { rows: TagMappingDto[]; save: Saver }) {
     <div className="space-y-3">
       <div className="flex justify-end"><Button onClick={() => setEdit({ id: `t-${rows.length + 1}-${rows.at(-1)?.id ?? "0"}`, tagKey: "costCenter", tagValue: "", team: "Platform" })}><Plus className="size-4" />Add mapping</Button></div>
       {rows.length === 0 ? <EmptyState icon={Users} title="No tag mappings." action="Add mapping" onAction={() => setEdit({ id: "t-1", tagKey: "costCenter", tagValue: "", team: "Platform" })} /> : (
-        <div className="organic-card overflow-x-auto"><table className="w-full min-w-[480px] text-sm">
+        <div className="organic-card overflow-x-auto"><table className="density-table w-full min-w-[480px] text-sm">
           <thead className="text-left text-xs text-muted-foreground"><tr><th className="px-4 py-2 font-medium">Tag key</th><th className="px-4 py-2 font-medium">Tag value</th><th className="px-4 py-2 font-medium">Team</th><th className="px-4 py-2" /></tr></thead>
           <tbody>{rows.map((r) => <tr key={r.id} className="border-t border-border"><td className="px-4 py-2">{r.tagKey}</td><td className="px-4 py-2">{r.tagValue}</td><td className="px-4 py-2">{r.team}</td>
             <td className="px-4 py-2 text-right"><Button size="sm" variant="ghost" aria-label="Edit mapping" onClick={() => setEdit(r)}><Pencil className="size-4" /></Button><Button size="sm" variant="ghost" aria-label="Delete mapping" onClick={() => save({ mappings: rows.filter((x) => x.id !== r.id) }, "Mapping deleted")}><Trash2 className="size-4" /></Button></td></tr>)}</tbody></table></div>
@@ -143,7 +143,7 @@ function Keys({ d, open, onOpen, save }: { d: SettingsDto; open: boolean; onOpen
   return (
     <div className="space-y-3">
       <div className="flex justify-end"><Button onClick={() => onOpen(true)}><Plus className="size-4" />Create key</Button></div>
-      <div className="organic-card overflow-x-auto"><table className="w-full min-w-[520px] text-sm">
+      <div className="organic-card overflow-x-auto"><table className="density-table w-full min-w-[520px] text-sm">
         <thead className="text-left text-xs text-muted-foreground"><tr><th className="px-4 py-2 font-medium">Name</th><th className="px-4 py-2 font-medium">Key</th><th className="px-4 py-2 font-medium">Created</th><th className="px-4 py-2 font-medium">Last used</th><th className="px-4 py-2" /></tr></thead>
         <tbody>{d.keys.map((k) => <tr key={k.id} className="border-t border-border"><td className="px-4 py-2 font-medium">{k.name}</td><td className="px-4 py-2 font-mono text-xs">{k.masked}</td><td className="px-4 py-2">{fmtDemoDate(k.created)}</td><td className="px-4 py-2">{k.lastUsed ? fmtDemoDate(k.lastUsed) : "Never"}</td>
           <td className="px-4 py-2 text-right"><Button size="sm" variant="ghost" aria-label={`Revoke ${k.name}`} onClick={() => save({ keys: d.keys.filter((x) => x.id !== k.id) }, "Key revoked")}><Trash2 className="size-4" /></Button></td></tr>)}</tbody></table></div>

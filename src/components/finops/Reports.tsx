@@ -82,7 +82,7 @@ export function ReportsWorkspace() {
       <section className="space-y-4">
         <div className="flex items-center gap-2"><SectionHeading title="Past reports" description="Generated this session only." /><Demo /></div>
         {reports.length === 0 ? <EmptyState icon={FileText} title="No reports yet. Generate one from a template above." action="Generate executive summary" onAction={() => open("executive")} /> : (
-          <div className="organic-card overflow-x-auto"><table className="w-full min-w-[560px] text-sm">
+          <div className="organic-card overflow-x-auto"><table className="density-table w-full min-w-[560px] text-sm">
             <thead className="text-left text-xs text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Report</th><th className="px-4 py-3 font-medium">Range</th><th className="px-4 py-3 font-medium">Format</th><th className="px-4 py-3 font-medium">Created</th><th className="px-4 py-3" /></tr></thead>
             <tbody>{reports.map((r) => (
               <tr key={r.id} className="border-t border-border"><td className="px-4 py-3 font-medium">{r.title}</td><td className="px-4 py-3">{r.range}</td><td className="px-4 py-3">{r.format}</td><td className="px-4 py-3">{fmtDemoDate(r.created)}</td>
@@ -94,7 +94,7 @@ export function ReportsWorkspace() {
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><SectionHeading title="Scheduled reports" description="Nothing is actually sent." /><Demo /></div><Button variant="secondary" onClick={() => setSched(true)}>New schedule</Button></div>
         {schedules.length === 0 ? <EmptyState icon={FileText} title="No schedules yet." action="Create schedule" onAction={() => setSched(true)} /> : (
-          <div className="organic-card overflow-x-auto"><table className="w-full min-w-[620px] text-sm">
+          <div className="organic-card overflow-x-auto"><table className="density-table w-full min-w-[620px] text-sm">
             <thead className="text-left text-xs text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Template</th><th className="px-4 py-3 font-medium">Cadence</th><th className="px-4 py-3 font-medium">Recipients</th><th className="px-4 py-3 font-medium">Format</th><th className="px-4 py-3 font-medium">On</th><th className="px-4 py-3" /></tr></thead>
             <tbody>{schedules.map((s) => (
               <tr key={s.id} className="border-t border-border"><td className="px-4 py-3 font-medium">{tplName(s.template)}</td><td className="px-4 py-3 capitalize">{s.cadence}</td><td className="max-w-[220px] truncate px-4 py-3">{s.recipients.join(", ")}</td><td className="px-4 py-3">{s.format}</td>

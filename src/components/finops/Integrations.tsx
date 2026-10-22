@@ -77,7 +77,7 @@ function SyncHistory({ rows }: { rows: SyncRunDto[] }) {
   return (
     <section className="space-y-4">
       <div className="flex items-center gap-2"><SectionHeading title="Sync history" description="Seeded demo runs." /><Demo /></div>
-      <div className="organic-card overflow-x-auto"><table className="w-full min-w-[600px] text-sm">
+      <div className="organic-card overflow-x-auto"><table className="density-table w-full min-w-[600px] text-sm">
         <thead className="text-left text-xs text-muted-foreground"><tr>{cols.map(([k, l]) => <th key={k} className="px-4 py-2 font-medium" aria-sort={sort.k === k ? (sort.asc ? "ascending" : "descending") : "none"}><button className="inline-flex min-h-10 items-center gap-1" onClick={() => setSort((s) => ({ k, asc: s.k === k ? !s.asc : true }))}>{l}<ArrowUpDown className="size-3" /></button></th>)}</tr></thead>
         <tbody>{sorted.map((r) => (
           <tr key={r.id} className="border-t border-border"><td className="px-4 py-2 font-medium">{r.integration}</td><td className="px-4 py-2">{fmtTime(r.started)}</td>
