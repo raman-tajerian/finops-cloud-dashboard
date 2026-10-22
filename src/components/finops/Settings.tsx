@@ -17,6 +17,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CardSkeleton, EmptyState, ErrorState } from "./States";
 import { Demo } from "./Reports";
+import { CURRENCIES, useCurrency, useSetCurrency, type Currency } from "@/lib/money";
+
+function CurrencyButton({ c }: { c: Currency }) {
+  const active = useCurrency();
+  const setCurrency = useSetCurrency();
+  return <Button variant={active === c ? "default" : "secondary"} aria-pressed={active === c} onClick={() => setCurrency(c)}>{c}</Button>;
+}
 
 export const SETTINGS_TABS = [["profile", "Profile"], ["workspace", "Workspace"], ["members", "Team members"], ["allocation", "Cost allocation"], ["notifications", "Notifications"], ["keys", "API keys"], ["appearance", "Appearance"]] as const;
 const ROLES: MemberRole[] = ["Admin", "Editor", "Viewer"];
