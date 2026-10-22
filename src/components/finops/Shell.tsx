@@ -10,6 +10,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useDashboard } from "@/lib/queries";
+import { CURRENCIES, CurrencySync, useCurrency, useSetCurrency } from "@/lib/money";
+import { useTableDensity } from "@/lib/density";
 
 const seedNotes = [
   { id: 1, kind: "Anomaly", text: "+140% Azure Blob Storage egress", time: "2h ago" },
@@ -27,6 +29,9 @@ export function Shell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const resources = useDashboard().data?.resources ?? [];
   const current = navItems.find((i) => i.to === path) ?? navItems[0]!;
+  const currency = useCurrency();
+  const setCurrency = useSetCurrency();
+  const { density } = useTableDensity();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setPalette((p) => !p); } };
