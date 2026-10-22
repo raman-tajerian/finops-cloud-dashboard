@@ -47,6 +47,11 @@ export function SettingsWorkspace({ tab, dialog, onTab, onDialog }: { tab: strin
       <TabsContent value="appearance">
         <div className="organic-card space-y-3 p-6"><Label>Table density</Label>
           <div className="flex gap-2">{(["comfortable", "compact"] as const).map((v) => <Button key={v} variant={ss.density === v ? "default" : "secondary"} aria-pressed={ss.density === v} className="capitalize" onClick={() => save({ density: v })}>{v}</Button>)}</div>
+          <p className="text-xs text-muted-foreground">Applies to every data table in the app.</p>
+        </div>
+        <div className="organic-card space-y-3 p-6"><Label>Display currency</Label>
+          <div className="flex gap-2">{CURRENCIES.map((c) => <CurrencyButton key={c} c={c} />)}</div>
+          <p className="text-xs text-muted-foreground">Demo rates — all figures are computed in USD and converted for display. Saved in the page link.</p>
         </div>
       </TabsContent>
     </Tabs>
