@@ -26,7 +26,7 @@ export function useMoney() {
   const currency = useCurrency();
   return {
     currency,
-    fmt: (usd: number, opts?: Parameters<typeof fmtMoney>[2]) => fmtMoney(usd, currency, opts),
+    fmt: (usd: number, opts?: Omit<Parameters<typeof fmtMoney>[1], "currency">) => fmtMoney(usd, { ...opts, currency }),
     fmtCompact: (usd: number) => fmtMoneyCompact(usd, currency),
   };
 }

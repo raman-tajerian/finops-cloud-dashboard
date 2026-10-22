@@ -80,7 +80,7 @@ function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
         <article className="organic-card min-w-0 p-6">
           <Title sub={`Efficiency = avg(CPU ${c.cpuAvg}%, memory ${c.memAvg}%) × namespace factor; under 30% is over-provisioned`}>Namespaces</Title>
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[420px] text-left text-sm">
+            <table className="density-table w-full min-w-[420px] text-left text-sm">
               <thead className="text-xs text-muted-foreground"><tr>{th("name", "Namespace")}{th("cost", "Cost", true)}{th("efficiency", "Efficiency", true)}<th className="px-4 py-2 font-medium">Status</th></tr></thead>
               <tbody>{ns.map((n) => <tr key={n.name}><td className="px-4 py-2">{n.name}</td><td className="px-4 py-2 text-right tabular-nums">{fmtMoney(n.cost)}</td><td className="px-4 py-2 text-right tabular-nums">{n.efficiency}%</td><td className="px-4 py-2">{n.overProvisioned ? <StatusBadge tone="warning">Over-provisioned</StatusBadge> : <StatusBadge tone="success">Efficient</StatusBadge>}</td></tr>)}</tbody>
             </table>

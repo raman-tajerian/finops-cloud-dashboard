@@ -10,6 +10,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { useDashboard } from "@/lib/queries";
+import { CURRENCIES, CurrencySync, useCurrency, useSetCurrency } from "@/lib/money";
+import { useTableDensity } from "@/lib/density";
 
 const seedNotes = [
   { id: 1, kind: "Anomaly", text: "+140% Azure Blob Storage egress", time: "2h ago" },
@@ -27,6 +29,9 @@ export function Shell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const resources = useDashboard().data?.resources ?? [];
   const current = navItems.find((i) => i.to === path) ?? navItems[0]!;
+  const currency = useCurrency();
+  const setCurrency = useSetCurrency();
+  const { density } = useTableDensity();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setPalette((p) => !p); } };
@@ -39,7 +44,8 @@ export function Shell({ children }: { children: ReactNode }) {
   const go = (to: string) => { setPalette(false); navigate({ to }); };
 
   return (
-    <div className={`min-h-screen bg-background lg:grid ${collapsed ? "lg:grid-cols-[72px_minmax(0,1fr)]" : "lg:grid-cols-[248px_minmax(0,1fr)]"}`}>
+    <div data-density={density} className={`min-h-screen bg-background lg:grid ${collapsed ? "lg:grid-cols-[72px_minmax(0,1fr)]" : "lg:grid-cols-[248px_minmax(0,1fr)]"}`}>
+      <CurrencySync />
       <aside className={`fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col bg-sidebar-bg px-3 py-4 transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${collapsed ? "lg:w-[72px]" : ""} ${open ? "translate-x-0" : "-translate-x-full"}`}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -114,6 +120,10 @@ export function Shell({ children }: { children: ReactNode }) {
               <DropdownMenuContent align="end" className="w-52">
                 <DropdownMenuLabel>Raman Tajerian</DropdownMenuLabel>
                 <DropdownMenuItem onSelect={() => navigate({ to: "/settings" })}><User />Profile</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Currency · demo rates</DropdownMenuLabel>
+                {CURRENCIES.map((c) => <DropdownMenuItem key={c} aria-pressed={currency === c} onSelect={() => setCurrency(c)}><span className={currency === c ? "font-semibold" : "text-muted-foreground"}>{c}</span>{currency === c && <span className="ml-auto text-primary">✓</span>}</DropdownMenuItem>)}
+                <DropdownMenuSeparator />
                 <DropdownMenuItem disabled>Theme: dark matte</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => toast("Signed out (demo)")}><LogOut />Sign out</DropdownMenuItem>

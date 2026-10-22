@@ -123,7 +123,7 @@ function ComplianceCards({ findings, frameworks }: { findings: SecurityFindingDt
       </div>
       {active && (
         <div className="mt-4 overflow-hidden rounded-xl border border-border">
-          <table className="w-full text-left text-sm">
+          <table className="density-table w-full text-left text-sm">
             <caption className="sr-only">{active.fw.name} controls</caption>
             <thead className="bg-secondary/60 text-xs text-muted-foreground"><tr><th scope="col" className="px-4 py-2 font-medium">Control</th><th scope="col" className="w-20 px-4 py-2 font-medium">Result</th><th scope="col" className="px-4 py-2 font-medium">Open findings behind a failure</th></tr></thead>
             <tbody>
@@ -210,7 +210,7 @@ function FindingsTable({ findings, search, setSearch }: { findings: SecurityFind
         <div className="mt-4"><EmptyState icon={ShieldCheck} title="No findings match the current filters. Try widening the filters or resetting the search." action="Clear filters" onAction={() => { setQInput(""); setSearch({ sev: "All", fstatus: "All", prov: "All", rule: "All", q: "" }); }} /></div>
       ) : (
         <div className="mt-4 overflow-x-auto rounded-xl border border-border">
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="density-table w-full min-w-[640px] text-left text-sm">
             <caption className="sr-only">Security findings</caption>
             <thead className="bg-secondary/60 text-xs text-muted-foreground">
               <tr><th scope="col" className="px-4 py-2 font-medium">Severity</th><th scope="col" className="px-4 py-2 font-medium">Finding</th><th scope="col" className="px-4 py-2 font-medium">Provider</th><th scope="col" className="px-4 py-2 font-medium">First detected</th><th scope="col" className="px-4 py-2 font-medium">Status</th></tr>
