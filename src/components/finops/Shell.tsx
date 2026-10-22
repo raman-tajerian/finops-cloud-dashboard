@@ -119,6 +119,10 @@ export function Shell({ children }: { children: ReactNode }) {
               <DropdownMenuContent align="end" className="w-52">
                 <DropdownMenuLabel>Raman Tajerian</DropdownMenuLabel>
                 <DropdownMenuItem onSelect={() => navigate({ to: "/settings" })}><User />Profile</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Currency · demo rates</DropdownMenuLabel>
+                {CURRENCIES.map((c) => <DropdownMenuItem key={c} aria-pressed={currency === c} onSelect={() => setCurrency(c)}><span className={currency === c ? "font-semibold" : "text-muted-foreground"}>{c}</span>{currency === c && <span className="ml-auto text-primary">✓</span>}</DropdownMenuItem>)}
+                <DropdownMenuSeparator />
                 <DropdownMenuItem disabled>Theme: dark matte</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => toast("Signed out (demo)")}><LogOut />Sign out</DropdownMenuItem>
