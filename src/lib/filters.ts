@@ -38,4 +38,4 @@ export function useGlobalFilters() {
 
 export const isDefault = (f: Filters) => f.range === "mtd" && f.providers.length === 3 && f.env === "All" && f.team === "All";
 
-// cur: display currency (USD default), validated via filterSearchSchema.
+// cur: display currency (USD default), validated via filterSearchSchema above.
