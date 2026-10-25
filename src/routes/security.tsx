@@ -18,7 +18,7 @@ const schema = z.object({
 
 export const Route = createFileRoute("/security")({
   validateSearch: zodValidator(schema),
-  search: { middlewares: [stripSearchParams(defaults)] },
+  // TEMP-DEBUG
   head: () => ({
     meta: [
       { title: "Security & Compliance — Fern" },
