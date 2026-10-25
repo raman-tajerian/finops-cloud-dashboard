@@ -1,5 +1,5 @@
 import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
-import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
 import { CardBoundary, PageHeader } from "@/components/finops/States";
@@ -19,7 +19,7 @@ const schema = z.object({
 });
 
 export const Route = createFileRoute("/resources")({
-  validateSearch: zodValidator(schema),
+  validateSearch: (search: Record<string, unknown>) => schema.parse(search),
   search: { middlewares: [stripSearchParams(defaults)] },
   head: () => ({
     meta: [
