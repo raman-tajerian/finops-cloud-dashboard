@@ -1,6 +1,7 @@
 import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { z } from "zod";
+import { filterSearchSchema } from "@/lib/filters";
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
 import { PageHeader } from "@/components/finops/States";
 import { SecurityWorkspace, type SecSearch } from "@/components/finops/Security";
@@ -18,7 +19,7 @@ const schema = z.object({
 
 export const Route = createFileRoute("/security")({
   validateSearch: zodValidator(schema),
-  search: { middlewares: [stripSearchParams(defaults)] },
+  search: { middlewares: [stripSearchParams<z.infer<typeof schema> & z.infer<typeof filterSearchSchema>>(defaults)] },
   head: () => ({
     meta: [
       { title: "Security & Compliance — Fern" },
