@@ -17,7 +17,7 @@ const schema = z.object({
 });
 
 export const Route = createFileRoute("/security")({
-  validateSearch: (search: Record<string, unknown>) => schema.parse(search),
+  validateSearch: zodValidator(schema),
   search: { middlewares: [stripSearchParams(defaults)] },
   head: () => ({
     meta: [
