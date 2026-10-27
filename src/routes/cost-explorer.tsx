@@ -1,4 +1,4 @@
-import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, stripSearchParams, useNavigate, type SearchSchemaInput } from "@tanstack/react-router";
 import { fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
@@ -28,7 +28,7 @@ function decodeViews(raw: string): SavedView[] {
 }
 
 export const Route = createFileRoute("/cost-explorer")({
-  validateSearch: (search: Partial<z.infer<typeof schema>>) => schema.parse(search),
+  validateSearch: (search: Partial<z.infer<typeof schema>> & SearchSchemaInput) => schema.parse(search),
   search: { middlewares: [stripSearchParams(defaults)] },
   head: () => ({
     meta: [
