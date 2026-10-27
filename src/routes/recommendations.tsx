@@ -15,7 +15,7 @@ const schema = z.object({
 });
 
 export const Route = createFileRoute("/recommendations")({
-  validateSearch: (search: Partial<z.infer<typeof schema>> & Record<string, unknown>) => schema.parse(search),
+  validateSearch: (search: Partial<z.infer<typeof schema>>) => schema.parse(search),
   search: { middlewares: [stripSearchParams(defaults)] },
   head: () => ({
     meta: [
