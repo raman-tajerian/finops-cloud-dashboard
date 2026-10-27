@@ -1,5 +1,5 @@
-import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
-import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { createFileRoute, stripSearchParams, useNavigate, type SearchSchemaInput } from "@tanstack/react-router";
+import { fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
 import { PageHeader } from "@/components/finops/States";
@@ -15,7 +15,7 @@ const schema = z.object({
 });
 
 export const Route = createFileRoute("/recommendations")({
-  validateSearch: zodValidator(schema),
+  validateSearch: (search: Partial<z.infer<typeof schema>> & SearchSchemaInput) => schema.parse(search),
   search: { middlewares: [stripSearchParams(defaults)] },
   head: () => ({
     meta: [
