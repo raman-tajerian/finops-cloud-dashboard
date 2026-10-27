@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { masterResources } from "@/data/resources";
-import { buildReport, reportToCsv } from "@/data/reports";
+import { buildReport, reportToCsv, fmtReportCell, isMoneyTotal } from "@/data/reports";
 import { buildDashboard, buildExplore } from "@/data/aggregate";
 import { buildSavings } from "@/data/budgets";
 import { buildSecurity, isOpenFinding } from "@/data/security";
@@ -39,7 +39,8 @@ describe("exports", () => {
   it.each(["executive", "team", "savings", "security"] as const)("CSV and JSON carry the same rows and totals (%s)", (t) => {
     const r = buildReport(masterResources, defaultFilters, t);
     const csv = reportToCsv(r);
-    for (const [k, v] of Object.entries(r.totals)) expect(csv).toContain(`${k},${v}`);
+    for (const [k, v] of Object.entries(r.totals)) expect(csv).toContain(`${k},${fmtReportCell(v, isMoneyTotal(k), "USD")}`);
+    expect(csv).toContain("currency USD (demo rates)");
     const rows = r.sections.reduce((a, s) => a + s.rows.length, 0);
     const dataLines = csv.split("\n").filter((l) => l && !l.startsWith("#")).length;
     expect(dataLines).toBe(1 + Object.keys(r.totals).length + r.sections.length + rows);
