@@ -12,6 +12,8 @@ import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, C
 import { useDashboard } from "@/lib/queries";
 import { CURRENCIES, CurrencySync, useCurrency, useSetCurrency } from "@/lib/money";
 import { useTableDensity } from "@/lib/density";
+import { SHORTCUTS, useGlobalShortcuts } from "@/lib/shortcuts";
+import { ShortcutsDialog } from "@/components/finops/ShortcutsDialog";
 
 const seedNotes = [
   { id: 1, kind: "Anomaly", text: "+140% Azure Blob Storage egress", time: "2h ago" },
@@ -23,6 +25,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [palette, setPalette] = useState(false);
+  const [help, setHelp] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [unread, setUnread] = useState<number[]>(seedNotes.map((n) => n.id));
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -42,6 +45,12 @@ export function Shell({ children }: { children: ReactNode }) {
 
   const scan = () => { setScanning(true); window.setTimeout(() => { setScanning(false); toast.success("Scan complete — 1,872 resources checked"); }, 1600); };
   const go = (to: string) => { setPalette(false); navigate({ to }); };
+  useGlobalShortcuts({
+    navigate: (to) => { setPalette(false); setHelp(false); navigate({ to }); },
+    openPalette: () => setPalette(true),
+    openHelp: () => setHelp(true),
+    closeOverlays: () => { setPalette(false); setHelp(false); setOpen(false); },
+  });
 
   return (
     <div data-density={density} className={`min-h-screen bg-background lg:grid ${collapsed ? "lg:grid-cols-[72px_minmax(0,1fr)]" : "lg:grid-cols-[248px_minmax(0,1fr)]"}`}>
@@ -145,10 +154,15 @@ export function Shell({ children }: { children: ReactNode }) {
             <CommandItem onSelect={() => go("/budgets")}>Create budget</CommandItem>
             <CommandItem onSelect={() => { setPalette(false); scan(); }}>Run full scan</CommandItem>
             <CommandItem onSelect={() => go("/reports")}>Export CSV</CommandItem>
+            <CommandItem onSelect={() => { setPalette(false); setHelp(true); }}>Keyboard shortcuts<span className="ml-auto text-xs text-muted-foreground">?</span></CommandItem>
+          </CommandGroup>
+          <CommandGroup heading="Shortcuts">
+            {SHORTCUTS.filter((s) => s.to).map((s) => <CommandItem key={s.keys} onSelect={() => go(s.to!)}>{s.action}<span className="ml-auto text-xs text-muted-foreground">{s.keys}</span></CommandItem>)}
           </CommandGroup>
           <CommandGroup heading="Resources">{resources.map((r) => <CommandItem key={r.id} value={`${r.name} ${r.type} ${r.region}`} onSelect={() => go("/resources")}>{r.name}<span className="ml-auto text-xs text-muted-foreground">{r.type}</span></CommandItem>)}</CommandGroup>
         </CommandList>
       </CommandDialog>
+      <ShortcutsDialog open={help} onOpenChange={setHelp} />
     </div>
   );
 }
