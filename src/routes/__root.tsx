@@ -14,6 +14,8 @@ import { useEffect, type ReactNode } from "react";
 
 import { Shell } from "../components/finops/Shell";
 import { Toaster } from "../components/ui/sonner";
+import { MotionConfig } from "framer-motion";
+import { PageTransition } from "../components/motion";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { defaultFilters, filterSearchSchema } from "../lib/filters";
 import appCss from "../styles.css?url";
@@ -130,8 +132,10 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Shell><Outlet /></Shell>
-      <Toaster theme="light" />
+      <MotionConfig reducedMotion="user">
+        <Shell><PageTransition><Outlet /></PageTransition></Shell>
+        <Toaster theme="light" />
+      </MotionConfig>
     </QueryClientProvider>
   );
 }
