@@ -32,9 +32,9 @@ export const Route = createFileRoute("/cost-explorer")({
   search: { middlewares: [stripSearchParams(defaults)] },
   head: () => ({
     meta: [
-      { title: "Cost Explorer — Fern" },
+      { title: "Cost Explorer · Fern" },
       { name: "description", content: "Fern — Multi-cloud cost and sustainability dashboard. Group spend by service, provider, region, team, environment or tag and compare with the previous period." },
-      { property: "og:title", content: "Cost Explorer — Fern" },
+      { property: "og:title", content: "Cost Explorer · Fern" },
       { property: "og:description", content: "Fern — Multi-cloud cost and sustainability dashboard. Group spend by service, provider, region, team, environment or tag and compare with the previous period." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

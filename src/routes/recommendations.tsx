@@ -19,9 +19,9 @@ export const Route = createFileRoute("/recommendations")({
   search: { middlewares: [stripSearchParams(defaults)] },
   head: () => ({
     meta: [
-      { title: "Recommendations — Fern" },
+      { title: "Recommendations · Fern" },
       { name: "description", content: "Fern — Multi-cloud cost and sustainability dashboard. Savings actions ranked by impact." },
-      { property: "og:title", content: "Recommendations — Fern" },
+      { property: "og:title", content: "Recommendations · Fern" },
       { property: "og:description", content: "Fern — Multi-cloud cost and sustainability dashboard. Savings actions ranked by impact." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

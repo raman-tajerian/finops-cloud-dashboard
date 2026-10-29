@@ -10,9 +10,9 @@ export const Route = createFileRoute("/settings")({
   validateSearch: zodValidator(schema),
   head: () => ({
     meta: [
-      { title: "Settings — Fern" },
+      { title: "Settings · Fern" },
       { name: "description", content: "Fern — Multi-cloud cost and sustainability dashboard. Workspace, team and preferences." },
-      { property: "og:title", content: "Settings — Fern" },
+      { property: "og:title", content: "Settings · Fern" },
       { property: "og:description", content: "Fern — Multi-cloud cost and sustainability dashboard. Workspace, team and preferences." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

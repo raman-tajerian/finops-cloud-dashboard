@@ -9,9 +9,9 @@ import { PageHeader } from "@/components/finops/States";
 export const Route = createFileRoute("/budgets")({
   head: () => ({
     meta: [
-      { title: "Budgets & Alerts — Fern" },
+      { title: "Budgets & Alerts · Fern" },
       { name: "description", content: "Fern — Multi-cloud cost and sustainability dashboard. Budgets, thresholds and anomaly alerts." },
-      { property: "og:title", content: "Budgets & Alerts — Fern" },
+      { property: "og:title", content: "Budgets & Alerts · Fern" },
       { property: "og:description", content: "Fern — Multi-cloud cost and sustainability dashboard. Budgets, thresholds and anomaly alerts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
