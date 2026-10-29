@@ -16,12 +16,16 @@ function writeDismissed() {
 
 export function OnboardingChecklist() {
   const [dismissed, setDismissed] = useState(readDismissed);
-  const steps = useSession((s) => [
-    { id: "connect", icon: Cloud, label: "Connect a cloud account", to: "/integrations", done: Object.values(s.integrations).includes("Connected") },
-    { id: "budget", icon: Wallet, label: "Set a budget", to: "/budgets", done: s.budgets.length > 0 },
-    { id: "review", icon: Rocket, label: "Review recommendations", to: "/recommendations", done: Object.values(s.recs).some((r) => r.status !== "Open") },
-    { id: "invite", icon: UserPlus, label: "Invite a teammate", to: "/settings", done: (s.settings.members ?? []).some((m) => m.lastActive === "Invited") },
-  ] as const);
+  const connected = useSession((s) => Object.values(s.integrations).includes("Connected"));
+  const hasBudget = useSession((s) => s.budgets.length > 0);
+  const reviewed = useSession((s) => Object.values(s.recs).some((r) => r.status !== "Open"));
+  const invited = useSession((s) => (s.settings.members ?? []).some((m) => m.lastActive === "Invited"));
+  const steps = [
+    { id: "connect", icon: Cloud, label: "Connect a cloud account", to: "/integrations", done: connected },
+    { id: "budget", icon: Wallet, label: "Set a budget", to: "/budgets", done: hasBudget },
+    { id: "review", icon: Rocket, label: "Review recommendations", to: "/recommendations", done: reviewed },
+    { id: "invite", icon: UserPlus, label: "Invite a teammate", to: "/settings", done: invited },
+  ] as const;
   if (dismissed) return null;
   const doneCount = steps.filter((s) => s.done).length;
   return (
