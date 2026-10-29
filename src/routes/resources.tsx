@@ -23,9 +23,9 @@ export const Route = createFileRoute("/resources")({
   search: { middlewares: [stripSearchParams(defaults)] },
   head: () => ({
     meta: [
-      { title: "Resources — Fern" },
+      { title: "Resources · Fern" },
       { name: "description", content: "Fern — Multi-cloud cost and sustainability dashboard. Every cloud resource with cost, utilization, status and right-sizing suggestions." },
-      { property: "og:title", content: "Resources — Fern" },
+      { property: "og:title", content: "Resources · Fern" },
       { property: "og:description", content: "Fern — Multi-cloud cost and sustainability dashboard. Every cloud resource with cost, utilization, status and right-sizing suggestions." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

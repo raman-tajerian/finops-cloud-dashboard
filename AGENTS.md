@@ -23,3 +23,7 @@
 - Session-only demo state (recommendation statuses, budgets, alert rules, anomaly statuses) lives in src/lib/session-store.ts — keeps demo actions out of the data layer.
 - All demo date logic uses DEMO_TODAY in src/data/resources.ts (history ends there; never the real clock) — keeps windows, forecasts and snooze dates deterministic.
 - Reports, Integrations and Settings are pure builders in src/data (reports.ts, integrations.ts, settings.ts) with format-only validators in src/lib/validators.ts — report totals reuse page aggregates so they reconcile.
+- All money stays USD in data and aggregates; display conversion happens once via fmtMoney/fmtMoneyCompact in src/data/currency.ts (fixed demo rates, ?cur= URL param) — no component formats currency on its own.
+- Table density is one session value in src/lib/density.ts applied through the data-density attribute and .density-table CSS — pages never keep their own density state.
+- Global keyboard shortcuts live only in src/lib/shortcuts.ts (G-chords, /, ?, Esc) mounted once in the Shell — no per-page key handlers.
+- All animation goes through the shared layer: presets in src/lib/motion.ts and components in src/components/motion.tsx (PageTransition, Reveal, AnimatedNumber, StaggerList) — transform/opacity only, 150-450ms, reduced-motion respected; no ad-hoc animation utilities.

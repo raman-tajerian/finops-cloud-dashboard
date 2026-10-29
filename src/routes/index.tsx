@@ -10,13 +10,15 @@ import { CardBoundary } from "@/components/finops/States";
 import { CostTrendCard, OverviewKpis, TopMovers } from "@/components/finops/Overview";
 import { AnomalyForecast, GreenOps, Tilt, Topology3D } from "@/components/finops/Insights";
 import { AnomalyAnalyst } from "@/components/finops/AnomalyAnalyst";
+import { OnboardingChecklist } from "@/components/finops/Onboarding";
+import { Reveal } from "@/components/motion";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Fern — Multi-cloud cost and sustainability dashboard" },
+      { title: "Overview · Fern" },
       { name: "description", content: "Multi-cloud cost and sustainability dashboard" },
-      { property: "og:title", content: "Fern — Multi-cloud cost and sustainability dashboard" },
+      { property: "og:title", content: "Overview · Fern" },
       { property: "og:description", content: "Multi-cloud cost and sustainability dashboard" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -29,14 +31,15 @@ function Index() {
   const [detail, setDetail] = useState<Detail>(null);
   return (
     <>
-      <div className="reveal-up"><CardBoundary label="Anomaly banner"><AnomalyStrip onOpen={setDetail} /></CardBoundary></div>
-      <div className="reveal-up reveal-delay-1 relative isolate flex flex-wrap items-end justify-between gap-4 overflow-hidden rounded-[1.25rem] px-1 pb-2">
+      <Reveal><CardBoundary label="Anomaly banner"><AnomalyStrip onOpen={setDetail} /></CardBoundary></Reveal>
+      <Reveal delay={0.04} className="relative isolate flex flex-wrap items-end justify-between gap-4 overflow-hidden rounded-[1.25rem] px-1 pb-2">
         <HeroShapes />
         <div className="relative z-10 pt-6"><FjordLogo size={24} className="mb-3" /><p className="text-xs text-muted-foreground">Cloud & FinOps platform · <ResourceCount /> resources</p><h1 className="mt-2 font-display text-[32px] font-normal leading-tight tracking-tight">Good afternoon, Raman.</h1></div>
-      </div>
-      <div className="reveal-up reveal-delay-2"><GlobalFilters /></div>
-      <div className="reveal-up reveal-delay-3"><DataGate h="h-16"><OverviewKpis /></DataGate></div>
-      <section className="reveal-up reveal-delay-4 grid gap-4 xl:grid-cols-12">
+      </Reveal>
+      <Reveal delay={0.08}><GlobalFilters /></Reveal>
+      <Reveal delay={0.12}><OnboardingChecklist /></Reveal>
+      <Reveal delay={0.16}><DataGate h="h-16"><OverviewKpis /></DataGate></Reveal>
+      <section className="grid gap-4 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-8"><DataGate h="h-72"><CostTrendCard /></DataGate></div>
         <div className="min-w-0 xl:col-span-4"><DataGate h="h-72"><TopMovers /></DataGate></div>
         <div className="min-w-0 xl:col-span-8"><DataGate h="h-72"><CostDistribution /></DataGate></div>

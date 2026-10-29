@@ -61,8 +61,8 @@ Budget creation, alert rules and anomaly statuses are client-side demo state onl
 ## GET /api/v1/security
 Query: global filters. Returns `SecurityDto` (`src/types/finops.ts`). Findings are simulated — no real scanning takes place.
 - Resource-level rules (seeded PRNG over the full dataset, then filtered): Open SSH to 0.0.0.0/0 (EC2/Azure VM/GCP Compute, ~12%, Critical), Public storage bucket (S3/Blob, ~10%, High), Unencrypted database (RDS/SQL DB, ~15%, High), Outdated Kubernetes version (EKS/AKS/GKE, ~25%, Low). Each references an existing resource id.
-- Account-level rules (fixed counts, reference the provider): Over-permissive IAM role (4, Medium), Unused IAM access key > 90 days (5, Medium), Missing MFA on root account (1 per provider, Critical).
-- `score` = 100 − weighted open findings (Critical 10, High 5, Medium 2, Low 1), clamped at 0. `scoreTrend` is 6 months of seeded demo history; the current month equals the computed score.
+- Account-level rules (fixed counts, reference the provider): Over-permissive IAM role (3, Medium), Unused IAM access key > 90 days (3, Medium), Missing MFA on root account (1 provider only, Critical).
+- `score` = 100 − weighted open findings (Critical 8, High 4, Medium 1.5, Low 0.5), clamped at 0. `scoreTrend` is 6 months of seeded demo history; the current month equals the computed score.
 - `frameworks`: CIS, SOC 2, ISO 27001 and GDPR — fixed control lists (≥10 each); a control fails if any open finding of a mapped rule exists.
 Finding statuses (In progress / Resolved / Accepted risk) are client-side session demo state; the client recomputes score and compliance with the overlay.
 
@@ -81,3 +81,11 @@ Returns `IntegrationsDto` { integrations: IntegrationDto[], history: SyncRunDto[
 
 ## GET /api/v1/settings
 Returns `SettingsDto` { profile, workspace, members, mappings, keys (masked only), channels, events }. Demo: changes are session-only.
+
+## Display currency (client concern)
+
+All API money values are and stay in USD. The UI converts once at display time through the shared formatter in `src/data/currency.ts` using fixed **demo rates** (1 USD = 0.92 EUR, 10.55 SEK, 0.79 GBP) — never live FX, never summed after rounding. The selected currency travels in the `?cur=` URL param (USD | EUR | SEK | GBP) and applies to every money value including charts, tooltips, tables and report exports (CSV/JSON/PDF). A live C# API should keep returning USD and let the client own presentation currency.
+
+## Keyboard shortcuts (client concern)
+
+G then O/C/R/S/K navigates (Overview, Cost Explorer, Resources, Security, Kubernetes), `/` opens search, `?` opens the shortcuts dialog, Esc closes dialogs and drawers, ⌘/Ctrl+K opens the command palette. Shortcuts are ignored while typing and while a dialog is open (except Esc).

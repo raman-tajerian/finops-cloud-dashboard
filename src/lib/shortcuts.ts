@@ -21,7 +21,7 @@ const CHORDS: Record<string, string> = { o: "/", c: "/cost-explorer", r: "/resou
 export function isEditableTarget(t: EventTarget | null): boolean {
   if (!(t instanceof HTMLElement)) return false;
   const tag = t.tagName;
-  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || t.isContentEditable;
+  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || t.isContentEditable === true;
 }
 
 /** True when a modal dialog is open (shortcuts other than Esc are paused). */

@@ -28,6 +28,11 @@ Some values are estimates or demo telemetry and are labelled as such in the app:
 - **Resources:** sortable and searchable table with column menu, density toggle, pagination, multi-select actions and a detail drawer with cost history, utilisation and right-sizing suggestions.
 - **Sustainability:** estimated CO2e by region, provider and service, with greener-region suggestions.
 - **Shared:** filters stored in the URL (shareable views), command palette (Ctrl/Cmd+K), notifications, skeleton, empty and error states, and responsive layout.
+- **Currency:** display currency selector (USD, EUR, SEK, GBP) in the top bar and Settings. All values are stored and aggregated in USD and converted once at display time through one shared formatter with fixed demo rates (1 USD = 0.92 EUR, 10.55 SEK, 0.79 GBP) — including charts, tooltips, tables and report exports. The choice lives in the `?cur=` URL param.
+- **Keyboard shortcuts:** G then O/C/R/S/K jumps between pages, `/` opens search, `?` shows the shortcuts dialog, Esc closes dialogs and drawers. Ignored while typing or while a dialog is open (except Esc).
+- **Table density:** the Appearance setting (compact/comfortable) applies to every data table and is shared with the Resources page toggle.
+- **Onboarding:** a dismissible checklist on Overview tracks four first-run steps using session-only demo state; only the dismissed flag is stored locally.
+- **Motion:** one shared framer-motion layer (`src/lib/motion.ts`, `src/components/motion.tsx`) — page transitions, reveals, animated numbers and staggered lists with reduced-motion support.
 
 ## Tech stack
 
