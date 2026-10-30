@@ -1,6 +1,6 @@
 // Dismissible getting-started checklist on Overview. Step completion is read
 // from session-only demo state; only the "dismissed" flag touches localStorage.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Check, Cloud, Rocket, UserPlus, Wallet, X } from "lucide-react";
 import { useSession } from "@/lib/session-store";
@@ -15,7 +15,9 @@ function writeDismissed() {
 }
 
 export function OnboardingChecklist() {
-  const [dismissed, setDismissed] = useState(readDismissed);
+  // Read localStorage only after mount so SSR HTML always matches the first client render.
+  const [dismissed, setDismissed] = useState(false);
+  useEffect(() => setDismissed(readDismissed()), []);
   const connected = useSession((s) => Object.values(s.integrations).includes("Connected"));
   const hasBudget = useSession((s) => s.budgets.length > 0);
   const reviewed = useSession((s) => Object.values(s.recs).some((r) => r.status !== "Open"));
