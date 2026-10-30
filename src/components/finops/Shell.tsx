@@ -140,7 +140,7 @@ export function Shell({ children }: { children: ReactNode }) {
             </DropdownMenu>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-[1540px] min-w-0 space-y-6 p-4 pb-24 md:p-8 md:pb-24">{children}</main>
+        <main key={currency} className="mx-auto w-full max-w-[1540px] min-w-0 space-y-6 p-4 pb-24 md:p-8 md:pb-24">{children}</main>
         <div className="mx-auto max-w-[1540px] px-4 md:px-8"><AccentBand className="h-1 rounded-full overflow-hidden" /></div>
         <footer className="mx-auto flex max-w-[1540px] flex-wrap items-center gap-3 px-4 pb-8 pt-4 text-xs text-muted-foreground md:px-8"><FjordLogo size={16} /><span>·</span><span>Fern v0.4.0</span><span>·</span><span>{dataSource === "live" ? "Live data" : "Demo data — all figures are simulated"}</span><span>·</span><span>Demo data as of 12 Oct 2026</span></footer>
       </div>
