@@ -43,10 +43,16 @@ export function useSetCurrency() {
     } as never);
 }
 
-/** Keeps the module-level active currency in sync with the ?cur= URL param. Mount once in the Shell. */
+/** Keeps the module-level active currency in sync with the ?cur= URL param. Mount once in the Shell.
+ *  On change it also invalidates queries so every card re-renders and re-formats in the new currency. */
 export function CurrencySync() {
+  const router = useRouter();
   const search = useSearch({ strict: false }) as { cur?: string };
   const cur = normalizeCurrency(search.cur);
-  useEffect(() => setActiveCurrency(cur), [cur]);
+  useEffect(() => {
+    if (getActiveCurrency() === cur) return;
+    setActiveCurrency(cur);
+    router.invalidate();
+  }, [cur, router]);
   return null;
 }
