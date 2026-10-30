@@ -1,6 +1,6 @@
 // React bindings for the currency layer in src/data/currency.ts.
 import { useEffect } from "react";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useNavigate, useRouter, useSearch } from "@tanstack/react-router";
 import {
   CURRENCIES,
   convert,
