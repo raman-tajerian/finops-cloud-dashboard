@@ -1,12 +1,12 @@
 # Roadmap
 
-- [ ] Density/currency/shortcuts/onboarding/titles/motion brief (2026-10-20):
-  - [ ] Shared table density applied to all data tables
-  - [ ] Currency selector (USD/EUR/SEK/GBP) with ?cur= URL param, shared formatter, demo rates
-  - [ ] Keyboard shortcuts (G-chords, /, ?, Esc) + shortcuts dialog + palette hints
-  - [ ] Onboarding checklist on Overview
-  - [ ] Per-route titles in "Name · Fern" style
-  - [ ] Shared framer-motion layer + route transitions
+- [x] Density/currency/shortcuts/onboarding/titles/motion brief (2026-10-20):
+  - [x] Shared table density applied to all data tables
+  - [x] Currency selector (USD/EUR/SEK/GBP) with ?cur= URL param, shared formatter, demo rates
+  - [x] Keyboard shortcuts (G-chords, /, ?, Esc) + shortcuts dialog + palette hints
+  - [x] Onboarding checklist on Overview
+  - [x] Per-route titles in "Name · Fern" style
+  - [x] Shared framer-motion layer + route transitions
 
 
 - [x] Rename product and demo workspace everywhere, update metadata and documentation, verify no old names remain, and run all tests without changing design or behavior.
