@@ -73,7 +73,7 @@ function BudgetCards({ d }: { d: AlertsDto }) {
                 <div className="flex items-start justify-between gap-2"><div className="min-w-0"><p className="truncate text-sm font-medium">{c.name}</p><p className="text-xs text-muted-foreground">{scopeLabel(c.s.scope)} · {c.period}</p></div><div className="flex shrink-0 items-center gap-1.5">{c.demo && <Demo />}<StatusBadge tone={tone}>{pct.toFixed(0)}%</StatusBadge></div></div>
                 <dl className="mt-4 grid grid-cols-3 gap-2 text-xs"><div><dt className="text-muted-foreground">Budget / mo</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtMoney(c.amount)}</dd></div><div><dt className="text-muted-foreground">Spent</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtMoney(c.s.spent)}</dd></div><div><dt className="text-muted-foreground">Forecast</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtMoney(c.s.forecast)}</dd></div></dl>
                 <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label={`${c.name} forecast vs budget`} aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
-                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, pct)}%`, background: toneColor[tone] }} />
+                  <div className="h-full origin-left rounded-full transition-transform duration-500" style={{ transform: `scaleX(${Math.min(100, pct) / 100})`, background: toneColor[tone] }} />
                 </div>
               </article>
             );
