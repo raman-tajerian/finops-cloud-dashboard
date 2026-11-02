@@ -16,6 +16,8 @@ import { Shell } from "../components/finops/Shell";
 import { Toaster } from "../components/ui/sonner";
 import { MotionConfig } from "framer-motion";
 import { PageTransition } from "../components/motion";
+import { reducedMotionMode } from "../lib/motion";
+import { useSession } from "../lib/session-store";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { defaultFilters, filterSearchSchema } from "../lib/filters";
 import appCss from "../styles.css?url";
@@ -128,11 +130,12 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const reduceMotion = useSession((s) => s.settings.reduceMotion);
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <MotionConfig reducedMotion="user">
+      <MotionConfig reducedMotion={reducedMotionMode(reduceMotion)}>
         <Shell><PageTransition><Outlet /></PageTransition></Shell>
         <Toaster theme="light" />
       </MotionConfig>
