@@ -2,7 +2,7 @@ import { createFileRoute, stripSearchParams, useNavigate, type SearchSchemaInput
 import { fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
-import { PageHeader } from "@/components/finops/States";
+import { CardBoundary, PageHeader } from "@/components/finops/States";
 import { RecommendationsWorkspace, type RecSearch } from "@/components/finops/Recommendations";
 
 const defaults: RecSearch = { cat: "All", effort: "All", risk: "All", status: "All", sort: "savings-desc" };
@@ -38,7 +38,7 @@ function RecommendationsPage() {
     <>
       <PageHeader title="Recommendations" description="Savings actions ranked by impact" />
       <GlobalFilters />
-      <RecommendationsWorkspace search={search} setSearch={setSearch} />
+      <CardBoundary label="Recommendations"><RecommendationsWorkspace search={search} setSearch={setSearch} /></CardBoundary>
     </>
   );
 }

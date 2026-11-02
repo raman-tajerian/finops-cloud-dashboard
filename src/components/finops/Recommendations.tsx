@@ -60,7 +60,7 @@ function Workspace({ d, search, setSearch }: { d: SavingsDto; search: RecSearch;
         <div className="mt-6">
           <div className="mb-2 flex justify-between text-xs text-muted-foreground"><span>Progress toward target</span><span className="tabular-nums">{d.target ? Math.round((done / d.target) * 100) : 0}%</span></div>
           <div className="h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={d.target ? Math.round((done / d.target) * 100) : 0} aria-valuemin={0} aria-valuemax={100}>
-            <div className="h-full rounded-full bg-success transition-all duration-500" style={{ width: `${d.target ? Math.min(100, (done / d.target) * 100) : 0}%` }} />
+            <div className="h-full origin-left rounded-full bg-success transition-transform duration-500" style={{ transform: `scaleX(${d.target ? Math.min(100, (done / d.target) * 100) / 100 : 0})` }} />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">Target = {Math.round(d.targetShare * 100)}% of total potential ({fmtMoney(d.total)}/mo). Statuses are demo-only and reset when you reload.</p>
         </div>

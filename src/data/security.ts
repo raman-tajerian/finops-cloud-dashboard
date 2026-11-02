@@ -3,7 +3,7 @@
 import type { Filters } from "@/lib/filters";
 import type { CloudProvider, MasterResource } from "@/types/finops";
 import type { ComplianceFrameworkDto, FindingRule, FindingStatus, SecurityDto, SecurityFindingDto, Severity } from "@/types/finops";
-import { DATA_END_DATE, mulberry32 } from "./resources";
+import { DEMO_TODAY, mulberry32 } from "./resources";
 import { filterResources } from "./aggregate";
 
 /** Score weights per severity — the formula documented in the UI: score = 100 − Σ weight(open finding), clamped at 0. */
@@ -88,7 +88,7 @@ const iso = (d: Date) => d.toISOString().slice(0, 10);
 /** All findings over the full dataset. Deterministic: same input → identical output. */
 export function buildFindings(all: MasterResource[]): SecurityFindingDto[] {
   const rnd = mulberry32(20261026);
-  const detected = () => iso(new Date(DATA_END_DATE.getTime() - Math.floor(rnd() * 90) * 86_400_000));
+  const detected = () => iso(new Date(DEMO_TODAY.getTime() - Math.floor(rnd() * 90) * 86_400_000));
   const out: SecurityFindingDto[] = [];
   const push = (rule: FindingRule, r: MasterResource | null, provider: CloudProvider, n?: number) => {
     const meta = RULE_META[rule];

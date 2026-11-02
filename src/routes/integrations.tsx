@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PageHeader } from "@/components/finops/States";
+import { CardBoundary, PageHeader } from "@/components/finops/States";
 import { IntegrationsWorkspace } from "@/components/finops/Integrations";
 
 export const Route = createFileRoute("/integrations")({
@@ -20,7 +20,7 @@ function IntegrationsPage() {
   return (
     <>
       <PageHeader title="Integrations" description="Cloud accounts and tool connections" />
-      <IntegrationsWorkspace />
+      <CardBoundary label="Integrations"><IntegrationsWorkspace /></CardBoundary>
     </>
   );
 }

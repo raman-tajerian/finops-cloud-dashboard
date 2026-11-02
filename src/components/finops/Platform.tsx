@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { rangeLabels, type CloudId, type Env, type PlatformRange } from "@/lib/finops-platform-data";
-import { useDashboard, useDashboardData } from "@/lib/queries";
+import { useBudget, useDashboard, useDashboardData } from "@/lib/queries";
 import { allProviders, teams, type Filters, type Team } from "@/lib/filters";
 import { DataTableView, TableToggle } from "./States";
 import type { RecommendationDto } from "@/types/finops";
@@ -94,7 +94,9 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
 function BudgetAlertDialog() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("Q4 production budget");
-  const [amount, setAmount] = useState("300000");
+  const defaultBudget = useBudget().data?.defaultBudget ?? 0;
+  const [amount, setAmount] = useState<string | null>(null);
+  const shownAmount = amount ?? String(defaultBudget);
   const [threshold, setThreshold] = useState(80);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -103,12 +105,12 @@ function BudgetAlertDialog() {
         <DialogHeader><DialogTitle>Create budget alert</DialogTitle><DialogDescription>Get notified when spend crosses a threshold.</DialogDescription></DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5"><Label>Alert name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
-          <div className="space-y-1.5"><Label>Budget (USD)</Label><Input type="number" min={1} value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
-          <div className="space-y-3"><div className="flex justify-between"><Label>Warn at</Label><span className="metric-numbers text-sm">{threshold}% · {fmtMoney((Number(amount) || 0) * threshold / 100)}</span></div><Slider value={[threshold]} min={50} max={100} step={5} onValueChange={([v]) => setThreshold(v ?? 80)} /></div>
+          <div className="space-y-1.5"><Label>Budget (USD)</Label><Input type="number" min={1} value={shownAmount} onChange={(e) => setAmount(e.target.value)} /></div>
+          <div className="space-y-3"><div className="flex justify-between"><Label>Warn at</Label><span className="metric-numbers text-sm">{threshold}% · {fmtMoney((Number(shownAmount) || 0) * threshold / 100)}</span></div><Slider value={[threshold]} min={50} max={100} step={5} onValueChange={([v]) => setThreshold(v ?? 80)} /></div>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button disabled={!name.trim() || !(Number(amount) > 0)} onClick={() => { setOpen(false); toast.success(`Alert "${name}" set at ${threshold}%`); }}>Save alert</Button>
+          <Button disabled={!name.trim() || !(Number(shownAmount) > 0)} onClick={() => { setOpen(false); toast.success(`Alert "${name}" set at ${threshold}%`); }}>Save alert</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -140,13 +142,14 @@ export function Spark({ data: raw, color, className = "h-10 w-24" }: { data: num
 /* ---------- KPI cards ---------- */
 export function DenseKpis({ onOpen }: { onOpen: (d: Detail) => void }) {
   const dd = useDashboardData(), k = dd.kpis, o = dd.overview;
+  const defaultBudget = useBudget().data?.defaultBudget ?? 0;
   const unitExtra = k.unit;
   const top = k.anomalies[0];
   const s = (n: number) => fmtMoney(n);
   const items = [
     { label: "Total spend", n: k.spend.total, f: (n: number) => fmtMoney(n), value: "", pill: <Pill tone={k.spend.mom > 0 ? "warning" : "success"}>{k.spend.mom > 0 ? "+" : ""}{k.spend.mom}% vs prev.</Pill>, color: "var(--chart-1)", spark: o.totalSpend.spark,
       subs: [["Daily burn", `${s(k.spend.burn)}/day`], ["EOM projection", s(k.spend.projected)]],
-      detail: { title: "Total monthly spend", description: "Month-to-date spend across selected clouds.", rows: [["MTD spend", s(k.spend.total)], ["Vs previous period", `${k.spend.mom > 0 ? "+" : ""}${k.spend.mom}%`], ["Daily burn rate", s(k.spend.burn)], ["Projected end of month", s(k.spend.projected)], ["Budget remaining", s(300_000 - k.spend.projected)]] } },
+      detail: { title: "Total monthly spend", description: "Month-to-date spend across selected clouds.", rows: [["MTD spend", s(k.spend.total)], ["Vs previous period", `${k.spend.mom > 0 ? "+" : ""}${k.spend.mom}%`], ["Daily burn rate", s(k.spend.burn)], ["Projected end of month", s(k.spend.projected)], ["Budget remaining", s(defaultBudget - k.spend.projected)]] } },
     { label: "Idle resource waste", n: k.waste.total, f: (n: number) => `${fmtMoney(n)}/mo`, value: "", pill: <Pill tone="warning">{o.idleCount} idle resources</Pill>, color: "var(--chart-3)", spark: o.idleWaste.spark,
       subs: [["Idle storage", `${k.waste.ebs}`], ["Idle DBs · Oversized", `${k.waste.rds} · ${k.waste.ec2}`]],
       detail: { title: "Idle resource waste", description: "Resources costing money without doing work.", rows: [["Idle resources", `${o.idleCount}`], ["Idle storage", `${k.waste.ebs}`], ["Idle databases", `${k.waste.rds}`], ["Oversized compute (CPU < 25%)", `${k.waste.ec2}`], ["Monthly waste", s(k.waste.total)]] } },

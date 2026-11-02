@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { PageHeader } from "@/components/finops/States";
+import { CardBoundary, PageHeader } from "@/components/finops/States";
 import { SettingsWorkspace, SETTINGS_TABS } from "@/components/finops/Settings";
 
 const schema = z.object({ tab: fallback(z.string(), "profile").default("profile"), dialog: fallback(z.string(), "").default("") });
@@ -28,9 +28,9 @@ function SettingsPage() {
   return (
     <>
       <PageHeader title="Settings" description="Workspace, team and preferences" />
-      <SettingsWorkspace tab={safeTab} dialog={dialog}
+      <CardBoundary label="Settings"><SettingsWorkspace tab={safeTab} dialog={dialog}
         onTab={(t) => navigate({ search: (p) => ({ ...p, tab: t, dialog: "" }), replace: true })}
-        onDialog={(d) => navigate({ search: (p) => ({ ...p, dialog: d }), replace: true })} />
+        onDialog={(d) => navigate({ search: (p) => ({ ...p, dialog: d }), replace: true })} /></CardBoundary>
     </>
   );
 }

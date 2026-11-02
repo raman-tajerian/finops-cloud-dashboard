@@ -60,6 +60,12 @@ export function SettingsWorkspace({ tab, dialog, onTab, onDialog }: { tab: strin
           <div className="flex gap-2">{CURRENCIES.map((c) => <CurrencyButton key={c} c={c} />)}</div>
           <p className="text-xs text-muted-foreground">Demo rates — all figures are computed in USD and converted for display. Saved in the page link.</p>
         </div>
+        <div className="organic-card flex items-center justify-between gap-4 p-6">
+          <div><Label>Reduce motion</Label>
+            <p className="mt-1 text-xs text-muted-foreground">Turns off counters, draw-ins, staggers and page transitions — content simply fades in. Also follows your system setting.</p>
+          </div>
+          <Switch checked={ss.reduceMotion} aria-label="Reduce motion" onCheckedChange={(v) => save({ reduceMotion: v }, v ? "Motion reduced (demo, this session only)" : "Motion restored (demo, this session only)")} />
+        </div>
       </TabsContent>
     </Tabs>
   );

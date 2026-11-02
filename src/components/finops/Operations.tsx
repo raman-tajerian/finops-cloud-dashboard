@@ -125,7 +125,7 @@ function BudgetCard({ d }: { d: NonNullable<ReturnType<typeof useBudget>["data"]
       <div className="mt-6">
         <div className="mb-2 flex justify-between text-xs text-muted-foreground"><span>Projected % of budget</span><span className="tabular-nums">{pct.toFixed(1)}%</span></div>
         <div className="relative h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
-          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, pct)}%`, background: toneColor[tone] }} />
+          <div className="h-full origin-left rounded-full transition-transform duration-500" style={{ transform: `scaleX(${Math.min(100, pct) / 100})`, background: toneColor[tone] }} />
           <span className="absolute inset-y-0 left-[80%] w-px bg-foreground/30" aria-hidden />
         </div>
         <div className="mt-1 flex justify-between text-[11px] text-muted-foreground"><span>0%</span><span className="ml-[70%]">80%</span><span>100%</span></div>

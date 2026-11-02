@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { FjordLogo } from "@/components/brand";
-import { PageHeader } from "@/components/finops/States";
+import { CardBoundary, PageHeader } from "@/components/finops/States";
 import { ReportsWorkspace } from "@/components/finops/Reports";
 
 export const Route = createFileRoute("/reports")({
@@ -22,7 +22,7 @@ function ReportsPage() {
     <>
       <FjordLogo size={32} />
       <PageHeader title="Reports" description="Generate, download and schedule cost reports" />
-      <ReportsWorkspace />
+      <CardBoundary label="Reports"><ReportsWorkspace /></CardBoundary>
     </>
   );
 }
