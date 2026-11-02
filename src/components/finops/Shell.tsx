@@ -35,6 +35,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const currency = useCurrency();
   const setCurrency = useSetCurrency();
   const { density } = useTableDensity();
+  const reduceMotion = useSession((s) => s.settings.reduceMotion);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setPalette((p) => !p); } };
@@ -53,7 +54,7 @@ export function Shell({ children }: { children: ReactNode }) {
   });
 
   return (
-    <div data-density={density} className={`min-h-screen bg-background lg:grid ${collapsed ? "lg:grid-cols-[72px_minmax(0,1fr)]" : "lg:grid-cols-[248px_minmax(0,1fr)]"}`}>
+    <div data-density={density} data-reduce-motion={reduceMotion} className={`min-h-screen bg-background lg:grid ${collapsed ? "lg:grid-cols-[72px_minmax(0,1fr)]" : "lg:grid-cols-[248px_minmax(0,1fr)]"}`}>
       <CurrencySync />
       <aside className={`fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col bg-sidebar-bg px-3 py-4 transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${collapsed ? "lg:w-[72px]" : ""} ${open ? "translate-x-0" : "-translate-x-full"}`}>
         <DropdownMenu>
