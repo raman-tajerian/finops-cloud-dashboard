@@ -5,17 +5,17 @@ import type {
   Anomaly, CarbonRegionDto, CostByDimension, DashboardDto, ExploreDto, GroupBy, KpiValue, MasterResource, Mover,
   ProviderDaily, RegionCost, SavingCategory, SavingItemDto, Level, ResourceDto, SustainabilityDto, TopoNodeDto,
 } from "@/types/finops";
-import { businessVolume, DATA_END_DATE, dayAt, dayLabel, HISTORY_DAYS } from "./resources";
+import { businessVolume, DEMO_TODAY, dayAt, dayLabel, HISTORY_DAYS } from "./resources";
 import { cluster, tickerSeed } from "./operations";
 import { topoEdges, topoLayout } from "./topology";
 
 export interface Window { start: number; end: number; days: number }
 const H = HISTORY_DAYS;
-const indexOf = (d: Date) => H - 1 - Math.round((DATA_END_DATE.getTime() - d.getTime()) / 86_400_000);
+const indexOf = (d: Date) => H - 1 - Math.round((DEMO_TODAY.getTime() - d.getTime()) / 86_400_000);
 
 /** Current window (end exclusive) for a range. */
 export function windowOf(range: Filters["range"]): Window {
-  const dom = DATA_END_DATE.getUTCDate();
+  const dom = DEMO_TODAY.getUTCDate();
   if (range === "7d") return { start: H - 7, end: H, days: 7 };
   if (range === "mtd") return { start: H - dom, end: H, days: dom };
   if (range === "q3") { const s = indexOf(new Date(Date.UTC(2026, 6, 1))), e = indexOf(new Date(Date.UTC(2026, 8, 30))) + 1; return { start: s, end: e, days: e - s }; }
@@ -176,8 +176,8 @@ const kv = (value: number, previous: number, spark: number[]): KpiValue => ({ va
 
 /** End-of-month forecast: month-to-date spend + 7-day run rate x remaining days. Shared by Overview and Budgets. */
 export function forecastMonth(rs: MasterResource[]) {
-  const mw = windowOf("mtd"), dom = DATA_END_DATE.getUTCDate();
-  const monthDays = new Date(Date.UTC(DATA_END_DATE.getUTCFullYear(), DATA_END_DATE.getUTCMonth() + 1, 0)).getUTCDate();
+  const mw = windowOf("mtd"), dom = DEMO_TODAY.getUTCDate();
+  const monthDays = new Date(Date.UTC(DEMO_TODAY.getUTCFullYear(), DEMO_TODAY.getUTCMonth() + 1, 0)).getUTCDate();
   const remaining = monthDays - dom;
   const last7 = dailyOf(rs, { start: H - 7, end: H, days: 7 });
   const rate = last7.reduce((a, b) => a + b, 0) / 7;
@@ -217,7 +217,7 @@ export function buildDashboard(all: MasterResource[], f: Filters): DashboardDto 
     return { day: dayLabel(i), ...p, total: tot, forecast: k === w.days - 1 ? tot : null, band: k === w.days - 1 ? [tot, tot] : null, ...(an ? { anomaly: an.title } : {}) };
   });
   for (let k = 1; k <= ext; k++) {
-    const d = new Date(DATA_END_DATE.getTime() + k * 86_400_000);
+    const d = new Date(DEMO_TODAY.getTime() + k * 86_400_000);
     const spread = 1.96 * sd * Math.sqrt(k);
     trend.push({ day: d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" }), AWS: 0, Azure: 0, GCP: 0, total: 0, forecast: rate, band: [Math.max(0, rate - spread), rate + spread] });
   }
