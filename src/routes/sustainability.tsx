@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
 import { SustainabilityDashboard } from "@/components/finops/Sustainability";
-import { PageHeader } from "@/components/finops/States";
+import { CardBoundary, PageHeader } from "@/components/finops/States";
 
 export const Route = createFileRoute("/sustainability")({
   head: () => ({
@@ -22,7 +22,7 @@ function SustainabilityPage() {
     <>
       <PageHeader title="Sustainability" description="Estimated carbon footprint by region and provider — figures are estimates" />
       <GlobalFilters />
-      <SustainabilityDashboard />
+      <CardBoundary label="Sustainability"><SustainabilityDashboard /></CardBoundary>
     </>
   );
 }

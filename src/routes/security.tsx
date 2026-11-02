@@ -2,7 +2,7 @@ import { createFileRoute, stripSearchParams, useNavigate, type SearchSchemaInput
 import { fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
-import { PageHeader } from "@/components/finops/States";
+import { CardBoundary, PageHeader } from "@/components/finops/States";
 import { SecurityWorkspace, type SecSearch } from "@/components/finops/Security";
 
 const defaults: SecSearch = { sev: "All", fstatus: "All", prov: "All", rule: "All", q: "", sort: "sev-asc", finding: "" };
@@ -40,7 +40,7 @@ function SecurityPage() {
     <>
       <PageHeader title="Security & Compliance" description="Findings and compliance posture across clouds" />
       <GlobalFilters />
-      <SecurityWorkspace search={search} setSearch={setSearch} />
+      <CardBoundary label="Security"><SecurityWorkspace search={search} setSearch={setSearch} /></CardBoundary>
     </>
   );
 }
