@@ -12,6 +12,7 @@ import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, C
 import { useDashboard } from "@/lib/queries";
 import { CURRENCIES, CurrencySync, useCurrency, useSetCurrency } from "@/lib/money";
 import { useTableDensity } from "@/lib/density";
+import { useSession } from "@/lib/session-store";
 import { SHORTCUTS, useGlobalShortcuts } from "@/lib/shortcuts";
 import { ShortcutsDialog } from "@/components/finops/ShortcutsDialog";
 
