@@ -10,6 +10,9 @@ export const MOTION = {
   stagger: 0.04, // s between list items
 } as const;
 
+/** Maps the session "Reduce motion" switch to the root MotionConfig setting. */
+export const reducedMotionMode = (on: boolean): "always" | "user" => (on ? "always" : "user");
+
 /** Page transition: outgoing fades (120ms), incoming fades and rises 8px (240ms). */
 export const pageExit = { opacity: 0, transition: { duration: 0.12 } } as const;
 export const pageEnter = {
