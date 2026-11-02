@@ -52,7 +52,8 @@ export function buildBudget(all: MasterResource[], f: Filters): BudgetDto {
   const rs = filterResources(all, f);
   const fm = forecastMonth(rs);
   const previousQuarterSpend = totalOf(rs, windowOf("q3"));
-  return { spendToDate: fm.mtd, forecastEom: fm.forecastEom, dayOfMonth: fm.dom, monthDays: fm.monthDays, previousQuarterSpend, defaultBudget: Math.round((previousQuarterSpend / 3) * BUDGET_UPLIFT), period: "October 2026" };
+  // spendToDate = the selected period's spend — identical to the Overview total for the same filters.
+  return { spendToDate: totalOf(rs, windowOf(f.range)), forecastEom: fm.forecastEom, dayOfMonth: fm.dom, monthDays: fm.monthDays, previousQuarterSpend, defaultBudget: Math.round((previousQuarterSpend / 3) * BUDGET_UPLIFT), period: "October 2026" };
 }
 export { budgetTone } from "@/lib/scenario";
 

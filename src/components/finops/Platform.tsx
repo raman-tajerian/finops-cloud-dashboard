@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { rangeLabels, type CloudId, type Env, type PlatformRange } from "@/lib/finops-platform-data";
-import { useDashboard, useDashboardData } from "@/lib/queries";
+import { useBudget, useDashboard, useDashboardData } from "@/lib/queries";
 import { allProviders, teams, type Filters, type Team } from "@/lib/filters";
 import { DataTableView, TableToggle } from "./States";
 import type { RecommendationDto } from "@/types/finops";
