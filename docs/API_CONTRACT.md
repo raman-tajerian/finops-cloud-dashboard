@@ -62,7 +62,7 @@ Query: global filters. Returns `KubernetesDto` (`src/types/finops.ts`).
 - Clusters = EKS, AKS and GKE resources matching the filters; `monthlyCost` = the resource's last-30-day cost.
 - `nodes = max(3, round(cost / 350))`, `podsTotal = nodes × 14`, failed/pending = `round(pods × rate)` with rate 1% (Running/Idle) or 4% (Warning); which pods fail is chosen with the seeded PRNG.
 - Namespace weights: prod-api 35%, data 25%, web 20%, monitoring 10%, system 10% (sum = cluster cost).
-- Namespace efficiency = `round(avg(cpuAvg, memAvg) × factor)` with factors 1.15 / 1.0 / 0.9 / 0.6 / 0.5; under 30% = over-provisioned.
+- Namespace efficiency = `min(100, round(avg(cpuAvg, memAvg) × factor))` with factors 1.15 / 1.0 / 0.9 / 0.6 / 0.5; under 30% = over-provisioned.
 - Live CPU/memory gauges and the activity feed are simulated client-side ("Demo telemetry") and not part of this contract.
 
 ## GET /api/v1/budget
@@ -90,7 +90,7 @@ Categories (first matching rule wins, so a resource is counted once): Idle resou
 
 ## GET /api/v1/alerts
 Query: global filters. Returns `AlertsDto`:
-- `scopes`: per scope (All, each provider, team and environment) `spent` = Overview total spend for the period, `forecast` = Overview end-of-month forecast, `defaultAmount` = 105% × Q3 ÷ 3.
+- `scopes`: All/provider/team/environment scopes intersect global filters; spent uses the selected period and forecast the shared end-of-month function. `defaultAmount = round(105% × scoped Q3 spend ÷ 3)`.
 - `anomalies`: the same anomalies as Overview with expected (14-day baseline × 3 days), actual (last 3 days), % deviation, impact, probable cause (fixed mapping per service) and a 21-day series with a ±15% expected band.
 Budget creation, alert rules and anomaly statuses are client-side demo state only.
 
@@ -141,6 +141,8 @@ The linked TypeScript contracts are authoritative for all enums and field types.
 - **SettingsDto:** profile:{name,email,title}, workspace:{name,currency,timezone}, members:{id,name,email,role:Admin/Editor/Viewer,lastActive}[], mappings:{id,tagKey,tagValue,team}[], keys:{id,name,masked,created,lastUsed:string|null}[], channels:string[], events:string[]. Other listed profile/member/key text fields are strings. Fake-key creation and session edits are not write APIs.
 - **SustainabilityRegionDto:** region, provider, intensity, rating (A/B/C/D), tons, cost, share. CarbonBreakdown: name, tons, share. CarbonTrendPoint: day, tons. GreenerRegionSuggestion: resourceId, workload, provider, currentRegion, suggestedRegion, currentIntensity, suggestedIntensity, currentTons, reductionTons, reductionPct, costChangePct.
 - **Dashboard series:** DailyCost {day,spend}; ProviderDaily {day,AWS,Azure,GCP,total,forecast:number|null,band:[number,number]|null,anomaly?:string}; ForecastPoint {day,forecast,band:[number,number],actual:number|null}. Movers contain id/name/provider/service/current/previous/delta in up/down lists. Topology nodes contain id/label/kind/health/x/y/z/cost; edges are {from,to}.
+- **Explorer series/rows:** series is Record<string,number|string>[] with day/date, one numeric column per key, total and previous; rows contain name:string, current:number, previous:number, changePct:number, share:number, spark:number[].
+- **Legacy ClusterDto / carbon / topology:** cluster has name, region, version, nodes, cpu, memory, podsHealthy, podsTotal; ticker is string[]. CarbonRegionDto has region/provider/intensity/rating/tons. Topology kind is region/vpc/cluster, health is ok/oversized/anomaly; coordinates and cost are numeric.
 - **KpiBundle:** spend:{total,mom,burn,projected}, waste:{total,ebs,rds,ec2} (ebs/rds/ec2 are counts), anomalies:Anomaly[], unit:{perUser,perRequest,activeUsers,requests,perDeployment,perSession}. Legacy spend/daily DTO fields can be rounded; precise Overview totals retain aggregate values.
 
 ## Documentation reconciliation (3 November 2026)
