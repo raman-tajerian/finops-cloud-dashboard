@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Documentation-only brief: update README, document implemented demo rules and invariants in docs/DEMO_DATA.md, reconcile the API contract, and report verification without changing app code.
+
 - [x] Density/currency/shortcuts/onboarding/titles/motion brief (2026-10-20):
   - [x] Shared table density applied to all data tables
   - [x] Currency selector (USD/EUR/SEK/GBP) with ?cur= URL param, shared formatter, demo rates
