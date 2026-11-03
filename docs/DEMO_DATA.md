@@ -258,7 +258,7 @@ The suite is an implementation regression check, not proof of real-world correct
 | Carbon sums per region/provider/service equal total and Overview GreenOps; destination intensity is strictly lower | `aggregate.test.ts` |
 | Kubernetes cluster count/cost, node/pod formulas, namespace cost sum, healthy+bad totals and determinism | `platform-ops.test.ts` |
 | Budget selected-period spend and forecast equal Overview; default amount equals rounded Q3/3 ×1.05; 80/100 tone boundaries | `platform-ops.test.ts`, `savings-budgets.test.ts`, `audit-fixes.test.tsx` |
-| Scenario baseline equals Overview, no-op has zero saving, RI/migration/rightsizing follow eligible-spend formulas | `platform-ops.test.ts` |
+| Scenario baseline equals Overview, no-op has zero saving, and 50% RI applies 30% to shifted compute spend (migration/rightsizing output formulas are documented from code, not independently asserted here) | `platform-ops.test.ts` |
 | AI context total and anomaly count/amount/change match Overview across filter combinations | `anomaly-context.test.ts` |
 | Security severity totals, weighted score, Critical resolution +8, valid references, determinism and per-rule coverage | `security.test.ts` |
 | Compliance passed+failed+not-assessed equals control count; unmapped controls are not assessed | `security.test.ts`, `demo-date.test.ts` |
@@ -269,4 +269,4 @@ The suite is an implementation regression check, not proof of real-world correct
 
 ## Verification scope
 
-Documentation was checked against source and the full suite passed **151 tests across 12 files** on 3 November 2026. No application source, data, styling, routes or tests were modified for this documentation task. A compatible production HTTP backend, successful Gateway generation, secret-rejection guarantees and real cloud/delivery behavior were not verified; the latter cloud/delivery features are not built.
+Documentation was checked against source and the full suite passed **151 tests across 12 files** on 3 November 2026. The automatic build log reported `build OK`; no manual build or separate typecheck was run in this documentation task. No application source, data, styling, routes or tests were modified. A compatible production HTTP backend, successful Gateway generation, secret-rejection guarantees and real cloud/delivery behavior were not verified; the latter cloud/delivery features are not built.
