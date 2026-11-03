@@ -32,7 +32,9 @@ const sourceFiles = (dir: string): string[] =>
     const p = path.join(dir, e);
     return statSync(p).isDirectory() ? sourceFiles(p) : /\.(ts|tsx|css)$/.test(e) ? [p] : [];
   });
-const allSource = sourceFiles(SRC).map((p) => ({ file: path.relative(SRC, p), text: readFileSync(p, "utf8") }));
+const allSource = sourceFiles(SRC)
+  .filter((p) => !p.endsWith("audit-fixes.test.tsx")) // this file contains the search strings themselves
+  .map((p) => ({ file: path.relative(SRC, p), text: readFileSync(p, "utf8") }));
 
 describe("no hard-coded leftovers in src", () => {
   it("no file references DATA_END_DATE", () => {
