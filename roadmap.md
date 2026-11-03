@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Documentation-only brief: README and DEMO_DATA completed, all 14 API functions reconciled, 151 tests passed, automatic build OK; separate typecheck not run (manual checks disabled by workspace rules).
+
 - [x] Density/currency/shortcuts/onboarding/titles/motion brief (2026-10-20):
   - [x] Shared table density applied to all data tables
   - [x] Currency selector (USD/EUR/SEK/GBP) with ?cur= URL param, shared formatter, demo rates
@@ -21,10 +23,10 @@
 - [x] Add the selected Interactive FinOps Hub motion and interaction system.- [x] Add AI anomaly analyst (causes + prioritized actions).
 - [x] Phase 1: foundation — grouped nav + routes, command palette, notifications, breadcrumbs, API client + contract.
 - [x] Foundation follow-up: URL filters, query-backed cards, states, table views, coming-soon pages.
-- [ ] Phase 2: Overview, Cost Explorer, Resources, Sustainability pages.
-- [ ] Phase 3: Recommendations, Kubernetes, Security, Budgets, Scenario simulator.
+- [x] Phase 2: Overview, Cost Explorer, Resources, Sustainability pages.
+- [x] Phase 3: Recommendations, Kubernetes, Security, Budgets, Scenario simulator.
 - [x] Phase 4: Reports, Integrations, Settings, tests.
-- [ ] Keyboard shortcuts (not requested yet)
+- [x] Keyboard shortcuts (completed in the shared-workspace brief)
 - [x] Phase 2a: master dataset, error boundaries, one-row filter bar, Overview KPIs/trend/movers, Cost Explorer.
 - [x] Phase 2b: Resources page (advanced table, bulk actions, detail drawer, URL state).
 - [x] Sustainability page.
