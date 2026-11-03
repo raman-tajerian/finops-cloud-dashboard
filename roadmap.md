@@ -30,3 +30,4 @@
 - [x] Sustainability page.
 
 - [x] Security & Compliance page (findings, score, compliance, table + drawer).
+- [x] Audit fixes (2026-11-02): API contract rewritten to match src/lib/api.ts (+dashboard/sustainability DTOs), budget spendToDate = period total, 300_000 removed, DATA_END_DATE alias removed, warning text AA contrast, Reduce motion switch, scaleX progress bars, CardBoundary on six workspace routes, tests.

@@ -76,7 +76,7 @@ function build(): MasterResource[] {
 export const masterResources: MasterResource[] = build();
 
 /** ISO date (YYYY-MM-DD) for a history index. */
-export const dayAt = (index: number) => new Date(DATA_END_DATE.getTime() - (HISTORY_DAYS - 1 - index) * 86_400_000);
+export const dayAt = (index: number) => new Date(DEMO_TODAY.getTime() - (HISTORY_DAYS - 1 - index) * 86_400_000);
 export const dayLabel = (index: number) => dayAt(index).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 
 /** Snooze end date (ISO yyyy-mm-dd) computed from DEMO_TODAY, never the real clock. */
