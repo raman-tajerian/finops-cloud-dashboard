@@ -11,7 +11,8 @@ import { setSession, useSession } from "@/lib/session-store";
 import { CardBoundary } from "@/components/finops/States";
 import { renderHook, act } from "@testing-library/react";
 
-const ranges: Filters["range"][] = ["7d", "30d", "mtd"];
+// "custom" is the 30-day window (windowOf falls back to 30 days for it).
+const ranges: Filters["range"][] = ["7d", "custom", "mtd"];
 
 describe("budget spendToDate reconciles with Overview", () => {
   it.each(ranges)("spendToDate equals the Overview total for range %s", (range) => {
