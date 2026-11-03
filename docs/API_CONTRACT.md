@@ -2,14 +2,41 @@
 
 Set `VITE_API_BASE_URL` to switch the app from demo data to a live backend. All endpoints are `GET {base}/api/v1/...` and return JSON matching the types in `src/types/finops.ts`.
 
+Endpoints actually called by the client (`src/lib/api.ts`). All list endpoints take the global filter query `range, providers, env, team` unless noted.
+
 | Endpoint | Returns |
 | --- | --- |
-| `/summary` | `SpendSummary` |
-| `/costs?groupBy=service\|region` | `CostByDimension[]` |
-| `/resources` | `ResourceDto[]` |
-| `/recommendations` | `RecommendationDto[]` |
-| `/anomalies` | `Anomaly[]` |
-| `/clusters` | `ClusterDto[]` |
+| `/dashboard` | `DashboardDto` |
+| `/costs/explore?groupBy=…` | `ExploreDto` |
+| `/resources` | `ResourcesDto` |
+| `/resources/{id}` | `ResourceDetailDto \| null` |
+| `/sustainability` | `SustainabilityDto` |
+| `/kubernetes` | `KubernetesDto` |
+| `/budget` | `BudgetDto` |
+| `/scenario` | `ScenarioDto` |
+| `/savings` | `SavingsDto` |
+| `/alerts` | `AlertsDto` |
+| `/security` | `SecurityDto` |
+| `/reports/{template}` | `ReportDto` |
+| `/integrations` | `IntegrationsDto` (no filters) |
+| `/settings` | `SettingsDto` (no filters) |
+
+Plus `POST /api/anomaly-analysis` (server route, streaming) — documented below.
+
+## GET /api/v1/dashboard
+Query: `range, providers, env, team`. Returns `DashboardDto` (src/types/finops.ts) — everything the Overview cards need for one filter combination:
+- `providers`: active cloud providers; `services`, `regions`, `teams`: `CostByDimension[]` breakdowns (name + value) that each sum to the total.
+- `kpis`: `KpiBundle` — spend (total, mom %, daily burn, EOM projection), waste (total + idle storage/DBs/oversized), anomalies (same list as `/alerts`), unit economics (per user/request/deployment/session).
+- `daily`: daily spend series for the selected window; `trend`: per-provider daily series; `forecast`: MTD + 7-day run-rate projection; `movers`: biggest cost increases/decreases.
+- `recommendations`: top `SavingItemDto`s (same rules as `/savings`); `cluster` + `ticker`: the Kubernetes health card (simulated "Demo telemetry"); `carbon`: per-region CO₂e (same as `/sustainability`); `topology`: region/vpc/cluster nodes for the map; `resources`: top resources by cost.
+- `overview`: the headline KPI values (total spend, savings opportunity, active anomalies, idle count) with sparkline series; `totals`: `{ total, byProvider }`.
+
+## GET /api/v1/sustainability
+Query: `range, providers, env, team`. Returns `SustainabilityDto` (src/types/finops.ts). All figures are estimates: CO₂e = cost × kWh-per-dollar × region carbon intensity.
+- `totalTons`, `previousTons`, `changePct`: total t CO₂e for the period vs the previous period.
+- `kgPerThousandUsd`: kg CO₂e per $1,000 spend; `abSpendShare`: share of spend in A/B-graded regions (0–1).
+- `trend`: `CarbonTrendPoint[]` daily series; `regions`: `SustainabilityRegionDto[]` (region, provider, gCO₂/kWh, grade A–D, tons, share %); `providers` / `services`: `CarbonBreakdown[]` — each sums to `totalTons`.
+- `suggestions`: `GreenerRegionSuggestion[]` — for the 3 highest-emitting workloads, a lower-intensity region on the same provider with estimated CO₂e reduction and cost change (never suggests a higher-intensity region).
 
 ## GET /api/v1/costs/explore
 Query: `range, providers, env, team, groupBy` (`service|provider|region|team|environment|tag`).
@@ -34,7 +61,7 @@ Query: global filters. Returns `KubernetesDto` (`src/types/finops.ts`).
 
 ## GET /api/v1/budget
 Query: global filters. Returns `BudgetDto`.
-- `spendToDate` = month-to-date spend; `forecastEom` uses the same function as the Overview forecast (MTD + 7-day run rate × remaining days).
+- `spendToDate` = total spend for the selected period (`range`) — identical to the Overview total for the same filters; `forecastEom` uses the same function as the Overview forecast (MTD + 7-day run rate × remaining days).
 - `defaultBudget = 105% × previous quarter (Q3) spend ÷ 3`. The client lets users override it; bar turns amber at 80% and red at 100%.
 
 ## GET /api/v1/scenario
@@ -60,7 +87,7 @@ Budget creation, alert rules and anomaly statuses are client-side demo state onl
 
 ## GET /api/v1/security
 Query: global filters. Returns `SecurityDto` (`src/types/finops.ts`). Findings are simulated — no real scanning takes place.
-- Resource-level rules (seeded PRNG over the full dataset, then filtered): Open SSH to 0.0.0.0/0 (EC2/Azure VM/GCP Compute, ~12%, Critical), Public storage bucket (S3/Blob, ~10%, High), Unencrypted database (RDS/SQL DB, ~15%, High), Outdated Kubernetes version (EKS/AKS/GKE, ~25%, Low). Each references an existing resource id.
+- Resource-level rules (seeded PRNG over the full dataset, then filtered): Open SSH to 0.0.0.0/0 (EC2/Azure VM/GCP Compute, ~6%, Critical), Public storage bucket (S3/Blob, ~5%, High), Unencrypted database (RDS/SQL DB, ~8%, High), Outdated Kubernetes version (EKS/AKS/GKE, ~20%, Low). Each references an existing resource id, and every rule produces at least one finding when eligible resources exist.
 - Account-level rules (fixed counts, reference the provider): Over-permissive IAM role (3, Medium), Unused IAM access key > 90 days (3, Medium), Missing MFA on root account (1 provider only, Critical).
 - `score` = 100 − weighted open findings (Critical 8, High 4, Medium 1.5, Low 0.5), clamped at 0. `scoreTrend` is 6 months of seeded demo history; the current month equals the computed score.
 - `frameworks`: CIS, SOC 2, ISO 27001 and GDPR — fixed control lists (≥10 each); a control fails if any open finding of a mapped rule exists.
