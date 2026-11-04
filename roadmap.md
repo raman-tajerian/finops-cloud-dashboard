@@ -1,8 +1,8 @@
 # Roadmap
 
-- [ ] Realism/robustness: independent seeded usage histories and shared unit economics; preserve all existing totals.
-- [ ] Consistent zero-resource empty state and safe aggregate edge cases.
-- [ ] Mobile tables, controls, overlays, navigation and topology; tests and four-width browser checks.
+- [x] Realism/robustness: independent seeded usage histories and shared unit economics; existing totals preserved.
+- [x] Consistent zero-resource empty state and safe aggregate edge cases; all empty filter combinations tested.
+- [x] Mobile tables, 40px controls/pods, scrolling overlays with reachable close controls, navigation and topology; 172 tests and all eleven pages at 375/768/1024/1440 pass. Manual typechecks not run under workspace restrictions; automatic build OK.
 
 - [x] Documentation-only brief: README and DEMO_DATA completed, all 14 API functions reconciled, 151 tests passed, automatic build OK; separate typecheck not run (manual checks disabled by workspace rules).
 
