@@ -53,9 +53,9 @@ function Workspace({ d, search, setSearch }: { d: SavingsDto; search: RecSearch;
     <div className="grid gap-6">
       <section className="organic-card p-6 md:p-8" aria-label="Savings summary">
         <div className="grid gap-6 sm:grid-cols-3">
-          <div><p className="text-[13px] text-muted-foreground">Open savings</p><p className="mt-1 font-display text-[30px] leading-none tabular-nums">{fmtMoney(open)}<span className="text-base text-muted-foreground">/mo</span></p></div>
-          <div><p className="flex items-center gap-2 text-[13px] text-muted-foreground">Done this session <Demo /></p><p className="mt-1 font-display text-[30px] leading-none tabular-nums text-success">{fmtMoney(done)}</p></div>
-          <div><p className="text-[13px] text-muted-foreground">Monthly target</p><p className="mt-1 font-display text-[30px] leading-none tabular-nums">{fmtMoney(d.target)}</p></div>
+          <div><p className="text-[13px] text-muted-foreground">Open savings</p><p className="mt-1 metric-numbers text-[30px] leading-none">{fmtMoney(open)}<span className="text-base text-muted-foreground">/mo</span></p></div>
+          <div><p className="flex items-center gap-2 text-[13px] text-muted-foreground">Done this session <Demo /></p><p className="mt-1 metric-numbers text-[30px] leading-none text-success">{fmtMoney(done)}</p></div>
+          <div><p className="text-[13px] text-muted-foreground">Monthly target</p><p className="mt-1 metric-numbers text-[30px] leading-none">{fmtMoney(d.target)}</p></div>
         </div>
         <div className="mt-6">
           <div className="mb-2 flex justify-between text-xs text-muted-foreground"><span>Progress toward target</span><span className="tabular-nums">{d.target ? Math.round((done / d.target) * 100) : 0}%</span></div>
