@@ -88,7 +88,8 @@ export interface Mover { id: string; name: string; provider: CloudProvider; serv
 export type GroupBy = "service" | "provider" | "region" | "team" | "environment" | "tag";
 export interface ExploreRow { name: string; current: number; previous: number; changePct: number; share: number; spark: number[] }
 /** GET /api/v1/costs/explore */
-export interface ExploreDto { groupBy: GroupBy; keys: string[]; series: Record<string, number | string>[]; rows: ExploreRow[]; total: number; previousTotal: number }
+export interface UnitEconomicsDto { activeUsers: number; requests: number; perUser: number; perRequest: number; previousPerUser: number; previousPerRequest: number; userSpark: number[]; requestSpark: number[] }
+export interface ExploreDto { groupBy: GroupBy; keys: string[]; series: Record<string, number | string>[]; rows: ExploreRow[]; total: number; previousTotal: number; unitEconomics: UnitEconomicsDto }
 
 export interface ResourceRow { id: string; name: string; provider: CloudProvider; service: ServiceName; sku: string; region: string; environment: Environment; team: Team; monthlyCost: number; cpuAvg: number; memAvg: number; status: "Running" | "Idle" | "Warning" }
 /** GET /api/v1/resources */
@@ -132,7 +133,7 @@ export type ReportTemplateId = "executive" | "team" | "savings" | "security";
 export type ReportFormat = "PDF" | "CSV" | "JSON";
 export interface ReportTemplateMeta { id: ReportTemplateId; name: string; description: string; sections: string[] }
 export interface ReportSection { title: string; columns: string[]; rows: (string | number)[][] }
-export interface ReportDto { template: ReportTemplateId; title: string; range: string; filters: unknown; generatedAt: string; totals: Record<string, number>; sections: ReportSection[] }
+export interface ReportDto { template: ReportTemplateId; title: string; range: string; filters: unknown; generatedAt: string; totals: Record<string, number>; sections: ReportSection[]; unitEconomics: UnitEconomicsDto }
 export type IntegrationKind = "cloud" | "kubernetes" | "chat" | "dev" | "ops";
 export type IntegrationStatus = "Connected" | "Not connected" | "Error";
 export type CredentialKind = "aws-role-arn" | "azure-sp-id" | "gcp-project-id" | "none";

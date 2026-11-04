@@ -15,6 +15,7 @@ import { useTableDensity } from "@/lib/density";
 import { useSession } from "@/lib/session-store";
 import { SHORTCUTS, useGlobalShortcuts } from "@/lib/shortcuts";
 import { ShortcutsDialog } from "@/components/finops/ShortcutsDialog";
+import { CardSkeleton, FilterEmptyState } from "./States";
 
 const seedNotes = [
   { id: 1, kind: "Anomaly", text: "+140% Azure Blob Storage egress", time: "2h ago" },
@@ -31,7 +32,9 @@ export function Shell({ children }: { children: ReactNode }) {
   const [unread, setUnread] = useState<number[]>(seedNotes.map((n) => n.id));
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const resources = useDashboard().data?.resources ?? [];
+  const dashboard = useDashboard();
+  const resources = dashboard.data?.resources ?? [];
+  const filteredPage = path !== "/settings" && path !== "/integrations";
   const current = navItems.find((i) => i.to === path) ?? navItems[0]!;
   const currency = useCurrency();
   const setCurrency = useSetCurrency();
@@ -60,7 +63,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <aside className={`fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col bg-sidebar-bg px-3 py-4 transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${collapsed ? "lg:w-[72px]" : ""} ${open ? "translate-x-0" : "-translate-x-full"}`}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex h-11 w-full min-w-0 items-center gap-3 rounded-xl px-2 text-left hover:bg-secondary">
+            <button className="flex h-11 w-full min-w-0 items-center gap-3 rounded-xl px-2 pr-12 text-left hover:bg-secondary lg:pr-2">
               <FjordAvatar size={32} />
               {!collapsed && <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold tracking-[0.02em]">Fjord <span className="font-normal text-muted-foreground">Labs</span></span><span className="block truncate text-xs text-muted-foreground">Production</span></span>}
               {!collapsed && <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />}
@@ -81,7 +84,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 {g.items.map(({ to, label, icon: Icon }) => {
                   const active = path === to;
                   return (
-                    <Link key={to} to={to} title={collapsed ? label : undefined} aria-current={active ? "page" : undefined}
+                    <Link key={to} to={to} onClick={() => setOpen(false)} title={collapsed ? label : undefined} aria-current={active ? "page" : undefined}
                       className={`flex min-h-9 items-center gap-3 rounded-xl px-3 text-sm transition-colors ${active ? "bg-primary-soft text-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"} ${collapsed ? "lg:justify-center lg:px-0" : ""}`}>
                       <Icon className={`size-4 shrink-0 ${active ? "text-primary" : ""}`} />
                       <span className={collapsed ? "lg:sr-only" : ""}>{label}</span>
@@ -143,7 +146,7 @@ export function Shell({ children }: { children: ReactNode }) {
             </DropdownMenu>
           </div>
         </header>
-        <main key={currency} className="mx-auto w-full max-w-[1540px] min-w-0 space-y-6 p-4 pb-24 md:p-8 md:pb-24">{children}</main>
+        <main key={currency} className="mx-auto w-full max-w-[1540px] min-w-0 space-y-6 p-4 pb-24 md:p-8 md:pb-24">{filteredPage && (dashboard.isPending || dashboard.isPlaceholderData) ? <CardSkeleton h="h-64" /> : filteredPage && dashboard.isSuccess && resources.length === 0 ? <FilterEmptyState /> : children}</main>
         <div className="mx-auto max-w-[1540px] px-4 md:px-8"><AccentBand className="h-1 rounded-full overflow-hidden" /></div>
         <footer className="mx-auto flex max-w-[1540px] flex-wrap items-center gap-3 px-4 pb-8 pt-4 text-xs text-muted-foreground md:px-8"><FjordLogo size={16} /><span>·</span><span>Fern v0.4.0</span><span>·</span><span>{dataSource === "live" ? "Live data" : "Demo data — all figures are simulated"}</span><span>·</span><span>Demo data as of 12 Oct 2026</span></footer>
       </div>

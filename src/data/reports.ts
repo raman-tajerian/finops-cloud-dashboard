@@ -1,7 +1,7 @@
 // Report templates built only from the shared aggregates so totals match Overview, Cost Explorer, Recommendations and Security.
 import type { Filters } from "@/lib/filters";
 import type { MasterResource, ReportDto, ReportTemplateId, ReportTemplateMeta } from "@/types/finops";
-import { buildDashboard, buildExplore } from "./aggregate";
+import { buildDashboard, buildExplore, buildUnitEconomics, filterResources, windowOf } from "./aggregate";
 import { buildSavings } from "./budgets";
 import { buildSecurity, isOpenFinding } from "./security";
 import { DEMO_TODAY } from "./resources";
@@ -18,7 +18,7 @@ const r2 = (n: number) => Math.round(n * 100) / 100;
 
 export function buildReport(all: MasterResource[], f: Filters, template: ReportTemplateId): ReportDto {
   const meta = REPORT_TEMPLATES.find((t) => t.id === template)!;
-  const base = { template, title: meta.name, range: f.range, filters: f, generatedAt: DEMO_TODAY.toISOString().slice(0, 10) };
+  const base = { template, title: meta.name, range: f.range, filters: f, generatedAt: DEMO_TODAY.toISOString().slice(0, 10), unitEconomics: buildUnitEconomics(filterResources(all, f), windowOf(f.range)) };
   if (template === "executive") {
     const d = buildDashboard(all, f), p = buildExplore(all, f, "provider"), s = buildSavings(all, f);
     const cats = new Map<string, number>();
@@ -27,6 +27,7 @@ export function buildReport(all: MasterResource[], f: Filters, template: ReportT
       sections: [
         { title: "Spend by provider", columns: ["Provider", "Spend", "Previous", "Change %"], rows: p.rows.map((x) => [x.name, r2(x.current), r2(x.previous), r2(x.changePct)]) },
         { title: "Savings by category", columns: ["Category", "Monthly saving"], rows: [...cats].map(([k, v]) => [k, r2(v)]) },
+        { title: "Unit economics", columns: ["Metric", "Cost", "Previous cost"], rows: [["Cost per active user", base.unitEconomics.perUser, base.unitEconomics.previousPerUser], ["Cost per API request", base.unitEconomics.perRequest, base.unitEconomics.previousPerRequest]] },
       ] };
   }
   if (template === "team") {

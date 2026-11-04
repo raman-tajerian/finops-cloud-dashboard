@@ -100,6 +100,11 @@ export function CostExplorer({ state, views, setViews, setState }: { state: Expl
           </DropdownMenu>
         </div>
       </div>
+      <section aria-label="Unit economics" className="grid gap-6 sm:grid-cols-2">
+        {[{ label: "Cost per active user", value: d.unitEconomics.perUser, previous: d.unitEconomics.previousPerUser, decimals: 4 }, { label: "Cost per API request", value: d.unitEconomics.perRequest, previous: d.unitEconomics.previousPerRequest, decimals: 6 }].map((u) => (
+          <article key={u.label} className="organic-card p-6"><Label>{u.label}</Label><p className="metric-numbers mt-2 text-[32px]">{fmtMoney(u.value, { decimals: u.decimals })}</p><p className="mt-2 text-xs text-muted-foreground">{u.previous > 0 ? `${((u.value / u.previous - 1) * 100).toFixed(1)}%` : "—"} vs prev</p></article>
+        ))}
+      </section>
       <ExplorerChart d={d} state={state} />
       <ExplorerTable d={d} group={state.group} />
     </div>
