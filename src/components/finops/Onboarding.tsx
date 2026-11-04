@@ -40,7 +40,7 @@ export function OnboardingChecklist() {
           <span className="shrink-0 text-muted-foreground">· {doneCount} of {steps.length} done</span>
           <ChevronDown className={`size-3.5 shrink-0 text-muted-foreground transition-transform ${expanded ? "rotate-180" : ""}`} aria-hidden />
         </button>
-        <div className="hidden shrink-0 items-center gap-1.5 md:flex" aria-hidden={!expanded ? undefined : true}>
+        <div className="hidden shrink-0 items-center gap-1.5 md:flex">
           {steps.map((s) => (
             <span key={s.id} className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] ${s.done ? "border-primary/30 bg-primary-soft text-primary" : "border-border bg-secondary text-muted-foreground"}`}>
               {s.done && <Check className="size-3" aria-hidden />}{s.short}

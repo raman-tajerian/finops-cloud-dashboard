@@ -50,9 +50,9 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
   };
   return (
     <div className="organic-card @container flex min-w-0 max-w-full items-center gap-3 p-3">
-      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3 xl:flex-nowrap">
       <Select value={filters.range} onValueChange={(v) => { onChange({ ...filters, range: v as PlatformRange }); if (v === "custom") toast("Custom range: Sep 4 – Oct 3, 2026"); }}>
-        <SelectTrigger className="h-9 w-[150px] rounded-xl" aria-label="Date range"><SelectValue /></SelectTrigger>
+        <SelectTrigger className="h-9 w-[140px] rounded-xl" aria-label="Date range"><SelectValue /></SelectTrigger>
         <SelectContent>{(Object.keys(rangeLabels) as PlatformRange[]).map((r) => <SelectItem key={r} value={r}>{rangeLabels[r]}</SelectItem>)}</SelectContent>
       </Select>
       <div className="flex items-center gap-1 rounded-xl bg-secondary p-1">
@@ -62,7 +62,7 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
         ))}
       </div>
       <Select value={filters.env} onValueChange={(v) => onChange({ ...filters, env: v as Env | "All" })}>
-        <SelectTrigger className="h-9 w-[150px] rounded-xl" aria-label="Environment"><SelectValue /></SelectTrigger>
+        <SelectTrigger className="h-9 w-[140px] rounded-xl" aria-label="Environment"><SelectValue /></SelectTrigger>
         <SelectContent>{["All", "Production", "Staging", "Development"].map((e) => <SelectItem key={e} value={e}>{e === "All" ? "All environments" : e}</SelectItem>)}</SelectContent>
       </Select>
       <Popover>
