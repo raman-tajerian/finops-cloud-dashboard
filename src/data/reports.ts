@@ -49,7 +49,7 @@ export function buildReport(all: MasterResource[], f: Filters, template: ReportT
 // Money is stored in USD in the DTO and converted once, at export time, through the shared formatter.
 const NON_MONEY_TOTALS = new Set(["activeAnomalies", "items", "score", "openFindings", "critical", "high"]);
 const MONEY_COL = /spend|saving|cost|forecast|previous|target/i;
-const fmtCell = (v: string | number, money: boolean, cur: Currency) => (money && typeof v === "number" ? fmtMoney(v, { currency: cur }) : v);
+const fmtCell = (v: string | number, money: boolean, cur: Currency) => (money && typeof v === "number" ? fmtMoney(v, { currency: cur, decimals: v !== 0 && Math.abs(v) < 0.001 ? 6 : v !== 0 && Math.abs(v) < 1 ? 4 : 0 }) : v);
 // Shared by the CSV export and the print view so every export shows the same formatted values.
 export const isMoneyTotal = (key: string) => !NON_MONEY_TOTALS.has(key);
 export const isMoneyColumn = (name: string) => MONEY_COL.test(name);

@@ -5,7 +5,7 @@ export interface Levers { ri: number; migrate: number; rightsize: number }
 export function simulate(d: ScenarioDto, l: Levers) {
   const ri = d.computeSpend * (l.ri / 100) * d.riDiscount;
   const moved = d.migrateSpend * (l.migrate / 100);
-  const migrate = moved * (1 - d.costRatio); // negative when the target region is pricier
+  const migrate = moved === 0 ? 0 : moved * (1 - d.costRatio); // negative when the target region is pricier
   const rightsize = d.rightsizeEligible * (l.rightsize / 100);
   const savings = ri + migrate + rightsize;
   const projected = d.baseline - savings;
