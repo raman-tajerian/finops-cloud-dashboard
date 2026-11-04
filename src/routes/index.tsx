@@ -39,7 +39,7 @@ function Index() {
       <Reveal delay={0.08}><GlobalFilters /></Reveal>
       <Reveal delay={0.12}><OnboardingChecklist /></Reveal>
       <Reveal delay={0.16}><DataGate h="h-16"><OverviewKpis /></DataGate></Reveal>
-      <section className="grid gap-4 xl:grid-cols-12">
+      <section className="grid gap-6 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-8"><DataGate h="h-72"><CostTrendCard /></DataGate></div>
         <div className="min-w-0 xl:col-span-4"><DataGate h="h-72"><TopMovers /></DataGate></div>
         <div className="min-w-0 xl:col-span-8"><DataGate h="h-72"><CostDistribution /></DataGate></div>
