@@ -156,7 +156,7 @@ function ExplorerTable({ d, group }: { d: ExploreDto; group: GroupBy }) {
   );
   const totalChange = d.previousTotal ? ((d.total - d.previousTotal) / d.previousTotal) * 100 : 0;
   return (
-    <article className="organic-card inline-contain min-w-0 max-w-full overflow-hidden [contain:inline-size_paint]">
+    <article className="organic-card relative inline-contain min-w-0 max-w-full overflow-hidden">
       <div className="max-w-full overflow-x-auto overscroll-x-contain">
         <table className="w-full min-w-[720px] text-left text-sm">
           <caption className="sr-only">Cost by {group}</caption>
@@ -169,7 +169,7 @@ function ExplorerTable({ d, group }: { d: ExploreDto; group: GroupBy }) {
                 <td className="metric-numbers px-4 py-3 text-right text-muted-foreground">{fmtMoney(r.previous)}</td>
                 <td className={`metric-numbers px-4 py-3 text-right ${r.changePct > 0 ? "text-warning" : "text-success"}`}>{r.changePct > 0 ? "+" : ""}{r.changePct.toFixed(1)}%</td>
                 <td className="metric-numbers px-4 py-3 text-right">{r.share.toFixed(1)}%</td>
-                <td className="px-4 py-2"><Spark data={r.spark} color={col(d.keys.indexOf(r.name))} className="h-7 w-24" /><span className="sr-only">row {i + 1}</span></td>
+                <td className="px-4 py-2" aria-label={`Trend for row ${i + 1}`}><Spark data={r.spark} color={col(d.keys.indexOf(r.name))} className="h-7 w-24" /></td>
               </tr>
             ))}
           </tbody>
