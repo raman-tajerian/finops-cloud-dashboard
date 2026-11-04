@@ -41,7 +41,7 @@ Query: `range, providers, env, team`. Returns `DashboardDto` (src/types/finops.t
 Query: `range, providers, env, team`. Returns `SustainabilityDto` (src/types/finops.ts). All figures are estimates: CO₂e = cost × kWh-per-dollar × region carbon intensity.
 - `totalTons`, `previousTons`, `changePct`: total t CO₂e for the period vs the previous period.
 - `kgPerThousandUsd`: kg CO₂e per $1,000 spend; `abSpendShare`: percentage of spend in A/B-graded regions (0–100).
-- `trend`: `CarbonTrendPoint[]` daily series; `regions`: `SustainabilityRegionDto[]` (region, provider, gCO₂/kWh, grade A–D, tons, share %); `providers` / `services`: `CarbonBreakdown[]` — each sums to `totalTons`.
+- `trend`: `CarbonTrendPoint[]` daily series; `regions`: `SustainabilityRegionDto[]` (`region`, `provider`, `intensity` in gCO₂/kWh, `rating` A–D, `tons`, `cost` USD, `share` %); `providers` / `services`: `CarbonBreakdown[]` — each sums to `totalTons`.
 - `suggestions`: `GreenerRegionSuggestion[]` — for the 3 highest-emitting workloads, a lower-intensity region on the same provider with estimated CO₂e reduction and cost change (never suggests a higher-intensity region).
 
 ## GET /api/v1/costs/explore
@@ -112,7 +112,9 @@ All demo responses are computed relative to a fixed `DEMO_TODAY = 2026-10-12` (U
 `complianceResult` is client-computed, not a SecurityDto field. It returns a per-control `status` of `pass`, `fail` or `not-assessed` (no mapped finding rule). `passed + failed + notAssessed = total`; the pass percentage uses assessed controls only. Open/In progress count against score/compliance; Resolved/Accepted risk do not. API score is a number, displayed with one decimal by the shared formatter.
 
 ## GET /api/v1/reports/{template}
-`template` = executive | team | savings | security. Query: range, providers, env, team. Returns `ReportDto` { template, title, range, filters, generatedAt, totals, sections[{title, columns, rows}] }. filters is typed unknown (demo uses supplied Filters), generatedAt is an ISO string, totals is Record<string,number>, and rows are (string|number)[][]. Totals come from the same aggregates as Overview, Cost Explorer, Recommendations and Security.
+`template` = executive | team | savings | security. Query: range, providers, env, team. Returns `ReportDto` { template, title, range, filters, generatedAt, totals, sections[{title, columns, rows}], unitEconomics:UnitEconomicsDto }. filters is typed unknown (demo uses supplied Filters), generatedAt is an ISO date string, totals is Record<string,number>, and rows are (string|number)[][]. Totals come from the same aggregates as Overview, Cost Explorer, Recommendations and Security.
+
+Every template includes exact shared `unitEconomics`; executive sections additionally include “Unit economics” rows with current and previous costs per active user/request. Executive financial totals are rounded to two decimals; unit costs are not rounded in the DTO. Team/savings/security sections remain template-specific rather than duplicating the executive unit-cost section.
 
 ## GET /api/v1/integrations
 Returns `IntegrationsDto` { integrations: IntegrationDto[], history: SyncRunDto[] }. Cloud providers are Connected when present in the dataset. Demo: simulated, no credentials stored.
@@ -144,9 +146,16 @@ The linked TypeScript contracts are authoritative for all enums and field types.
 - **SustainabilityRegionDto:** region, provider, intensity, rating (A/B/C/D), tons, cost, share. CarbonBreakdown: name, tons, share. CarbonTrendPoint: day, tons. GreenerRegionSuggestion: resourceId, workload, provider, currentRegion, suggestedRegion, currentIntensity, suggestedIntensity, currentTons, reductionTons, reductionPct, costChangePct.
 - **Dashboard series:** DailyCost {day,spend}; ProviderDaily {day,AWS,Azure,GCP,total,forecast:number|null,band:[number,number]|null,anomaly?:string}; ForecastPoint {day,forecast,band:[number,number],actual:number|null}. Movers contain id/name/provider/service/current/previous/delta in up/down lists. Topology nodes contain id/label/kind/health/x/y/z/cost; edges are {from,to}.
 - **Explorer series/rows:** series is Record<string,number|string>[] with day/date, one numeric column per key, total and previous; rows contain name:string, current:number, previous:number, changePct:number, share:number, spark:number[].
+- **UnitEconomicsDto:** activeUsers:number (mean daily users), requests:number (period request total), perUser:number, perRequest:number, previousPerUser:number, previousPerRequest:number, userSpark:number[], requestSpark:number[]. Used by ExploreDto and ReportDto; Dashboard maps these values into its existing KPI shapes. All monetary ratios stay USD.
 - **Legacy ClusterDto / carbon / topology:** cluster has name, region, version, nodes, cpu, memory, podsHealthy, podsTotal; ticker is string[]. CarbonRegionDto has region/provider/intensity/rating/tons. Topology kind is region/vpc/cluster, health is ok/oversized/anomaly; coordinates and cost are numeric.
 - **KpiBundle:** spend:{total,mom,burn,projected}, waste:{total,ebs,rds,ec2} (ebs/rds/ec2 are counts), anomalies:Anomaly[], unit:{perUser,perRequest,activeUsers,requests,perDeployment,perSession}. Legacy spend/daily DTO fields can be rounded; precise Overview totals retain aggregate values.
 
-## Documentation reconciliation (3 November 2026)
+## Documentation reconciliation (4 November 2026)
 
-No client function or endpoint was added or changed. Documented all 14 functions with explicit GET paths/query exceptions; added provider serialization, app defaults, ID encoding, client-only parameters and read/error limitations. Corrected Dashboard region shape, complete resource/recommendation lists, legacy telemetry distinction, A/B percentage scale and service-category grouping. Added missing groupBy/targetShare/weights/report filters and detailed Budget, Scenario and nested DTO shapes. Clarified client-computed compliance, rounded budget defaults, historical-versus-projected dates, report JSON currency semantics and the separate demo-context AI route with validation/error behavior. Production backend and successful live AI integration remain unverified.
+Checked all **14 functions** against `src/lib/api.ts`: each is listed with GET method, exact path, query parameters and response contract; none is missing. No client function or endpoint was added or changed by this documentation refresh.
+
+Changes in this refresh:
+- Added the previously omitted `unitEconomics` field to the Reports endpoint's response shape and the nested DTO inventory; confirmed the existing Explorer description and dashboard mapping.
+- Documented exact versus rounded report values, current/previous executive unit-cost rows and which templates expose those rows.
+- Corrected the Sustainability endpoint field names (`intensity`, `rating`) and added its region `cost` field to the endpoint summary.
+- Retained provider serialization, filter defaults, demo date, all nested contracts and separate AI route limitations. The read base URL requires a compatible external HTTP backend; no production implementation or successful live AI generation was verified.

@@ -11,6 +11,7 @@ Fern is a multi-cloud workspace for exploring cloud spend, resource usage and es
 In default demo mode, figures come from a seeded, simulated dataset of **61 fictional resources**, with **184 days** of cost history ending on **12 October 2026** (`DEMO_TODAY`). Historical data never extends beyond that date; projections and snooze end dates can extend into the future. Some illustrative histories and operational widgets use additional fixed seeds or temporary client-side simulation rather than measured telemetry.
 
 - **CO2e and greener regions:** estimates using cost, a fixed kWh-per-dollar factor, illustrative carbon intensities and regional cost indices; not measured emissions or cloud pricing quotes.
+- **Active users and API requests:** separate seeded daily series with weekday seasonality, slow growth and noise, independent of cost. Unit costs divide selected spend by average daily users or total period requests, not measured customer traffic.
 - **Utilization and activity:** CPU/memory averages and curves, pod health, live gauges and activity feeds are simulated, not monitored infrastructure.
 - **Security and compliance:** seeded findings and simplified control mappings are examples, not a security scan, audit or certification.
 - **Integrations:** connection states and sync histories are fictional. “Test connection” checks identifier format only; it does not contact a provider.
@@ -19,17 +20,18 @@ In default demo mode, figures come from a seeded, simulated dataset of **61 fict
 - **Currency:** USD is the base; EUR, SEK and GBP use fixed demo exchange rates, not live FX.
 - **Actions:** scans, optimization, stopping/tagging resources, resolving findings, budgets and alert rules demonstrate interactions only. Nothing is actually scanned, connected, remediated or sent to cloud accounts or report recipients.
 
-No real secrets are requested or stored by the demo connection/key workflows; they accept identifiers or key names only. **Never paste secrets into any text field:** generic fields do not guarantee secret detection or rejection. The AI analyst is a separate exception to offline simulation: when configured, it sends simulated anomaly context and your optional note to Lovable AI Gateway and streams a generated analysis. Do not put confidential data in that note; successful live AI access has not been verified by this documentation update.
+The demo connection/key workflows do not connect to providers or persist credentials. Integration fields are intended for public identifiers, and Settings generates fake keys rather than accepting a real credential. **Never paste secrets into any text field:** inputs accept arbitrary text and do not guarantee secret detection or rejection; other form values can be retained in session state. The AI analyst is a separate exception to offline simulation: when configured, it sends simulated anomaly context and your optional note to Lovable AI Gateway and streams a generated analysis. Do not put confidential data in that note; successful live AI access has not been verified by this documentation update.
 
 ## Features
 
 ### Overview
 - Spend, forecast, burn, savings, waste, anomalies and unit-cost KPIs with sparklines; provider trend and forecast band; allocation and movers.
-- Top 10 resources by cost, resource details and filtered link to Resources; operational, GreenOps, topology and what-if widgets; demo scan, budget alert and export controls.
+- Top 10 resources by cost, resource details and filtered link to Resources; operational, GreenOps and what-if widgets; a simplified 2D topology map with drag rotation; demo scan, budget alert and export controls.
 
 ### Cost Explorer
 - Service-category, provider, region, team, environment and app-tag grouping; area, bar and line views with previous-period comparison.
 - Tabular views, URL-encoded saved views and CSV/JSON exports.
+- Cost per active user and API request, using the same period formulas and previous-period values as Overview and report responses.
 
 ### Resources
 - Debounced search, status/service filters, sorting, column visibility, pagination and shared density; URL-backed table state and selected resource.
@@ -37,7 +39,7 @@ No real secrets are requested or stored by the demo connection/key workflows; th
 
 ### Recommendations
 - Six savings categories with search/filter/sort, resource details, effort, risk, confidence and savings tracker.
-- Session-only assign/implement/ignore/reopen actions and 7/30-day snooze dates calculated from the fixed demo date.
+- Session-only assign/implement/ignore/reopen actions and 7/30-day snooze dates calculated from the fixed demo date; no cloud changes are executed.
 
 ### Kubernetes
 - Filtered EKS/AKS/GKE clusters, node and pod totals, namespace costs/efficiency, sortable namespace table and pod grid/drawer.
@@ -57,7 +59,7 @@ No real secrets are requested or stored by the demo connection/key workflows; th
 
 ### Reports
 - Executive, team, savings and security templates with filtered aggregate totals and section previews.
-- CSV/JSON downloads and print-to-PDF workflow; session-only schedules and simulated send actions.
+- CSV/JSON downloads and print-to-PDF workflow; past reports and session-only schedules, with no report delivery. Executive reports include current and previous unit-cost rows; every template response includes shared unit economics.
 
 ### Integrations
 - Fictional cloud and tooling connection cards, read-only permission lists and identifier-format checks.
@@ -72,6 +74,7 @@ No real secrets are requested or stored by the demo connection/key workflows; th
 - Command palette (`Ctrl/Cmd+K` or `/`), G-chord navigation, `?` shortcut dialog and Escape dismissal.
 - URL display currency (USD/EUR/SEK/GBP); shared session table density; reduced-motion/system preference support; dismissible onboarding checklist.
 - Loading skeletons, empty states, retryable errors, error boundaries and chart/table alternatives.
+- One “No resources match these filters” / “Reset filters” state for resource-dependent pages, including Reports and the simulator. Settings and Integrations remain available; unavailable Overview comparisons and zero-budget ratios show “—”.
 
 ## Tech stack
 
@@ -87,6 +90,8 @@ From `package.json` (declared dependency ranges, not a claim about resolved lock
 ## Architecture
 
 `src/types/finops.ts` defines resource and response contracts. The typed client in `src/lib/api.ts` exposes 14 read functions, consumed through TanStack Query in `src/lib/queries.tsx`; query keys include relevant global filters. With no `VITE_API_BASE_URL`, each request waits a simulated 300–800 ms and calls pure response builders in `src/data` over the master dataset (Settings uses a fixed fixture builder). Temporary demo edits live in a shared in-memory session store, separate from aggregate data.
+
+Independent daily user/request histories live in `src/data/usage.ts`. `buildUnitEconomics` supplies Overview, Explorer and Reports without changing resource costs or financial totals. The shared Shell uses the filtered dashboard response to gate zero-resource pages; report generation calls the same typed client on demand.
 
 Setting `VITE_API_BASE_URL` switches those reads to `GET {base}/api/v1/...`. This switches the **read transport**, not demo actions into real writes; the client currently has no write API or authentication headers, and JSON is typed but not runtime-validated. The independent `/api/anomaly-analysis` server route still builds its context from the demo master dataset, even when the read client uses a live base URL. Presentation currency stays client-side and API amounts remain USD.
 
@@ -125,6 +130,7 @@ There is **no typecheck script** in `package.json`. With the installed native-pr
 
 - [x] Eleven-page frontend workspace and shared URL filters, navigation and states.
 - [x] Seeded master dataset, typed read client and consistent cost/savings/carbon aggregates.
+- [x] Independent usage histories, shared unit economics and zero-resource robustness.
 - [x] Resources, recommendations, Kubernetes, budgets, security and what-if demo workflows.
 - [x] Reports, integrations and settings demonstrations.
 - [x] Currency, density, keyboard shortcuts, onboarding and reduced-motion controls.
