@@ -20,7 +20,7 @@ In default demo mode, figures come from a seeded, simulated dataset of **61 fict
 - **Currency:** USD is the base; EUR, SEK and GBP use fixed demo exchange rates, not live FX.
 - **Actions:** scans, optimization, stopping/tagging resources, resolving findings, budgets and alert rules demonstrate interactions only. Nothing is actually scanned, connected, remediated or sent to cloud accounts or report recipients.
 
-No real secrets are requested or stored by the demo connection/key workflows; they accept identifiers or key names only. **Never paste secrets into any text field:** generic fields do not guarantee secret detection or rejection. The AI analyst is a separate exception to offline simulation: when configured, it sends simulated anomaly context and your optional note to Lovable AI Gateway and streams a generated analysis. Do not put confidential data in that note; successful live AI access has not been verified by this documentation update.
+The demo connection/key workflows do not connect to providers or persist credentials. Integration fields are intended for public identifiers, and Settings generates fake keys rather than accepting a real credential. **Never paste secrets into any text field:** inputs accept arbitrary text and do not guarantee secret detection or rejection; other form values can be retained in session state. The AI analyst is a separate exception to offline simulation: when configured, it sends simulated anomaly context and your optional note to Lovable AI Gateway and streams a generated analysis. Do not put confidential data in that note; successful live AI access has not been verified by this documentation update.
 
 ## Features
 

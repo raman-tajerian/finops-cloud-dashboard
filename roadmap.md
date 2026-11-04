@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Documentation refresh (4 November): README, demo formulas/invariants, all API shapes and factual demo limitations; markdown-only changes and regression tests.
+- [x] Documentation refresh (4 November): README, demo formulas/invariants, all 14 API functions and factual demo limitations; markdown-only changes, 172 tests passed, automatic build OK. Manual typecheck/build not run under workspace restrictions.
 
 - [x] Realism/robustness: independent seeded usage histories and shared unit economics; existing totals preserved.
 - [x] Consistent zero-resource empty state and safe aggregate edge cases; all empty filter combinations tested.
