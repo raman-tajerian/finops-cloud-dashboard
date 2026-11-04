@@ -92,12 +92,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Fern" },
       { name: "description", content: "Multi-cloud cost and sustainability dashboard" },
-      { name: "author", content: "Lovable" },
+      { name: "author", content: "Raman Tajerian" },
       { property: "og:title", content: "Fern" },
       { property: "og:description", content: "Multi-cloud cost and sustainability dashboard" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
