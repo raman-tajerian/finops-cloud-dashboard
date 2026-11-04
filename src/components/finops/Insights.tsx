@@ -71,12 +71,18 @@ export function Topology3D() {
     const s = 420 / (420 + z2);
     return { x: 300 + x1 * s, y: 190 + y1 * s, s, z: z2 };
   };
-  const pts = Object.fromEntries(topoNodes.map((n) => [n.id, project(n)]));
+  // Fit the projected graph inside the viewBox with padding so no node or label clips.
+  const raw = Object.fromEntries(topoNodes.map((n) => [n.id, project(n)]));
+  const xs = Object.values(raw).map((p) => p.x), ys = Object.values(raw).map((p) => p.y);
+  const pad = 40, minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+  const fit = Math.min((600 - 2 * pad) / Math.max(1, maxX - minX), (380 - 2 * pad) / Math.max(1, maxY - minY), 1);
+  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+  const pts = Object.fromEntries(Object.entries(raw).map(([id, p]) => [id, { ...p, x: 300 + (p.x - cx) * fit, y: 190 + (p.y - cy) * fit, s: p.s * fit }]));
   const sorted = [...topoNodes].sort((a, b) => pts[b.id]!.z - pts[a.id]!.z);
   return (
     <article className="organic-card flex h-full flex-col p-6">
       <div className="flex items-start justify-between gap-3">
-        <div><Label>Cloud topology</Label><p className="mt-1 text-[13px] text-muted-foreground">Regions, VPCs and clusters · drag to rotate</p></div>
+        <div><Label>Cloud topology</Label><p className="mt-1 text-[13px] text-muted-foreground">Regions, VPCs and clusters · simplified 2D map</p></div>
         <div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><Move3d className="size-4 text-muted-foreground" /></div>
       </div>
       {asTable ? <div className="mt-4 h-[300px]"><DataTableView caption="Cloud topology nodes" columns={["Node", "Type", "Health", "Cost / mo"]} rows={topoNodes.map((n) => [n.label, n.kind, n.health === "ok" ? "Healthy" : n.health, fmtMoney(n.cost)])} /></div> :
@@ -86,14 +92,16 @@ export function Topology3D() {
         onPointerUp={() => { drag.current = null; }}>
         <svg viewBox="0 0 600 380" className="h-full min-h-[300px] w-full">
           {topoEdges.map((e) => { const a = pts[e.from]!, b = pts[e.to]!; return <line key={e.from + e.to} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="var(--border)" strokeWidth={1.2} />; })}
-          {sorted.map((n) => {
+          {sorted.map((n, i) => {
             const p = pts[n.id]!; const r = (n.kind === "region" ? 14 : n.kind === "vpc" ? 9 : 7) * p.s; const c = healthColor[n.health];
+            const below = i % 2 === 0;
             return (
               <g key={n.id} onPointerEnter={() => setHover(n)} onPointerLeave={() => setHover(null)} style={{ opacity: 0.55 + 0.45 * Math.min(1, p.s) }}>
                 {n.health !== "ok" && <circle cx={p.x} cy={p.y} r={r} fill={c} className="topo-pulse" />}
                 <circle cx={p.x} cy={p.y} r={r} fill="var(--card)" stroke={c} strokeWidth={n.kind === "region" ? 2 : 1.5} />
                 <circle cx={p.x} cy={p.y} r={r * 0.35} fill={c} />
-                <text x={p.x} y={p.y + r + 13} textAnchor="middle" className="fill-muted-foreground font-mono" fontSize={10}>{n.label}</text>
+                <text x={p.x} y={below ? p.y + r + 15 : p.y - r - 7} textAnchor="middle" className="fill-muted-foreground font-mono" fontSize={12}
+                  stroke="var(--card)" strokeWidth={3.5} strokeLinejoin="round" style={{ paintOrder: "stroke" }}>{n.label}</text>
               </g>
             );
           })}
@@ -107,6 +115,7 @@ export function Topology3D() {
       </div>}
       <div className="mt-3 flex flex-wrap gap-4 text-[11px] text-muted-foreground">
         {(["ok", "oversized", "anomaly"] as const).map((h) => <span key={h} className="inline-flex items-center gap-1.5"><span className="size-2 rounded-full" style={{ background: healthColor[h] }} />{h === "ok" ? "Healthy" : h === "oversized" ? "Oversized" : "Anomaly"}</span>)}
+        <span className="ml-auto">Drag to rotate the view</span>
       </div>
     </article>
   );
