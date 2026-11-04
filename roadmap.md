@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Documentation refresh (4 November): README, demo formulas/invariants, all API shapes and factual demo limitations; markdown-only changes and regression tests.
+
 - [x] Realism/robustness: independent seeded usage histories and shared unit economics; existing totals preserved.
 - [x] Consistent zero-resource empty state and safe aggregate edge cases; all empty filter combinations tested.
 - [x] Mobile tables, 40px controls/pods, scrolling overlays with reachable close controls, navigation and topology; 172 tests and all eleven pages at 375/768/1024/1440 pass. Manual typechecks not run under workspace restrictions; automatic build OK.

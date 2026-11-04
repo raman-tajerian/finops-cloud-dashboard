@@ -2,7 +2,7 @@
 
 This is the current implementation, not a proposed production model. Fjord Labs is fictional. All prices, emissions, telemetry, findings and controls are simulated or estimated. Reproduce these rules in a replacement backend to preserve cross-page consistency; do not treat them as validated cloud pricing, emissions or compliance methodology.
 
-Sources: [`resources.ts`](../src/data/resources.ts), [`aggregate.ts`](../src/data/aggregate.ts), [`platformOps.ts`](../src/data/platformOps.ts), [`budgets.ts`](../src/data/budgets.ts), [`security.ts`](../src/data/security.ts), [`scenario.ts`](../src/lib/scenario.ts), [`currency.ts`](../src/data/currency.ts) and the [API contract](API_CONTRACT.md).
+Sources: [`resources.ts`](../src/data/resources.ts), [`usage.ts`](../src/data/usage.ts), [`aggregate.ts`](../src/data/aggregate.ts), [`platformOps.ts`](../src/data/platformOps.ts), [`budgets.ts`](../src/data/budgets.ts), [`security.ts`](../src/data/security.ts), [`scenario.ts`](../src/lib/scenario.ts), [`currency.ts`](../src/data/currency.ts) and the [API contract](API_CONTRACT.md).
 
 ## Master dataset
 
@@ -139,6 +139,8 @@ Active users and API requests are workspace-wide daily series in `src/data/usage
 
 Users: base 2,250,000 × growth × weekday factor (1.04 Mon–Fri, 0.86 weekend) × noise, rounded to an integer. Requests: base 72,000,000 × growth × weekday factor (1.08 Mon–Fri, 0.78 weekend) × noise, rounded to an integer.
 
+Each `UsageDay` is `{date: ISO yyyy-mm-dd, activeUsers: integer, apiRequests: integer}`. Noise is `0.98 + seededDraw*0.04`. These histories do not consume the resource-cost generator, so adding usage does not change any cost, savings, anomaly, emissions or security total. Default MTD unit costs display approximately **$0.0289/user** and **$0.000076/request** (USD, rounded for display).
+
 `costPerUser = selectedSpend / mean(activeUsers[start:end])`; `costPerRequest = selectedSpend / sum(apiRequests[start:end])`. Previous-period comparisons use exactly these formulas on `previousOf(window)`, dividing average users by actual stored days when history is truncated. Overview, Explorer and all report templates share `buildUnitEconomics`. Resource filters change only the numerator. Zero denominators return numeric zero in contracts; unavailable UI comparisons show `—`. Zero-resource selections show the same Reset filters empty state across all resource-dependent pages, including the simulator and Reports.
 
 Deployment and session costs retain monthly-equivalent spend `selectedSpend / window.days * 30` divided by their unchanged fixed per-30-day volumes:
@@ -149,6 +151,16 @@ Deployment and session costs retain monthly-equivalent spend `selectedSpend / wi
 | Session | 13,600,000 |
 
 Filters change spend but **do not scale the business-volume denominators**. Daily burn is selected spend divided by selected window days.
+
+Unit spark arrays divide each day's spend by that day's users or requests. They are daily ratios, not cumulative selected-window ratios; averaging those daily ratios is not the formula for either headline KPI. Report DTOs include exact unit-cost values; executive CSV/print sections display four decimals for the user cost and six for request cost at default scale. Existing report financial totals retain their two-decimal aggregate rounding.
+
+## Zero-result filters and unavailable ratios
+
+Shell checks `dashboard.resources.length` from the typed query after loading. With no matching resources, Overview, Explorer, Resources, Recommendations, Kubernetes, Budgets, Sustainability, Security and Reports show one “No resources match these filters.” state with “Reset filters”. The simulator is inside a resource-dependent page and is not rendered. Reset restores default global filters without changing the route or display currency. Settings and Integrations are not resource-gated.
+
+The pure builders still return their typed responses: numeric zero for guarded zero-denominator costs, carbon shares and simulator savings percentage; no NaN/Infinity placeholders are serialized. Account-level security findings follow provider selection and may remain in the raw Security DTO even when environment/team selects no resources; the page-level gate hides that response rather than changing security rules. Likewise legacy topology/telemetry fixtures are not evidence of matching inventory. Overview's unavailable previous-period percentage and zero-budget percentages display “—”; not every numeric zero is rendered as a dash. A resource selection with resources but no Kubernetes clusters uses the Kubernetes-specific no-clusters state.
+
+For the supplied nonnegative dataset and supported windows, `realism.test.ts` recursively checks every numeric field from all filter-aware builders and simulator results for all actual zero-resource provider/environment/team combinations across four ranges: no NaN, Infinity or negative zero. Migration explicitly returns zero when moved spend is zero, avoiding `0 × negative cost difference = -0`.
 
 ## CO2e and regional cost index
 
@@ -212,7 +224,7 @@ saving percentage = total saving / baseline × 100 (zero if baseline is zero)
 carbon reduction tons = moved × 2.2 × (379 - 28 × costRatio) / 1,000,000
 ```
 
-The current migration target costs 2% more in the model, so migration saving is negative. Levers add independently without deduplicating overlapping eligible workloads; these are estimates, not an optimization solver or executed changes.
+The current migration target costs 2% more in the model, so migration saving is negative for nonzero moved spend and zero otherwise. Levers add independently without deduplicating overlapping eligible workloads; these are estimates, not an optimization solver or executed changes.
 
 ## Security findings, score and compliance
 
@@ -270,7 +282,11 @@ The suite is an implementation regression check, not proof of real-world correct
 | Report totals reconcile; integration tests are format-only; key strings are fake | `reports-integrations.test.ts` |
 | USD conversion rates, currency fallback/sign formatting and active currency store | `currency.test.ts` |
 | Reduced-motion mapping/session switch, error-boundary isolation and removal of obsolete budget/date constants | `audit-fixes.test.tsx` |
+| Usage determinism, 184 dates ending on DEMO_TODAY, positive usage and plausible default unit-cost ranges | `realism.test.ts` |
+| Exact current/previous unit costs equal spend / average users or total requests for four filter combinations × four windows | `realism.test.ts` |
+| Overview, Explorer and all four report template responses have identical unit costs; default unit-cost changes differ from spend and each other | `realism.test.ts` |
+| Every real zero-resource combination yields finite, non-negative-zero numeric fields across all filter-aware aggregates and simulator results; zero-day usage fallbacks are safe | `realism.test.ts` |
 
 ## Verification scope
 
-Documentation was checked against source and the full suite passed **151 tests across 12 files** on 3 November 2026. The automatic build log reported `build OK`; no manual build or separate typecheck was run in this documentation task. No application source, data, styling, routes or tests were modified. A compatible production HTTP backend, successful Gateway generation, secret-rejection guarantees and real cloud/delivery behavior were not verified; the latter cloud/delivery features are not built.
+Documentation was checked against current source on **4 November 2026**. The previous realism pass reported **172 passing tests across 13 files**; the result of this documentation-only rerun is recorded below once completed. The latest available automatic build log reports `build OK`. Manual builds and separate typechecks are not run under the workspace rules; a prior automatic build is not a fresh standalone typecheck. No application source, data, styling, routes or tests were modified for this documentation refresh. A compatible production HTTP backend, successful Gateway generation, blanket secret-rejection guarantees and real cloud/report delivery were not verified; cloud/report delivery and production authentication are not built.
