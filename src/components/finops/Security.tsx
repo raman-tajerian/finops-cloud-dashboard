@@ -80,7 +80,7 @@ function ScoreCard({ trend }: { trend: SecurityDto["scoreTrend"] }) {
         <svg viewBox="0 0 120 120" className="size-28 shrink-0" role="img" aria-label={`Security score ${fmtScore(score)} of 100`}>
           <circle cx="60" cy="60" r={R} fill="none" strokeWidth="10" className="stroke-secondary" />
           <circle cx="60" cy="60" r={R} fill="none" strokeWidth="10" strokeLinecap="round" className="stroke-primary transition-[stroke-dashoffset] duration-700" strokeDasharray={C} strokeDashoffset={C * (1 - score / 100)} transform="rotate(-90 60 60)" />
-          <text x="60" y="66" textAnchor="middle" className="fill-foreground font-display text-2xl">{fmtScore(score)}</text>
+          <text x="60" y="66" textAnchor="middle" className="fill-foreground metric-numbers text-2xl">{fmtScore(score)}</text>
         </svg>
         <div className="min-w-0 flex-1">
           {asTable ? (
