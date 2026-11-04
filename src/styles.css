@@ -216,3 +216,15 @@ html { scroll-padding-top: 64px; }
 /* Shared table density: the session density setting (Settings > Appearance) drives every data table via data-density on the shell root. */
 .density-table :where(th, td) { padding-top: 0.75rem; padding-bottom: 0.75rem; }
 [data-density="compact"] .density-table :where(th, td) { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+
+/* Touch ergonomics without altering desktop density or the palette. */
+@media (max-width: 1023px) {
+  main :where(button, a, [role="button"], [role="tab"], [role="combobox"]),
+  aside nav a, [role="dialog"] :where(button, [role="combobox"]),
+  [role="menuitem"], [role="option"] { min-height: 40px; }
+  main :where(button, [role="button"]), [role="dialog"] button { min-width: 40px; }
+  main table :is(th, td):first-child { position: sticky; left: 0; z-index: 2; background: var(--card); }
+  main table thead :is(th, td):first-child { z-index: 3; }
+  main table tbody tr:hover td:first-child { background: var(--background); }
+  [role="dialog"] { max-width: calc(100vw - 24px); }
+}

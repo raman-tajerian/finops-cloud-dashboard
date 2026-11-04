@@ -8,6 +8,7 @@ import type {
 import { businessVolume, DEMO_TODAY, dayAt, dayLabel, HISTORY_DAYS } from "./resources";
 import { cluster, tickerSeed } from "./operations";
 import { topoEdges, topoLayout } from "./topology";
+import { usageHistory } from "./usage";
 
 export interface Window { start: number; end: number; days: number }
 const H = HISTORY_DAYS;
@@ -28,6 +29,21 @@ export const filterResources = (rs: MasterResource[], f: Filters) =>
 
 const sumWin = (r: MasterResource, w: Window) => { let s = 0; for (let i = w.start; i < w.end; i++) s += r.daily[i] ?? 0; return s; };
 export const totalOf = (rs: MasterResource[], w: Window) => rs.reduce((a, r) => a + sumWin(r, w), 0);
+/** Usage denominators are workspace-wide and independent of resource filters and spend. */
+export function buildUnitEconomics(rs: MasterResource[], w: Window) {
+  const volume = (win: Window) => {
+    const days = usageHistory.slice(win.start, win.end);
+    return { activeUsers: days.length ? days.reduce((n, d) => n + d.activeUsers, 0) / days.length : 0,
+      requests: days.reduce((n, d) => n + d.apiRequests, 0) };
+  };
+  const current = volume(w), pw = previousOf(w), previous = volume(pw);
+  const divide = (n: number, d: number) => d > 0 ? n / d : 0;
+  const spend = totalOf(rs, w), prevSpend = totalOf(rs, pw);
+  return { ...current, perUser: divide(spend, current.activeUsers), perRequest: divide(spend, current.requests),
+    previousPerUser: divide(prevSpend, previous.activeUsers), previousPerRequest: divide(prevSpend, previous.requests),
+    userSpark: dailyOf(rs, w).map((n, i) => divide(n, usageHistory[w.start + i]?.activeUsers ?? 0)),
+    requestSpark: dailyOf(rs, w).map((n, i) => divide(n, usageHistory[w.start + i]?.apiRequests ?? 0)) };
+}
 const dailyOf = (rs: MasterResource[], w: Window) => Array.from({ length: w.end - w.start }, (_, k) => rs.reduce((a, r) => a + (r.daily[w.start + k] ?? 0), 0));
 const sample = (xs: number[], n = 30) => xs.length <= n ? xs : Array.from({ length: n }, (_, i) => xs[Math.floor((i * xs.length) / n)]!);
 
@@ -205,6 +221,7 @@ export function buildDashboard(all: MasterResource[], f: Filters): DashboardDto 
   const idleWaste = idle.reduce((a, r) => a + r.monthlyCost, 0);
   const monthly = (t: number) => (t / w.days) * 30;
   const v = businessVolume;
+  const unit = buildUnitEconomics(rs, w);
 
   // Trend + forecast extension
   const ext = f.range === "mtd" ? remaining : 7;
@@ -257,7 +274,7 @@ export function buildDashboard(all: MasterResource[], f: Filters): DashboardDto 
       spend: { total: Math.round(total), mom: prevTotal ? Math.round(((total - prevTotal) / prevTotal) * 1000) / 10 : 0, burn: Math.round(total / w.days), projected: Math.round(forecastEom) },
       waste: { total: Math.round(idleWaste), ebs: idle.filter((r) => r.category === "Storage").length, rds: idle.filter((r) => r.category === "Database").length, ec2: oversized.length },
       anomalies: anomalies.map(({ resourceId: _r, index: _i, region: _g, ...a }) => a),
-      unit: { perUser: monthly(total) / v.activeUsers, perRequest: monthly(total) / v.apiRequests, activeUsers: v.activeUsers, requests: v.apiRequests, perDeployment: monthly(total) / v.deployments, perSession: monthly(total) / v.sessions },
+      unit: { perUser: unit.perUser, perRequest: unit.perRequest, activeUsers: unit.activeUsers, requests: unit.requests, perDeployment: monthly(total) / v.deployments, perSession: monthly(total) / v.sessions },
     },
     overview: {
       totalSpend: kv(total, prevTotal, daily),
@@ -266,8 +283,8 @@ export function buildDashboard(all: MasterResource[], f: Filters): DashboardDto 
       savings: kv(savings, prevSavings, sumBy([...idle, ...oversized])),
       idleWaste: kv(idleWaste, idle.reduce((a, r) => a + last30(r, 30), 0), sumBy(idle)),
       anomalies: kv(anomalies.length, prevAnomalies.length, sumBy(rs.filter((r) => anomalies.some((a) => a.resourceId === r.id)))),
-      costPerUser: kv(monthly(total) / v.activeUsers, monthly(prevTotal) / v.activeUsers, daily),
-      costPerRequest: kv(monthly(total) / v.apiRequests, monthly(prevTotal) / v.apiRequests, daily),
+      costPerUser: kv(unit.perUser, unit.previousPerUser, unit.userSpark),
+      costPerRequest: kv(unit.perRequest, unit.previousPerRequest, unit.requestSpark),
       idleCount: idle.length,
     },
     services: groupTotals(rs, w, "service"),
@@ -301,7 +318,7 @@ export function buildExplore(all: MasterResource[], f: Filters, g: GroupBy): Exp
     const p = prev.get(c.name) ?? 0;
     return { name: c.name, current: c.value, previous: p, changePct: p ? ((c.value - p) / p) * 100 : 0, share: total ? (c.value / total) * 100 : 0, spark: sample(series.map((s) => s[c.name] as number), 20) };
   });
-  return { groupBy: g, keys, series, rows, total, previousTotal };
+  return { groupBy: g, keys, series, rows, total, previousTotal, unitEconomics: buildUnitEconomics(rs, w) };
 }
 
 /* ---------- Resources ---------- */

@@ -86,10 +86,10 @@ export function Topology3D() {
         <div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><Move3d className="size-4 text-muted-foreground" /></div>
       </div>
       {asTable ? <div className="mt-4 h-[300px]"><DataTableView caption="Cloud topology nodes" columns={["Node", "Type", "Health", "Cost / mo"]} rows={topoNodes.map((n) => [n.label, n.kind, n.health === "ok" ? "Healthy" : n.health, fmtMoney(n.cost)])} /></div> :
-      <div className="relative mt-4 flex-1 cursor-grab touch-none select-none active:cursor-grabbing"
+      <div className="relative mt-4 flex-1 cursor-grab touch-pan-y select-none active:cursor-grabbing"
         onPointerDown={(e) => { drag.current = { x: e.clientX, y: e.clientY }; e.currentTarget.setPointerCapture(e.pointerId); }}
-        onPointerMove={(e) => { if (!drag.current) return; setYaw((y) => y + (e.clientX - drag.current!.x) * 0.008); setPitch((p) => Math.max(-1.2, Math.min(1.2, p + (e.clientY - drag.current!.y) * 0.006))); drag.current = { x: e.clientX, y: e.clientY }; }}
-        onPointerUp={() => { drag.current = null; }}>
+        onPointerMove={(e) => { const start = drag.current; if (!start) return; const dx = e.clientX - start.x, dy = e.clientY - start.y; setYaw((y) => y + dx * 0.008); if (e.pointerType !== "touch") setPitch((p) => Math.max(-1.2, Math.min(1.2, p + dy * 0.006))); drag.current = { x: e.clientX, y: e.clientY }; }}
+        onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }} onLostPointerCapture={() => { drag.current = null; }}>
         <svg viewBox="0 0 600 380" className="h-full min-h-[300px] w-full">
           {topoEdges.map((e) => { const a = pts[e.from]!, b = pts[e.to]!; return <line key={e.from + e.to} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="var(--border)" strokeWidth={1.2} />; })}
           {sorted.map((n, i) => {
@@ -173,7 +173,7 @@ export function AnomalyForecast() {
         <ResponsiveContainer>
           <ComposedChart data={data} margin={{ left: -10, right: 8 }}>
             <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} />
-            <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} interval={5} />
+            <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} minTickGap={24} />
             <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} formatter={(v) => Array.isArray(v) ? `${fmtMoney(Number(v[0]))} – ${fmtMoney(Number(v[1]))}` : fmtMoney(Number(v))} />
             <Area dataKey="band" name="Confidence" stroke="none" fill="var(--chart-1)" fillOpacity={0.14} animationDuration={900} />

@@ -48,6 +48,8 @@ Query: `range, providers, env, team`. Returns `SustainabilityDto` (src/types/fin
 Query: `range, providers, env, team, groupBy` (`service|provider|region|team|environment|tag`).
 Returns `ExploreDto` (src/types/finops.ts): `groupBy`, `keys`, daily `series` (one column per key plus `total` and `previous`), `rows` (current, previous, changePct, share, spark), `total`, `previousTotal`.
 
+Also returns `unitEconomics: UnitEconomicsDto`, shared with every ReportDto: `{activeUsers,requests,perUser,perRequest,previousPerUser,previousPerRequest,userSpark:number[],requestSpark:number[]}`. Dashboard exposes the same unit costs in `kpis.unit` and `overview.costPerUser/costPerRequest`. Active users is the mean of the independent seeded daily user series in the selected window; requests is the sum of the independent seeded request series. `perUser=selectedSpend/activeUsers`, `perRequest=selectedSpend/requests`; previous values use the preceding window's spend and usage, not monthly-normalized spend. Usage remains workspace-wide under provider/environment/team filters. Histories have 184 days ending 2026-10-12, separate seeds, weekday seasonality, 2% monthly growth and ±2% noise (see DEMO_DATA). Zero denominators return zero; the UI shows `—` for unavailable ratios and one Reset filters empty state for zero resources. No endpoint or query parameter was added.
+
 ## Derivation rules (mock mode)
 Builders live in src/data/aggregate.ts, platformOps.ts, budgets.ts, security.ts, reports.ts, integrations.ts and settings.ts. Costs share the master dataset; some telemetry/history is illustrative. Full formulas and limitations: [DEMO_DATA.md](DEMO_DATA.md). Provider, service-category and team sums equal selected-period total spend.
 

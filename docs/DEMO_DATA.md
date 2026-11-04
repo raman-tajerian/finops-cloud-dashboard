@@ -135,12 +135,16 @@ Alerts use exactly these IDs, amounts and percentages. `expected=round(baseline*
 
 ## Unit costs
 
-Monthly-equivalent spend is `selectedSpend / window.days * 30`. Divide by these fixed, simulated per-30-day business volumes:
+Active users and API requests are workspace-wide daily series in `src/data/usage.ts`, independent of cost and resource filter membership. Both have 184 observations ending on DEMO_TODAY, with separate Mulberry32 seeds (20261104 users, 20261105 requests), ±2% daily noise and growth `1.02^((index-183)/30)` (about 2% per month).
+
+Users: base 2,250,000 × growth × weekday factor (1.04 Mon–Fri, 0.86 weekend) × noise, rounded to an integer. Requests: base 72,000,000 × growth × weekday factor (1.08 Mon–Fri, 0.78 weekend) × noise, rounded to an integer.
+
+`costPerUser = selectedSpend / mean(activeUsers[start:end])`; `costPerRequest = selectedSpend / sum(apiRequests[start:end])`. Previous-period comparisons use exactly these formulas on `previousOf(window)`, dividing average users by actual stored days when history is truncated. Overview, Explorer and all report templates share `buildUnitEconomics`. Resource filters change only the numerator. Zero denominators return numeric zero in contracts; unavailable UI comparisons show `—`. Zero-resource selections show the same Reset filters empty state across all resource-dependent pages, including the simulator and Reports.
+
+Deployment and session costs retain monthly-equivalent spend `selectedSpend / window.days * 30` divided by their unchanged fixed per-30-day volumes:
 
 | Unit | Denominator |
 | --- | --- |
-| Active user | 5,920,000 |
-| API request | 2,070,000,000 |
 | Deployment | 125,000 |
 | Session | 13,600,000 |
 

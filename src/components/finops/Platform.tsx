@@ -49,7 +49,7 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
     toast.success(`${kind} report exported`);
   };
   return (
-    <div className="organic-card @container flex min-w-0 max-w-full items-center gap-3 p-3">
+    <div className="organic-card @container flex min-w-0 max-w-full flex-col items-stretch gap-3 p-3 md:flex-row md:items-center">
       <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3 xl:flex-nowrap">
       <Select value={filters.range} onValueChange={(v) => { onChange({ ...filters, range: v as PlatformRange }); if (v === "custom") toast("Custom range: Sep 4 – Oct 3, 2026"); }}>
         <SelectTrigger className="h-9 w-[140px] rounded-xl" aria-label="Date range"><SelectValue /></SelectTrigger>
@@ -76,7 +76,7 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
         </PopoverContent>
       </Popover>
       </div>
-      <div className="flex shrink-0 items-center gap-2 self-center">
+      <div className="flex shrink-0 items-center gap-2 self-end md:self-center">
         <BudgetAlertDialog />
         <DropdownMenu>
           <DropdownMenuTrigger asChild><Button variant="outline" aria-label="Export" className="rounded-xl border-border bg-card shadow-none"><Download /><span className="hidden @[860px]:inline">Export</span></Button></DropdownMenuTrigger>
@@ -186,7 +186,7 @@ export function CostDistribution() {
   const services = d.services;
   const total = services.reduce((a, b) => a + b.value, 0);
   const daily = d.daily;
-  const pct = (v: number) => `${((v / total) * 100).toFixed(1)}%`;
+  const pct = (v: number) => total > 0 ? `${((v / total) * 100).toFixed(1)}%` : "—";
   const table = view === "service" ? { columns: ["Service", "Cost", "Share"], rows: services.map((s) => [s.name, fmtMoney(s.value), pct(s.value)]) } : view === "region" ? { columns: ["Region", ...providers], rows: d.regions.map((r) => [r.region, ...providers.map((p) => fmtMoney(r[p]))]) } : view === "team" ? { columns: ["Team", "Cost", "Share"], rows: d.teams.map((s) => [s.name, fmtMoney(s.value), pct(s.value)]) } : { columns: ["Day", "Spend"], rows: daily.map((x) => [x.day, fmtMoney(x.spend)]) };
   return (
     <article className={card}>

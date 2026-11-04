@@ -45,7 +45,7 @@ export function OverviewKpis() {
               <Spark data={it.k.spark} color={it.color} className="h-8 w-20" />
             </div>
             <p title={`Previous period: ${it.f(it.k.previous)}`} className={`mt-auto flex items-center gap-1 whitespace-nowrap pt-3 text-xs tabular-nums ${Math.abs(d) < 0.05 ? "text-muted-foreground" : good ? "text-success" : "text-warning"}`}>
-              {Math.abs(d) < 0.05 ? <Minus className="size-3 shrink-0" /> : up ? <ArrowUpRight className="size-3 shrink-0" /> : <ArrowDownRight className="size-3 shrink-0" />}<span>{up ? "+" : ""}{d.toFixed(1)}%</span><span className="text-muted-foreground">vs prev</span>
+              {Math.abs(d) < 0.05 ? <Minus className="size-3 shrink-0" /> : up ? <ArrowUpRight className="size-3 shrink-0" /> : <ArrowDownRight className="size-3 shrink-0" />}<span>{it.k.previous > 0 ? `${up ? "+" : ""}${Math.abs(d) < 0.05 ? "0.0" : d.toFixed(1)}%` : "—"}</span><span className="text-muted-foreground">vs prev</span>
             </p>
           </Link>
         );

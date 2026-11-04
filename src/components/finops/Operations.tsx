@@ -68,7 +68,7 @@ function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={c.namespaces} margin={{ left: 0, right: 8, top: 4 }}>
                   <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} interval={0} />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={16} />
                   <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={52} tickFormatter={(v: number) => fmtMoneyCompact(Number(v))} />
                   <Tooltip contentStyle={tip} cursor={{ fill: "var(--muted)" }} formatter={(v) => fmtMoney(Number(v))} />
                   <Bar dataKey="cost" radius={[6, 6, 0, 0]}>{c.namespaces.map((n) => <Cell key={n.name} fill={n.overProvisioned ? "var(--chart-3)" : "var(--chart-1)"} />)}</Bar>
@@ -91,7 +91,7 @@ function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
         <div className="flex flex-wrap items-start justify-between gap-3"><Title sub="Each square is one pod. Hover for details, click to open.">Pod status</Title>
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground"><TableToggle on={podTable} onChange={setPodTable} />{(["Running", "Pending", "Failed"] as const).map((s) => <span key={s} className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-[3px]" style={{ background: podColor[s] }} />{s}</span>)}</div></div>
         {podTable ? <div className="mt-5 h-72"><DataTableView caption="Pods" columns={["Pod", "Namespace", "Status", "Restarts"]} rows={c.pods.map((p) => [p.name, p.namespace, p.status, p.restarts])} /></div> : <div className="mt-5 flex flex-wrap gap-1" role="list" aria-label="Pods">
-          {c.pods.map((p) => <button key={p.name} role="listitem" title={`${p.name} · ${p.status} · ${p.restarts} restarts`} aria-label={`${p.name}, ${p.status}, ${p.restarts} restarts`} onClick={() => setPod(p)} className="size-3.5 rounded-[3px] transition-transform hover:scale-125 focus-visible:scale-125" style={{ background: podColor[p.status], opacity: p.status === "Running" ? 0.55 : 1 }} />)}
+          {c.pods.map((p) => <Button key={p.name} variant="ghost" role="listitem" title={`${p.name} · ${p.status} · ${p.restarts} restarts`} aria-label={`${p.name}, ${p.status}, ${p.restarts} restarts`} onClick={() => setPod(p)} className="pod-target size-10 shrink-0 p-0 lg:size-3.5"><span className="size-3.5 rounded-[3px]" style={{ background: podColor[p.status], opacity: p.status === "Running" ? 0.55 : 1 }} /></Button>)}
         </div>}
       </article>
       <Sheet open={!!pod} onOpenChange={(o) => !o && setPod(null)}>
@@ -117,13 +117,13 @@ function BudgetCard({ d }: { d: NonNullable<ReturnType<typeof useBudget>["data"]
   const tone = budgetTone(pct);
   return (
     <article className="organic-card flex h-full flex-col p-6 md:p-8">
-      <div className="flex items-start justify-between gap-3"><Title sub={`${d.period} · day ${d.dayOfMonth} of ${d.monthDays}`}>Budget & forecast</Title><StatusBadge tone={tone}>{pct.toFixed(1)}% of budget</StatusBadge></div>
-      <div className="mt-6 grid grid-cols-2 gap-4">
+      <div className="flex items-start justify-between gap-3"><Title sub={`${d.period} · day ${d.dayOfMonth} of ${d.monthDays}`}>Budget & forecast</Title><StatusBadge tone={tone}>{budget > 0 ? `${pct.toFixed(1)}%` : "—"} of budget</StatusBadge></div>
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <div><p className="text-[13px] text-muted-foreground">Spend to date</p><p className="mt-1 metric-numbers text-[30px] leading-none"><CountUp value={d.spendToDate} format={(n) => fmtMoney(n)} /></p></div>
         <div><p className="text-[13px] text-muted-foreground">Projected end of month</p><p className="mt-1 metric-numbers text-[30px] leading-none"><CountUp value={d.forecastEom} format={(n) => fmtMoney(n)} /></p></div>
       </div>
       <div className="mt-6">
-        <div className="mb-2 flex justify-between text-xs text-muted-foreground"><span>Projected % of budget</span><span className="tabular-nums">{pct.toFixed(1)}%</span></div>
+        <div className="mb-2 flex justify-between text-xs text-muted-foreground"><span>Projected % of budget</span><span className="tabular-nums">{budget > 0 ? `${pct.toFixed(1)}%` : "—"}</span></div>
         <div className="relative h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
           <div className="h-full origin-left rounded-full transition-transform duration-500" style={{ transform: `scaleX(${Math.min(100, pct) / 100})`, background: toneColor[tone] }} />
           <span className="absolute inset-y-0 left-[80%] w-px bg-foreground/30" aria-hidden />
@@ -167,7 +167,7 @@ function Simulator({ d }: { d: NonNullable<ReturnType<typeof useScenario>["data"
           </div>
         ))}
       </div>
-      <div className="mt-6 grid grid-cols-3 gap-3 border-t border-border pt-5 text-sm">
+      <div className="mt-6 grid gap-3 border-t border-border pt-5 text-sm sm:grid-cols-3">
         <div><p className="text-[13px] text-muted-foreground">Baseline</p><p className="mt-1 metric-numbers text-2xl">{fmtMoney(d.baseline)}</p></div>
         <div><p className="text-[13px] text-muted-foreground">Projected</p><p className="mt-1 metric-numbers text-2xl"><CountUp value={r.projected} format={(n) => fmtMoney(n)} /></p></div>
         <div><p className="text-[13px] text-muted-foreground">Savings</p><p className={`mt-1 metric-numbers text-2xl ${r.savings >= 0 ? "text-success" : "text-warning"}`}>{fmtMoney(r.savings)}</p><p className="text-xs text-muted-foreground tabular-nums">{r.pct.toFixed(1)}%</p></div>

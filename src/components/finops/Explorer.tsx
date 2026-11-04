@@ -100,6 +100,11 @@ export function CostExplorer({ state, views, setViews, setState }: { state: Expl
           </DropdownMenu>
         </div>
       </div>
+      <section aria-label="Unit economics" className="grid gap-6 sm:grid-cols-2">
+        {[{ label: "Cost per active user", value: d.unitEconomics.perUser, previous: d.unitEconomics.previousPerUser, decimals: 4 }, { label: "Cost per API request", value: d.unitEconomics.perRequest, previous: d.unitEconomics.previousPerRequest, decimals: 6 }].map((u) => (
+          <article key={u.label} className="organic-card p-6"><Label>{u.label}</Label><p className="metric-numbers mt-2 text-[32px]">{fmtMoney(u.value, { decimals: u.decimals })}</p><p className="mt-2 text-xs text-muted-foreground">{u.previous > 0 ? `${((u.value / u.previous - 1) * 100).toFixed(1)}%` : "—"} vs prev</p></article>
+        ))}
+      </section>
       <ExplorerChart d={d} state={state} />
       <ExplorerTable d={d} group={state.group} />
     </div>
@@ -151,7 +156,7 @@ function ExplorerTable({ d, group }: { d: ExploreDto; group: GroupBy }) {
   );
   const totalChange = d.previousTotal ? ((d.total - d.previousTotal) / d.previousTotal) * 100 : 0;
   return (
-    <article className="organic-card inline-contain min-w-0 max-w-full overflow-hidden">
+    <article className="organic-card relative inline-contain min-w-0 max-w-full overflow-hidden">
       <div className="max-w-full overflow-x-auto overscroll-x-contain">
         <table className="w-full min-w-[720px] text-left text-sm">
           <caption className="sr-only">Cost by {group}</caption>
@@ -164,7 +169,7 @@ function ExplorerTable({ d, group }: { d: ExploreDto; group: GroupBy }) {
                 <td className="metric-numbers px-4 py-3 text-right text-muted-foreground">{fmtMoney(r.previous)}</td>
                 <td className={`metric-numbers px-4 py-3 text-right ${r.changePct > 0 ? "text-warning" : "text-success"}`}>{r.changePct > 0 ? "+" : ""}{r.changePct.toFixed(1)}%</td>
                 <td className="metric-numbers px-4 py-3 text-right">{r.share.toFixed(1)}%</td>
-                <td className="px-4 py-2"><Spark data={r.spark} color={col(d.keys.indexOf(r.name))} className="h-7 w-24" /><span className="sr-only">row {i + 1}</span></td>
+                <td className="px-4 py-2" aria-label={`Trend for row ${i + 1}`}><Spark data={r.spark} color={col(d.keys.indexOf(r.name))} className="h-7 w-24" /></td>
               </tr>
             ))}
           </tbody>

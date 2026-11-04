@@ -4,6 +4,7 @@ import { AlertCircle, CheckCircle2, CircleDashed, OctagonAlert, TriangleAlert, t
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTableDensity } from "@/lib/density";
+import { useGlobalFilters } from "@/lib/filters";
 
 export function PageHeader({ title, description, actions }: { title: string; description: string; actions?: ReactNode }) {
   return (
@@ -38,6 +39,11 @@ export function EmptyState({ icon: I, title, action, onAction }: { icon: LucideI
       <Button onClick={onAction}>{action}</Button>
     </div>
   );
+}
+
+export function FilterEmptyState() {
+  const { reset } = useGlobalFilters();
+  return <EmptyState icon={CircleDashed} title="No resources match these filters." action="Reset filters" onAction={reset} />;
 }
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {

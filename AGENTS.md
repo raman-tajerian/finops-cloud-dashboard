@@ -16,6 +16,8 @@
 - Data access goes through src/lib/api.ts (mock unless VITE_API_BASE_URL) with contracts in src/types — keeps the C# API swap one-file.
 - Global filters live in the root route's URL search (validated in src/lib/filters.ts, retained across nav); cards read data via useDashboard/DataGate in src/lib/queries.tsx keyed by filters.
 - All cost figures derive from the seeded master dataset in src/data via pure functions in src/data/aggregate.ts — one source keeps totals identical across cards (tested in src/test/aggregate.test.ts).
+- Unit economics use independent histories in src/data/usage.ts and shared buildUnitEconomics in the aggregate layer; Explorer and Report DTOs expose the same values so filters cannot cause cross-page drift.
+- Shell gates resource-dependent pages on the typed dashboard query and owns the zero-resource empty state; overlays keep close controls outside their internal scroll regions for mobile reachability.
 - Every card sits in a CardBoundary (DataGate includes one) and routes use the router's defaultErrorComponent — one failure never takes down a page.
 - Per-resource savings come only from rightsizeSaving() in src/data/aggregate.ts — recommendations and the resource drawer must show identical numbers.
 - Carbon estimates come only from carbonTons()/buildSustainability() in src/data/aggregate.ts — Overview and Sustainability must reconcile exactly.
