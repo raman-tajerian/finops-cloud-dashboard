@@ -34,12 +34,12 @@ function Index() {
       <Reveal><CardBoundary label="Anomaly banner"><AnomalyStrip onOpen={setDetail} /></CardBoundary></Reveal>
       <Reveal delay={0.04} className="relative isolate flex flex-wrap items-end justify-between gap-4 overflow-hidden rounded-[1.25rem] px-1 pb-2">
         <HeroShapes />
-        <div className="relative z-10 pt-6"><FjordLogo size={24} className="mb-3" /><p className="text-xs text-muted-foreground">Cloud & FinOps platform · <ResourceCount /> resources</p><h1 className="mt-2 font-display text-[32px] font-normal leading-tight tracking-tight">Good afternoon, Raman.</h1></div>
+        <div className="relative z-10 pt-6"><FjordLogo size={24} className="mb-3" /><p className="text-xs text-muted-foreground">Cloud & FinOps platform · <ResourceCount /> resources</p><h1 className="mt-2 font-display text-[36px] font-normal leading-[1.15] tracking-normal">Good afternoon, Raman.</h1></div>
       </Reveal>
       <Reveal delay={0.08}><GlobalFilters /></Reveal>
       <Reveal delay={0.12}><OnboardingChecklist /></Reveal>
       <Reveal delay={0.16}><DataGate h="h-16"><OverviewKpis /></DataGate></Reveal>
-      <section className="grid gap-4 xl:grid-cols-12">
+      <section className="grid gap-6 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-8"><DataGate h="h-72"><CostTrendCard /></DataGate></div>
         <div className="min-w-0 xl:col-span-4"><DataGate h="h-72"><TopMovers /></DataGate></div>
         <div className="min-w-0 xl:col-span-8"><DataGate h="h-72"><CostDistribution /></DataGate></div>

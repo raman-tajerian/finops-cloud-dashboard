@@ -73,18 +73,19 @@ export function Shell({ children }: { children: ReactNode }) {
         </DropdownMenu>
         <Button variant="ghost" size="icon" className="absolute right-2 top-4 lg:hidden" onClick={() => setOpen(false)} aria-label="Close menu"><X /></Button>
 
-        <nav className="mt-6 flex-1 space-y-5 overflow-y-auto" aria-label="Main">
+        <nav className="mt-4 flex-1 space-y-4 overflow-y-auto" aria-label="Main">
           {navGroups.map((g) => (
             <div key={g.label}>
-              {!collapsed && <p className="px-3 pb-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{g.label}</p>}
+              {!collapsed && <p className="px-3 pb-1 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{g.label}</p>}
               <div className="space-y-0.5">
                 {g.items.map(({ to, label, icon: Icon }) => {
                   const active = path === to;
                   return (
                     <Link key={to} to={to} title={collapsed ? label : undefined} aria-current={active ? "page" : undefined}
-                      className={`flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm transition-colors ${active ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"} ${collapsed ? "lg:justify-center lg:px-0" : ""}`}>
+                      className={`flex min-h-9 items-center gap-3 rounded-xl px-3 text-sm transition-colors ${active ? "bg-primary-soft text-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"} ${collapsed ? "lg:justify-center lg:px-0" : ""}`}>
                       <Icon className={`size-4 shrink-0 ${active ? "text-primary" : ""}`} />
                       <span className={collapsed ? "lg:sr-only" : ""}>{label}</span>
+                      {active && !collapsed && <span className="ml-auto size-1.5 shrink-0 rounded-full bg-primary" aria-hidden />}
                     </Link>
                   );
                 })}
@@ -92,9 +93,9 @@ export function Shell({ children }: { children: ReactNode }) {
             </div>
           ))}
         </nav>
-        <div className="mt-3 border-t border-border pt-3">
+        <div className="mt-2 border-t border-border pt-2">
           <p className={`px-3 text-xs text-muted-foreground ${collapsed ? "lg:hidden" : ""}`}>Data source: <span className="text-foreground">{dataSource === "live" ? "Live" : "Demo data"}</span></p>
-          <Button variant="ghost" size="sm" className="mt-2 hidden w-full justify-start text-muted-foreground lg:flex" onClick={() => setCollapsed((c) => !c)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
+          <Button variant="ghost" size="sm" className="mt-1 hidden w-full justify-start text-muted-foreground lg:flex" onClick={() => setCollapsed((c) => !c)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
             <ChevronsLeft className={`transition-transform ${collapsed ? "rotate-180" : ""}`} />{!collapsed && "Collapse"}
           </Button>
         </div>

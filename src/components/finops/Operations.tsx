@@ -57,7 +57,7 @@ function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
       </section>
       <section aria-label="Cluster metrics" className="grid gap-4 sm:grid-cols-3">
         {[["Monthly cost", fmtMoney(c.monthlyCost), "Last 30 days"], ["Nodes", String(c.nodes), `max(3, cost / ${fmtMoney(350)})`], ["Pod health", `${c.podsHealthy}/${c.podsTotal}`, `${c.podsFailed} failed or pending`]].map(([l, v, n]) => (
-          <div key={l} className="organic-card p-5"><p className="text-[13px] text-muted-foreground">{l}</p><p className="mt-2 font-display text-[32px] leading-none tracking-tight tabular-nums">{v}</p><p className="mt-3 text-xs text-muted-foreground">{n}</p></div>
+          <div key={l} className="organic-card p-5"><p className="text-[13px] text-muted-foreground">{l}</p><p className="mt-2 metric-numbers text-[32px] leading-none">{v}</p><p className="mt-3 text-xs text-muted-foreground">{n}</p></div>
         ))}
       </section>
       <div className="grid gap-6 xl:grid-cols-2">
@@ -119,8 +119,8 @@ function BudgetCard({ d }: { d: NonNullable<ReturnType<typeof useBudget>["data"]
     <article className="organic-card flex h-full flex-col p-6 md:p-8">
       <div className="flex items-start justify-between gap-3"><Title sub={`${d.period} · day ${d.dayOfMonth} of ${d.monthDays}`}>Budget & forecast</Title><StatusBadge tone={tone}>{pct.toFixed(1)}% of budget</StatusBadge></div>
       <div className="mt-6 grid grid-cols-2 gap-4">
-        <div><p className="text-[13px] text-muted-foreground">Spend to date</p><p className="mt-1 font-display text-[30px] leading-none tabular-nums"><CountUp value={d.spendToDate} format={(n) => fmtMoney(n)} /></p></div>
-        <div><p className="text-[13px] text-muted-foreground">Projected end of month</p><p className="mt-1 font-display text-[30px] leading-none tabular-nums"><CountUp value={d.forecastEom} format={(n) => fmtMoney(n)} /></p></div>
+        <div><p className="text-[13px] text-muted-foreground">Spend to date</p><p className="mt-1 metric-numbers text-[30px] leading-none"><CountUp value={d.spendToDate} format={(n) => fmtMoney(n)} /></p></div>
+        <div><p className="text-[13px] text-muted-foreground">Projected end of month</p><p className="mt-1 metric-numbers text-[30px] leading-none"><CountUp value={d.forecastEom} format={(n) => fmtMoney(n)} /></p></div>
       </div>
       <div className="mt-6">
         <div className="mb-2 flex justify-between text-xs text-muted-foreground"><span>Projected % of budget</span><span className="tabular-nums">{pct.toFixed(1)}%</span></div>
@@ -168,9 +168,9 @@ function Simulator({ d }: { d: NonNullable<ReturnType<typeof useScenario>["data"
         ))}
       </div>
       <div className="mt-6 grid grid-cols-3 gap-3 border-t border-border pt-5 text-sm">
-        <div><p className="text-[13px] text-muted-foreground">Baseline</p><p className="mt-1 font-display text-2xl tabular-nums">{fmtMoney(d.baseline)}</p></div>
-        <div><p className="text-[13px] text-muted-foreground">Projected</p><p className="mt-1 font-display text-2xl tabular-nums"><CountUp value={r.projected} format={(n) => fmtMoney(n)} /></p></div>
-        <div><p className="text-[13px] text-muted-foreground">Savings</p><p className={`mt-1 font-display text-2xl tabular-nums ${r.savings >= 0 ? "text-success" : "text-warning"}`}>{fmtMoney(r.savings)}</p><p className="text-xs text-muted-foreground tabular-nums">{r.pct.toFixed(1)}%</p></div>
+        <div><p className="text-[13px] text-muted-foreground">Baseline</p><p className="mt-1 metric-numbers text-2xl">{fmtMoney(d.baseline)}</p></div>
+        <div><p className="text-[13px] text-muted-foreground">Projected</p><p className="mt-1 metric-numbers text-2xl"><CountUp value={r.projected} format={(n) => fmtMoney(n)} /></p></div>
+        <div><p className="text-[13px] text-muted-foreground">Savings</p><p className={`mt-1 metric-numbers text-2xl ${r.savings >= 0 ? "text-success" : "text-warning"}`}>{fmtMoney(r.savings)}</p><p className="text-xs text-muted-foreground tabular-nums">{r.pct.toFixed(1)}%</p></div>
       </div>
       <div className="mt-4 flex justify-end"><TableToggle on={asTable} onChange={setAsTable} /></div>
       <div className="h-40">

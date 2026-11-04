@@ -23,25 +23,25 @@ const pctDelta = (k: KpiValue) => (k.previous ? ((k.value - k.previous) / k.prev
 export function OverviewKpis() {
   const o = useDashboardData().overview;
   const money = (n: number) => fmtMoney(n);
-  const items: { label: string; k: KpiValue; f: (n: number) => string; to: To; goodWhenUp?: boolean; color: string }[] = [
+  const items: { label: string; k: KpiValue; f: (n: number) => string; suffix?: string; to: To; goodWhenUp?: boolean; color: string }[] = [
     { label: "Total spend", k: o.totalSpend, f: money, to: "/cost-explorer", color: "var(--chart-1)" },
     { label: "Forecast end of month", k: o.forecastEom, f: money, to: "/budgets", color: "var(--chart-1)" },
-    { label: "Daily burn rate", k: o.dailyBurn, f: (n) => `${fmtMoney(n)}/d`, to: "/cost-explorer", color: "var(--chart-2)" },
-    { label: "Savings opportunity", k: o.savings, f: (n) => `${fmtMoney(n)}/mo`, to: "/recommendations", goodWhenUp: true, color: "var(--success)" },
-    { label: `Idle waste · ${o.idleCount} res.`, k: o.idleWaste, f: (n) => `${fmtMoney(n)}/mo`, to: "/resources", color: "var(--chart-3)" },
+    { label: "Daily burn rate", k: o.dailyBurn, f: money, suffix: "/d", to: "/cost-explorer", color: "var(--chart-2)" },
+    { label: "Savings opportunity", k: o.savings, f: money, suffix: "/mo", to: "/recommendations", goodWhenUp: true, color: "var(--success)" },
+    { label: `Idle waste · ${o.idleCount} res.`, k: o.idleWaste, f: money, suffix: "/mo", to: "/resources", color: "var(--chart-3)" },
     { label: "Active anomalies", k: o.anomalies, f: (n) => `${Math.round(n)}`, to: "/budgets", color: "var(--destructive)" },
     { label: "Cost per active user", k: o.costPerUser, f: (n) => fmtMoney(n, { decimals: 4 }), to: "/cost-explorer", color: "var(--chart-4)" },
     { label: "Cost per API request", k: o.costPerRequest, f: (n) => fmtMoney(n, { decimals: 6 }), to: "/cost-explorer", color: "var(--chart-4)" },
   ];
   return (
-    <section aria-label="Key metrics" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <section aria-label="Key metrics" className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((it) => {
         const d = pctDelta(it.k), up = d > 0, good = it.goodWhenUp ? up : !up;
         return (
           <Link key={it.label} to={it.to} className="organic-card subtle-lift group flex h-full flex-col p-5">
             <div className="flex items-center justify-between gap-2"><p className="truncate text-[13px] text-muted-foreground">{it.label}</p><ChevronRight className="size-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></div>
             <div className="mt-2 flex items-end justify-between gap-2">
-              <p className="font-display whitespace-nowrap text-[32px] leading-none tracking-tight tabular-nums" aria-live="polite"><CountUp value={it.k.value} format={it.f} /></p>
+              <p className="metric-numbers whitespace-nowrap text-[32px] leading-none" aria-live="polite"><CountUp value={it.k.value} format={it.f} />{it.suffix && <span className="text-base font-normal text-muted-foreground">{it.suffix}</span>}</p>
               <Spark data={it.k.spark} color={it.color} className="h-8 w-20" />
             </div>
             <p title={`Previous period: ${it.f(it.k.previous)}`} className={`mt-auto flex items-center gap-1 whitespace-nowrap pt-3 text-xs tabular-nums ${Math.abs(d) < 0.05 ? "text-muted-foreground" : good ? "text-success" : "text-warning"}`}>

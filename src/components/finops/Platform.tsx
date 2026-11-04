@@ -50,9 +50,9 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
   };
   return (
     <div className="organic-card @container flex min-w-0 max-w-full items-center gap-3 p-3">
-      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
+      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3 xl:flex-nowrap">
       <Select value={filters.range} onValueChange={(v) => { onChange({ ...filters, range: v as PlatformRange }); if (v === "custom") toast("Custom range: Sep 4 – Oct 3, 2026"); }}>
-        <SelectTrigger className="h-9 w-[150px] rounded-xl" aria-label="Date range"><SelectValue /></SelectTrigger>
+        <SelectTrigger className="h-9 w-[140px] rounded-xl" aria-label="Date range"><SelectValue /></SelectTrigger>
         <SelectContent>{(Object.keys(rangeLabels) as PlatformRange[]).map((r) => <SelectItem key={r} value={r}>{rangeLabels[r]}</SelectItem>)}</SelectContent>
       </Select>
       <div className="flex items-center gap-1 rounded-xl bg-secondary p-1">
@@ -62,7 +62,7 @@ export function FilterBar({ filters, onChange }: { filters: Filters; onChange: (
         ))}
       </div>
       <Select value={filters.env} onValueChange={(v) => onChange({ ...filters, env: v as Env | "All" })}>
-        <SelectTrigger className="h-9 w-[150px] rounded-xl" aria-label="Environment"><SelectValue /></SelectTrigger>
+        <SelectTrigger className="h-9 w-[140px] rounded-xl" aria-label="Environment"><SelectValue /></SelectTrigger>
         <SelectContent>{["All", "Production", "Staging", "Development"].map((e) => <SelectItem key={e} value={e}>{e === "All" ? "All environments" : e}</SelectItem>)}</SelectContent>
       </Select>
       <Popover>
@@ -353,7 +353,7 @@ export function AnomalyStrip({ onOpen }: { onOpen: (d: Detail) => void }) {
   const a = useDashboard().data?.kpis.anomalies[0];
   if (!a) return null;
   return (
-    <button onClick={() => onOpen({ title: a.title, description: "Last 3 days vs the prior 14-day baseline.", rows: [["Change", `+${a.change}%`], ["Est. monthly impact", fmtMoney(a.impact)], ["Detected", a.since], ["Suggested action", "Enable CDN caching for media container"]] })} className="group flex w-full items-center gap-3 rounded-2xl bg-destructive-soft px-4 py-2.5 text-left text-sm transition-[transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-destructive-soft/80 active:scale-[0.99]">
+    <button onClick={() => onOpen({ title: a.title, description: "Last 3 days vs the prior 14-day baseline.", rows: [["Change", `+${a.change}%`], ["Est. monthly impact", fmtMoney(a.impact)], ["Detected", a.since], ["Suggested action", "Enable CDN caching for media container"]] })} className="group flex w-full items-center gap-3 rounded-2xl bg-destructive-soft px-4 py-1.5 text-left text-[13px] transition-[transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-destructive-soft/80 active:scale-[0.99]">
       <AlertTriangle className="size-4 shrink-0 text-destructive" />
       <span className="flex-1"><span className="font-medium text-destructive">Anomaly:</span> <span className="text-foreground">Unexpected +{a.change}% spike in {a.title}</span></span>
       <ChevronRight className="size-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1" />
