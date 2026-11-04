@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Realism/robustness: independent seeded usage histories and shared unit economics; preserve all existing totals.
+- [ ] Consistent zero-resource empty state and safe aggregate edge cases.
+- [ ] Mobile tables, controls, overlays, navigation and topology; tests and four-width browser checks.
+
 - [x] Documentation-only brief: README and DEMO_DATA completed, all 14 API functions reconciled, 151 tests passed, automatic build OK; separate typecheck not run (manual checks disabled by workspace rules).
 
 - [x] Density/currency/shortcuts/onboarding/titles/motion brief (2026-10-20):
