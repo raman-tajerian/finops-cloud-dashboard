@@ -9,7 +9,7 @@ import { MOTION } from "@/lib/motion";
 export interface PageTab { id: string; label: string }
 
 /** Tab registry: single source for the tab bars, deep links and the command palette. */
-export const PAGE_TABS: Record<string, { label: string; tabs: PageTab[] }> = {
+export const PAGE_TABS = {
   "/": { label: "Overview", tabs: [
     { id: "summary", label: "Summary" },
     { id: "unit-economics", label: "Unit economics" },

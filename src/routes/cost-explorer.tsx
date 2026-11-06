@@ -1,33 +1,44 @@
-import { createFileRoute, stripSearchParams, type SearchSchemaInput } from "@tanstack/react-router";
+import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
+import { useState } from "react";
+import { GlobalFilters } from "@/components/finops/GlobalFilters";
+import { DataGate } from "@/lib/queries";
+import { DenseKpis, DetailDrawer, type Detail } from "@/components/finops/Platform";
+import { AnomalyForecast, Tilt } from "@/components/finops/Insights";
+import { CardBoundary, PageHeader, SectionHeading } from "@/components/finops/States";
 import { ExplorerCompare, ExplorerMain, SavedViewsPanel, UnitEconCards, type ExplorerState, type SavedView } from "@/components/finops/Explorer";
 import { PAGE_TABS, PageTabs, TabContent, usePageTab } from "@/components/finops/PageTabs";
-import { DenseKpis } from "@/components/finops/Platform";
-import { AnomalyForecast } from "@/components/finops/Insights";
-import { Tilt } from "@/components/finops/Insights";
-import { GlobalFilters } from "@/components/finops/GlobalFilters";
-import { PageHeader, CardBoundary } from "@/components/finops/States";
-import { DataGate } from "@/lib/queries";
-import { useSetFilters } from "@/lib/filters";
 import type { Filters } from "@/lib/filters";
 
-const viewSchema = z.object({ name: z.string(), filters: z.object({ range: z.string(), providers: z.array(z.string()), env: z.string(), team: z.string() }), state: z.object({ group: z.string(), chart: z.string(), compare: z.boolean() }) });
-const explorerSearchSchema = z.object({
-  group: z.string().optional(), chart: z.string().optional(), compare: z.boolean().optional(),
-  views: z.array(viewSchema).optional(),
+const defaults = { group: "service", chart: "area", compare: false, views: "" } as const;
+const schema = z.object({
+  group: fallback(z.enum(["service", "provider", "region", "team", "environment", "tag"]), "service").default("service"),
+  chart: fallback(z.enum(["area", "bar", "line"]), "area").default("area"),
+  compare: fallback(z.boolean(), false).default(false),
+  views: fallback(z.string(), "").default(""),
 });
 
+function decodeViews(raw: string): SavedView[] {
+  if (!raw || raw.length > 6000) return [];
+  try {
+    const value: unknown = JSON.parse(decodeURIComponent(raw));
+    if (!Array.isArray(value)) return [];
+    return value.filter((v): v is SavedView => typeof v === "object" && v !== null && typeof v.name === "string" && typeof v.state === "object" && v.state !== null && typeof v.filters === "object" && v.filters !== null).slice(-8);
+  } catch { return []; }
+}
+
 export const Route = createFileRoute("/cost-explorer")({
-  validateSearch: (search: Partial<z.infer<typeof explorerSearchSchema>> & SearchSchemaInput) => explorerSearchSchema.parse(search),
-  search: { middlewares: [stripSearchParams({ group: "service", chart: "area", compare: false, views: [] })] },
+  validateSearch: zodValidator(schema),
+  search: { middlewares: [stripSearchParams(defaults)] },
   head: () => ({
     meta: [
       { title: "Cost Explorer · Fern" },
-      { name: "description", content: "Explore cloud spend by service, provider, region and team." },
+      { name: "description", content: "Group spend by service, provider, region, team, environment or tag and compare with the previous period." },
       { property: "og:title", content: "Cost Explorer · Fern" },
-      { property: "og:description", content: "Explore cloud spend by service, provider, region and team." },
+      { property: "og:description", content: "Group spend by service, provider, region, team, environment or tag and compare with the previous period." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: CostExplorerPage,
@@ -37,37 +48,33 @@ const TABS = PAGE_TABS["/cost-explorer"].tabs;
 
 function CostExplorerPage() {
   const s = Route.useSearch();
-  const navigate = Route.useNavigate();
-  const setFilters = useSetFilters();
+  const navigate = useNavigate({ from: "/cost-explorer" });
+  const [detail, setDetail] = useState<Detail>(null);
   const { tab, setTab } = usePageTab(TABS);
-
-  const state: ExplorerState = {
-    group: (["service", "provider", "region", "team", "environment", "tag"].includes(s.group ?? "") ? s.group : "service") as ExplorerState["group"],
-    chart: (["area", "bar", "line"].includes(s.chart ?? "") ? s.chart : "area") as ExplorerState["chart"],
-    compare: s.compare ?? false,
-  };
-  const views = (s.views ?? []) as SavedView[];
-  const setState = (patch: Partial<ExplorerState>, filters?: Filters) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch, ...(filters ?? {}) }), replace: true });
-  const setViews = (v: SavedView[]) => navigate({ search: (prev) => ({ ...prev, views: v }), replace: true });
+  const state: ExplorerState = { group: s.group, chart: s.chart, compare: s.compare };
+  const setState = (p: Partial<ExplorerState>, f?: Filters) => navigate({ search: (prev) => ({ ...prev, ...(f ?? {}), ...p }), replace: true, resetScroll: false });
+  const views = decodeViews(s.views);
+  const setViews = (next: SavedView[]) => navigate({ to: ".", search: (prev) => ({ ...prev, views: encodeURIComponent(JSON.stringify(next)) }), replace: true, resetScroll: false });
 
   return (
     <>
-      <PageHeader title="Cost Explorer" description="Slice spend by service, provider, region, team, environment or tag." />
+      <PageHeader title="Cost Explorer" description="Slice spend any way you need and compare it with the previous period" />
       <GlobalFilters />
       <PageTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Cost Explorer sections" />
       <TabContent tab={tab}>
-        {tab === "explore" && <ExplorerMain state={state} setState={setState} />}
+        {tab === "explore" && <CardBoundary label="Cost explorer"><ExplorerMain state={state} setState={setState} /></CardBoundary>}
         {tab === "compare" && (
           <div className="space-y-6">
-            <ExplorerCompare state={state} setState={setState} />
-            <DataGate h="h-40"><DenseKpis /></DataGate>
-            <DataGate h="h-72"><Tilt><AnomalyForecast /></Tilt></DataGate>
+            <CardBoundary label="Compare periods"><ExplorerCompare state={state} setState={setState} /></CardBoundary>
+            <SectionHeading title="Spend details" description="Breakdown cards — click one for the full detail" />
+            <DataGate h="h-16"><DenseKpis onOpen={setDetail} /></DataGate>
+            <DataGate h="h-64"><Tilt><AnomalyForecast /></Tilt></DataGate>
           </div>
         )}
-        {tab === "unit-economics" && <UnitEconCards />}
-        {tab === "saved-views" && <SavedViewsPanel state={state} views={views} setViews={setViews} setState={(st, f) => { setState(st, f); if (f) setFilters(f); }} />}
+        {tab === "unit-economics" && <CardBoundary label="Unit economics"><UnitEconCards /></CardBoundary>}
+        {tab === "saved-views" && <CardBoundary label="Saved views"><SavedViewsPanel state={state} views={views} setViews={setViews} setState={setState} /></CardBoundary>}
       </TabContent>
+      <DetailDrawer detail={detail} onClose={() => setDetail(null)} />
     </>
   );
 }

@@ -15,7 +15,7 @@ type To = "/cost-explorer" | "/recommendations" | "/resources" | "/budgets";
 
 /** Card header link that drills down to a page (optionally a sub-tab); global filters are retained. */
 export function DrillLink({ to, tab, children = "Open" }: { to: To; tab?: string; children?: ReactNode }) {
-  return <Link to={to} search={tab ? (prev: Record<string, unknown>) => ({ ...prev, tab }) : undefined} className="group inline-flex min-h-8 items-center gap-1 rounded-lg px-2 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground">{children}<ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" /></Link>;
+  return <Link to={to} search={(prev: Record<string, unknown>) => (tab ? { ...prev, tab } : prev)} className="group inline-flex min-h-8 items-center gap-1 rounded-lg px-2 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground">{children}<ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" /></Link>;
 }
 
 const pctDelta = (k: KpiValue) => (k.previous ? ((k.value - k.previous) / k.previous) * 100 : 0);
