@@ -19,7 +19,7 @@ const CRED: Record<string, { label: string; placeholder: string }> = {
 };
 const fmtTime = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }) + " UTC";
 
-export function IntegrationsWorkspace() {
+export function IntegrationsWorkspace({ tab = "connected" }: { tab?: string }) {
   const q = useIntegrations();
   const overrides = useSession((s) => s.integrations);
   const [active, setActive] = useState<IntegrationDto | null>(null);
@@ -27,20 +27,24 @@ export function IntegrationsWorkspace() {
   if (q.isError) return <ErrorState message="We couldn't load integrations." onRetry={() => q.refetch()} />;
   const list = q.data.integrations.map((i) => { const o = overrides[i.id]; return o ? { ...i, status: o } : i; });
   if (!list.length) return <EmptyState icon={Plug} title="No integrations available." action="Retry" onAction={() => q.refetch()} />;
+  const shown = tab === "available" ? list.filter((i) => i.status === "Not connected") : list.filter((i) => i.status !== "Not connected");
   return (
     <div className="space-y-8">
       <p className="organic-card flex flex-wrap items-center gap-2 p-4 text-sm text-muted-foreground"><Demo /> All integrations are simulated. No network calls are made and no credentials are stored.</p>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {list.map((i) => (
-          <article key={i.id} className="organic-card flex flex-col gap-3 p-5">
-            <div className="flex items-start justify-between gap-2"><h3 className="font-semibold">{i.name}</h3>
-              <StatusBadge tone={i.status === "Connected" ? "success" : i.status === "Error" ? "critical" : "idle"}>{i.status}</StatusBadge></div>
-            <p className="text-xs text-muted-foreground">{i.lastSync ? `Last sync ${fmtTime(i.lastSync)}` : "Never synced"}</p>
-            <Button className="mt-auto" variant={i.status === "Connected" ? "secondary" : "default"} onClick={() => setActive(i)}>{i.status === "Not connected" ? "Connect" : "Configure"}</Button>
-          </article>
-        ))}
-      </div>
-      <SyncHistory rows={q.data.history} />
+      {tab === "sync-history" ? <SyncHistory rows={q.data.history} /> : shown.length === 0 ? (
+        <EmptyState icon={Plug} title={tab === "available" ? "No more integrations to connect." : "Nothing connected yet."} />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {shown.map((i) => (
+            <article key={i.id} className="organic-card flex flex-col gap-3 p-5">
+              <div className="flex items-start justify-between gap-2"><h3 className="font-semibold">{i.name}</h3>
+                <StatusBadge tone={i.status === "Connected" ? "success" : i.status === "Error" ? "critical" : "idle"}>{i.status}</StatusBadge></div>
+              <p className="text-xs text-muted-foreground">{i.lastSync ? `Last sync ${fmtTime(i.lastSync)}` : "Never synced"}</p>
+              <Button className="mt-auto" variant={i.status === "Connected" ? "secondary" : "default"} onClick={() => setActive(i)}>{i.status === "Not connected" ? "Connect" : "Configure"}</Button>
+            </article>
+          ))}
+        </div>
+      )}
       <ConnectDialog item={active} onClose={() => setActive(null)} />
     </div>
   );
