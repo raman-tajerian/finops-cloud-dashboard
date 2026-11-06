@@ -1,32 +1,52 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { GlobalFilters } from "@/components/finops/GlobalFilters";
-import { DataGate } from "@/lib/queries";
+import { KubernetesWorkspace, LiveFeed, LiveGauges, LiveLinks } from "@/components/finops/Operations";
 import { K8sHealth } from "@/components/finops/Platform";
-import { Topology3D } from "@/components/finops/Insights";
+import { Tilt, Topology3D } from "@/components/finops/Insights";
+import { GlobalFilters } from "@/components/finops/GlobalFilters";
 import { PageHeader } from "@/components/finops/States";
-import { KubernetesWorkspace } from "@/components/finops/Operations";
+import { DataGate } from "@/lib/queries";
+import { PAGE_TABS, PageTabs, TabContent, usePageTab } from "@/components/finops/PageTabs";
+import { useState } from "react";
+import { DetailDrawer, type Detail } from "@/components/finops/Platform";
 
 export const Route = createFileRoute("/kubernetes")({
   head: () => ({
     meta: [
       { title: "Kubernetes · Fern" },
-      { name: "description", content: "Fern — Multi-cloud cost and sustainability dashboard. Cluster health, utilization and live automation events." },
+      { name: "description", content: "Cluster health, namespaces and pod status across EKS, AKS and GKE." },
       { property: "og:title", content: "Kubernetes · Fern" },
-      { property: "og:description", content: "Fern — Multi-cloud cost and sustainability dashboard. Cluster health, utilization and live automation events." },
+      { property: "og:description", content: "Cluster health, namespaces and pod status across EKS, AKS and GKE." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: KubernetesPage,
 });
 
+const TABS = PAGE_TABS["/kubernetes"].tabs;
+
 function KubernetesPage() {
+  const { tab, setTab } = usePageTab(TABS);
+  const [detail, setDetail] = useState<Detail>(null);
   return (
     <>
-      <PageHeader title="Kubernetes" description="Cluster health, utilization and live automation events" />
+      <PageHeader title="Kubernetes" description="Cluster cost, health and pod status — derived from the resource dataset." />
       <GlobalFilters />
-      <KubernetesWorkspace />
-      <div className="grid gap-6 xl:grid-cols-2"><DataGate h="h-72"><K8sHealth onOpen={() => {}} /></DataGate><DataGate h="h-72"><Topology3D /></DataGate></div>
+      <PageTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Kubernetes sections" />
+      <TabContent tab={tab}>
+        {tab === "live" ? (
+          <section className="grid gap-6 xl:grid-cols-12">
+            <div className="min-w-0 xl:col-span-7"><DataGate h="h-72"><Tilt><Topology3D /></Tilt></DataGate></div>
+            <div className="min-w-0 xl:col-span-5"><DataGate h="h-72"><K8sHealth onOpen={setDetail} /></DataGate></div>
+            <div className="min-w-0 xl:col-span-4"><LiveGauges /></div>
+            <div className="min-w-0 xl:col-span-5"><LiveFeed /></div>
+            <div className="min-w-0 xl:col-span-3"><LiveLinks /></div>
+          </section>
+        ) : (
+          <KubernetesWorkspace tab={tab} />
+        )}
+      </TabContent>
+      <DetailDrawer detail={detail} onClose={() => setDetail(null)} />
     </>
   );
 }
