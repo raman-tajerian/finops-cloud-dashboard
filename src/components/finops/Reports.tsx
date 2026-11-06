@@ -37,7 +37,7 @@ function deliver(r: ReportDto, format: string, content: string) {
   else void printReport(JSON.parse(content) as ReportDto);
 }
 
-export function ReportsWorkspace() {
+export function ReportsWorkspace({ tab = "generate", onTab }: { tab?: string; onTab?: (t: string) => void }) {
   const { filters } = useGlobalFilters();
   const reports = useSession((s) => s.reports);
   const schedules = useSession((s) => s.schedules);
@@ -49,7 +49,7 @@ export function ReportsWorkspace() {
   const [del, setDel] = useState<{ kind: "report" | "schedule"; id: string } | null>(null);
   const [sched, setSched] = useState(false);
 
-  const open = (id: ReportTemplateId) => { setGen(id); setRange(filters.range); setErr(null); };
+  const open = (id: ReportTemplateId) => { setGen(id); setRange(filters.range); setErr(null); onTab?.("generate"); };
   async function generate() {
     if (!gen) return;
     setBusy(true); setErr(null);
@@ -59,12 +59,24 @@ export function ReportsWorkspace() {
       setSession((s) => ({ ...s, reports: [{ id: `rep-${s.reports.length + 1}-${Date.now()}`, template: gen, title: r.title, format, range: r.range, created: r.generatedAt, content }, ...s.reports] }));
       deliver(r, format, content);
       toast.success(`${r.title} generated (${format})`);
-      setGen(null);
+      onTab?.("history");
     } catch { setErr("We couldn't build this report. Try again."); } finally { setBusy(false); }
   }
 
   return (
     <div className="space-y-8">
+      {tab === "generate" && (
+        <section className="organic-card max-w-2xl space-y-4 p-6" aria-label="Generate report">
+          <SectionHeading title="Generate a report" description="Built from the same numbers as Overview, Cost Explorer, Recommendations and Security, using the active provider, environment and team filters." />
+          <div className="grid gap-1.5"><Label>Template</Label><Select value={gen ?? ""} onValueChange={(v) => { setGen(v as ReportTemplateId); setErr(null); }}><SelectTrigger aria-label="Template"><SelectValue placeholder="Choose a template" /></SelectTrigger><SelectContent>{REPORT_TEMPLATES.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent></Select></div>
+          <div className="grid gap-1.5"><Label>Date range</Label><Select value={range} onValueChange={setRange}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{RANGES.map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}</SelectContent></Select></div>
+          <div className="grid gap-1.5"><Label>Format</Label><div className="flex gap-2">{FORMATS.map((f) => <Button key={f} type="button" variant={format === f ? "default" : "secondary"} aria-pressed={format === f} onClick={() => setFormat(f)}>{f}</Button>)}</div>{format === "PDF" && <p className="text-xs text-muted-foreground">Opens a print-friendly view; choose "Save as PDF".</p>}</div>
+          {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
+          <div><Button disabled={busy || !gen} onClick={generate}>{busy ? <><Loader2 className="size-4 animate-spin" />Building report…</> : "Generate"}</Button></div>
+        </section>
+      )}
+
+      {tab === "templates" && (
       <section className="space-y-4">
         <SectionHeading title="Templates" description="Built from the same numbers as Overview, Cost Explorer, Recommendations and Security, using the active filters." />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -78,7 +90,9 @@ export function ReportsWorkspace() {
           ))}
         </div>
       </section>
+      )}
 
+      {tab === "history" && (
       <section className="space-y-4">
         <div className="flex items-center gap-2"><SectionHeading title="Past reports" description="Generated this session only." /><Demo /></div>
         {reports.length === 0 ? <EmptyState icon={FileText} title="No reports yet. Generate one from a template above." action="Generate executive summary" onAction={() => open("executive")} /> : (
