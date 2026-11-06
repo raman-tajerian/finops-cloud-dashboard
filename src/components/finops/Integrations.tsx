@@ -32,7 +32,7 @@ export function IntegrationsWorkspace({ tab = "connected" }: { tab?: string }) {
     <div className="space-y-8">
       <p className="organic-card flex flex-wrap items-center gap-2 p-4 text-sm text-muted-foreground"><Demo /> All integrations are simulated. No network calls are made and no credentials are stored.</p>
       {tab === "sync-history" ? <SyncHistory rows={q.data.history} /> : shown.length === 0 ? (
-        <EmptyState icon={Plug} title={tab === "available" ? "No more integrations to connect." : "Nothing connected yet."} />
+        <EmptyState icon={Plug} title={tab === "available" ? "No more integrations to connect." : "Nothing connected yet."} action="Reload" onAction={() => q.refetch()} />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {shown.map((i) => (
