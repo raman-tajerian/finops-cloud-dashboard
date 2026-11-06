@@ -77,6 +77,20 @@ export function DataTableView({ columns, rows, caption }: { columns: string[]; r
   );
 }
 
+/** Progressive disclosure: show the first `n` rows with a "Show all" expander. */
+export function useLimited<T>(rows: T[], n = 10) {
+  const [all, setAll] = useState(false);
+  return { shown: all ? rows : rows.slice(0, n), limited: !all && rows.length > n, total: rows.length, showAll: () => setAll(true) };
+}
+
+export function ShowAllButton({ total, onClick }: { total: number; onClick: () => void }) {
+  return (
+    <div className="flex justify-center border-t border-border p-3">
+      <Button variant="ghost" size="sm" className="h-10 text-xs text-muted-foreground" onClick={onClick}>Show all {total} rows</Button>
+    </div>
+  );
+}
+
 /** Placeholder for pages still being built, with a way back to Overview. */
 export function ComingSoon({ icon: I, what }: { icon: LucideIcon; what: string }) {
   return (
