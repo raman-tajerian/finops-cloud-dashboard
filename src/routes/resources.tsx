@@ -1,22 +1,18 @@
 import { createFileRoute, stripSearchParams, useNavigate, type SearchSchemaInput } from "@tanstack/react-router";
-import { fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
+import { ResourcesWorkspace, type TableSearch } from "@/components/finops/ResourcesTable";
+import { Tilt, Topology3D } from "@/components/finops/Insights";
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
 import { CardBoundary, PageHeader } from "@/components/finops/States";
-import { ResourcesWorkspace, type TableSearch } from "@/components/finops/ResourcesTable";
+import { DataGate } from "@/lib/queries";
+import { PAGE_TABS, PageTabs, TabContent, usePageTab } from "@/components/finops/PageTabs";
 
-const defaults = { q: "", sort: "monthlyCost", dir: "desc", page: 1, size: 25, id: "", status: "All", service: "All", ids: "" };
 const schema = z.object({
-  q: fallback(z.string(), "").default(""),
-  sort: fallback(z.string(), "monthlyCost").default("monthlyCost"),
-  dir: fallback(z.string(), "desc").default("desc"),
-  page: fallback(z.number(), 1).default(1),
-  size: fallback(z.number(), 25).default(25),
-  id: fallback(z.string(), "").default(""),
-  status: fallback(z.string(), "All").default("All"),
-  service: fallback(z.string(), "All").default("All"),
-  ids: fallback(z.string(), "").default(""),
+  q: z.string().optional(), sort: z.string().optional(), dir: z.string().optional(),
+  page: z.number().optional(), size: z.number().optional(), id: z.string().optional(),
+  status: z.string().optional(), service: z.string().optional(), ids: z.string().optional(),
 });
+const defaults = { q: "", sort: "monthlyCost", dir: "desc", page: 1, size: 25, id: "", status: "All", service: "All", ids: "" };
 
 export const Route = createFileRoute("/resources")({
   validateSearch: (search: Partial<z.infer<typeof schema>> & SearchSchemaInput) => schema.parse(search),
@@ -24,25 +20,45 @@ export const Route = createFileRoute("/resources")({
   head: () => ({
     meta: [
       { title: "Resources · Fern" },
-      { name: "description", content: "Fern — Multi-cloud cost and sustainability dashboard. Every cloud resource with cost, utilization, status and right-sizing suggestions." },
+      { name: "description", content: "Every cloud resource with cost, utilization and status." },
       { property: "og:title", content: "Resources · Fern" },
-      { property: "og:description", content: "Fern — Multi-cloud cost and sustainability dashboard. Every cloud resource with cost, utilization, status and right-sizing suggestions." },
+      { property: "og:description", content: "Every cloud resource with cost, utilization and status." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: ResourcesPage,
 });
 
+const TABS = PAGE_TABS["/resources"].tabs;
+
 function ResourcesPage() {
-  const search = Route.useSearch();
-  const navigate = useNavigate({ from: "/resources" });
+  const s = Route.useSearch();
+  const navigate = useNavigate();
+  const { tab, setTab } = usePageTab(TABS);
+  const search: TableSearch = { q: s.q ?? "", sort: s.sort ?? "monthlyCost", dir: s.dir ?? "desc", page: s.page ?? 1, size: s.size ?? 25, id: s.id ?? "", status: s.status ?? "All", service: s.service ?? "All", ids: s.ids ?? "" };
   const setSearch = (p: Partial<TableSearch>) => navigate({ search: (prev) => ({ ...prev, ...p }), replace: true, resetScroll: false });
+
   return (
     <>
-      <PageHeader title="Resources" description="Every cloud resource with cost, utilization and status" />
+      <PageHeader title="Resources" description="Every resource across AWS, Azure and GCP with cost and utilization." />
       <GlobalFilters />
-      <CardBoundary label="Resource table"><ResourcesWorkspace search={search} setSearch={setSearch} /></CardBoundary>
+      <PageTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Resources sections" />
+      <TabContent tab={tab}>
+        {tab === "list" && <CardBoundary label="Resources"><ResourcesWorkspace search={search} setSearch={setSearch} /></CardBoundary>}
+        {tab === "map" && (
+          <div className="grid gap-6">
+            <DataGate h="h-72"><Tilt><Topology3D /></Tilt></DataGate>
+            <p className="text-xs text-muted-foreground">The map shows the same filtered resources as the list, grouped by provider and region.</p>
+          </div>
+        )}
+        {tab === "idle" && (
+          <div className="grid gap-6">
+            <p className="rounded-xl bg-secondary px-4 py-3 text-[13px] text-muted-foreground">Showing only resources with status <span className="font-medium text-foreground">Idle</span> — the same set behind the Overview idle-waste figure.</p>
+            <CardBoundary label="Idle resources"><ResourcesWorkspace search={search} setSearch={setSearch} presetStatus="Idle" /></CardBoundary>
+          </div>
+        )}
+      </TabContent>
     </>
   );
 }
