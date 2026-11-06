@@ -93,6 +93,8 @@ function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string })
           </div>
         </article>
       </div>
+      )}
+      {tab === "pods" && (
       <article className="organic-card p-6">
         <div className="flex flex-wrap items-start justify-between gap-3"><Title sub="Each square is one pod. Hover for details, click to open.">Pod status</Title>
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground"><TableToggle on={podTable} onChange={setPodTable} />{(["Running", "Pending", "Failed"] as const).map((s) => <span key={s} className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-[3px]" style={{ background: podColor[s] }} />{s}</span>)}</div></div>
