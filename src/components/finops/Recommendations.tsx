@@ -118,11 +118,19 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
             </ul>
           )}
         </section>
-        <div className="grid content-start gap-6">
+  );
+
+  return (
+    <div className="grid gap-6">
+      {summary}
+      {tab === "tracker" ? (
+        <div className="grid gap-6 xl:grid-cols-2">
           <Tracker d={d} open={open} />
           <Rules d={d} />
         </div>
-      </div>
+      ) : (
+        listSection
+      )}
 
       <ReviewDrawer item={review} onClose={() => setReview(null)} />
       <IgnoreDialog item={ignore} onClose={() => setIgnore(null)} onConfirm={(reason) => { setStatus(ignore!.id, "Ignored", { reason }); toast("Ignored (demo)"); setIgnore(null); }} />
