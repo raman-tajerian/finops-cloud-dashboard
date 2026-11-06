@@ -47,13 +47,13 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
   const done = d.items.filter((i) => st(i.id) === "Done").reduce((a, b) => a + b.savings, 0);
   const setStatus = (id: string, status: RecStatus, extra: { team?: string; reason?: string; snoozedUntil?: string } = {}) => setSession((s) => ({ ...s, recs: { ...s.recs, [id]: { ...s.recs[id], status, ...extra } } }));
 
+  const lock = tabStatuses[tab];
   const list = d.items
-    .filter((i) => (search.cat === "All" || i.category === search.cat) && (search.effort === "All" || i.effort === search.effort) && (search.risk === "All" || i.risk === search.risk) && (search.status === "All" || st(i.id) === search.status))
+    .filter((i) => (search.cat === "All" || i.category === search.cat) && (search.effort === "All" || i.effort === search.effort) && (search.risk === "All" || i.risk === search.risk) && (lock ? lock.includes(st(i.id)) : search.status === "All" || st(i.id) === search.status))
     .sort((a, b) => (search.sort === "savings-asc" ? a.savings - b.savings : b.savings - a.savings));
   const filtersOn = search.cat !== "All" || search.effort !== "All" || search.risk !== "All" || search.status !== "All";
 
-  return (
-    <div className="grid gap-6">
+  const summary = (
       <section className="organic-card p-6 md:p-8" aria-label="Savings summary">
         <div className="grid gap-6 sm:grid-cols-3">
           <div><p className="text-[13px] text-muted-foreground">Open savings</p><p className="mt-1 metric-numbers text-[30px] leading-none">{fmtMoney(open)}<span className="text-base text-muted-foreground">/mo</span></p></div>
