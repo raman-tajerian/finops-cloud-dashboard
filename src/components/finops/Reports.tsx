@@ -119,18 +119,7 @@ export function ReportsWorkspace({ tab = "generate", onTab }: { tab?: string; on
             ))}</tbody></table></div>
         )}
       </section>
-
-      <Dialog open={!!gen} onOpenChange={(o) => !o && !busy && setGen(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Generate {gen ? tplName(gen) : ""}</DialogTitle><DialogDescription>Uses the active provider, environment and team filters.</DialogDescription></DialogHeader>
-          <div className="grid gap-4">
-            <div className="grid gap-1.5"><Label>Date range</Label><Select value={range} onValueChange={setRange}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{RANGES.map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}</SelectContent></Select></div>
-            <div className="grid gap-1.5"><Label>Format</Label><div className="flex gap-2">{FORMATS.map((f) => <Button key={f} type="button" variant={format === f ? "default" : "secondary"} aria-pressed={format === f} onClick={() => setFormat(f)}>{f}</Button>)}</div>{format === "PDF" && <p className="text-xs text-muted-foreground">Opens a print-friendly view; choose "Save as PDF".</p>}</div>
-            {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
-          </div>
-          <DialogFooter><Button variant="secondary" disabled={busy} onClick={() => setGen(null)}>Cancel</Button><Button disabled={busy} onClick={generate}>{busy ? <><Loader2 className="size-4 animate-spin" />Building report…</> : "Generate"}</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
+      )}
 
       <ScheduleDialog open={sched} onClose={() => setSched(false)} />
 
