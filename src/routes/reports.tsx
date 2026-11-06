@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { FjordLogo } from "@/components/brand";
 import { CardBoundary, PageHeader } from "@/components/finops/States";
 import { ReportsWorkspace } from "@/components/finops/Reports";
+import { PAGE_TABS, PageTabs, TabContent, usePageTab } from "@/components/finops/PageTabs";
+
+const TABS = PAGE_TABS["/reports"].tabs;
 
 export const Route = createFileRoute("/reports")({
   head: () => ({
@@ -18,11 +21,15 @@ export const Route = createFileRoute("/reports")({
 });
 
 function ReportsPage() {
+  const { tab, setTab } = usePageTab(TABS);
   return (
     <>
       <FjordLogo size={32} />
       <PageHeader title="Reports" description="Generate, download and schedule cost reports" />
-      <CardBoundary label="Reports"><ReportsWorkspace /></CardBoundary>
+      <PageTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Reports sections" />
+      <TabContent tab={tab}>
+        <CardBoundary label="Reports"><ReportsWorkspace tab={tab} onTab={setTab} /></CardBoundary>
+      </TabContent>
     </>
   );
 }
