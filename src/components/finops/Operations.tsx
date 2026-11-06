@@ -61,6 +61,8 @@ function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string })
           <div key={l} className="organic-card p-5"><p className="text-[13px] text-muted-foreground">{l}</p><p className="mt-2 metric-numbers text-[32px] leading-none">{v}</p><p className="mt-3 text-xs text-muted-foreground">{n}</p></div>
         ))}
       </section>
+      )}
+      {tab === "namespaces" && (
       <div className="grid gap-6 xl:grid-cols-2">
         <article className="organic-card min-w-0 p-6">
           <div className="flex items-start justify-between gap-3"><Title sub="Fixed namespace weights; sums to the cluster cost">Cost per namespace</Title><TableToggle on={asTable} onChange={setAsTable} /></div>
@@ -88,6 +90,8 @@ function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string })
           </div>
         </article>
       </div>
+      )}
+      {tab === "pods" && (
       <article className="organic-card p-6">
         <div className="flex flex-wrap items-start justify-between gap-3"><Title sub="Each square is one pod. Hover for details, click to open.">Pod status</Title>
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground"><TableToggle on={podTable} onChange={setPodTable} />{(["Running", "Pending", "Failed"] as const).map((s) => <span key={s} className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-[3px]" style={{ background: podColor[s] }} />{s}</span>)}</div></div>
@@ -95,6 +99,7 @@ function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string })
           {c.pods.map((p) => <Button key={p.name} variant="ghost" role="listitem" title={`${p.name} · ${p.status} · ${p.restarts} restarts`} aria-label={`${p.name}, ${p.status}, ${p.restarts} restarts`} onClick={() => setPod(p)} className="pod-target size-10 shrink-0 p-0 lg:size-3.5"><span className="size-3.5 rounded-[3px]" style={{ background: podColor[p.status], opacity: p.status === "Running" ? 0.55 : 1 }} /></Button>)}
         </div>}
       </article>
+      )}
       <Sheet open={!!pod} onOpenChange={(o) => !o && setPod(null)}>
         <SheetContent>
           {pod && <><SheetHeader><SheetTitle className="break-all">{pod.name}</SheetTitle><SheetDescription>{c.name} · namespace {pod.namespace}</SheetDescription></SheetHeader>
