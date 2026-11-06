@@ -104,7 +104,9 @@ export function ReportsWorkspace({ tab = "generate", onTab }: { tab?: string; on
             ))}</tbody></table></div>
         )}
       </section>
+      )}
 
+      {tab === "schedules" && (
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><SectionHeading title="Scheduled reports" description="Nothing is actually sent." /><Demo /></div><Button variant="secondary" onClick={() => setSched(true)}>New schedule</Button></div>
         {schedules.length === 0 ? <EmptyState icon={FileText} title="No schedules yet." action="Create schedule" onAction={() => setSched(true)} /> : (
