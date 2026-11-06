@@ -12,6 +12,7 @@ import { AnomalyForecast, GreenOps, Tilt, Topology3D } from "@/components/finops
 import { AnomalyAnalyst } from "@/components/finops/AnomalyAnalyst";
 import { OnboardingChecklist } from "@/components/finops/Onboarding";
 import { Reveal } from "@/components/motion";
+import { PAGE_TABS, PageTabs, TabContent, usePageTab } from "@/components/finops/PageTabs";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,8 +28,11 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+const TABS = PAGE_TABS["/"].tabs;
+
 function Index() {
   const [detail, setDetail] = useState<Detail>(null);
+  const { tab, setTab } = usePageTab(TABS);
   return (
     <>
       <Reveal><CardBoundary label="Anomaly banner"><AnomalyStrip onOpen={setDetail} /></CardBoundary></Reveal>
@@ -38,21 +42,39 @@ function Index() {
       </Reveal>
       <Reveal delay={0.08}><GlobalFilters /></Reveal>
       <Reveal delay={0.12}><OnboardingChecklist /></Reveal>
-      <Reveal delay={0.16}><DataGate h="h-16"><OverviewKpis /></DataGate></Reveal>
-      <section className="grid gap-6 xl:grid-cols-12">
-        <div className="min-w-0 xl:col-span-8"><DataGate h="h-72"><CostTrendCard /></DataGate></div>
-        <div className="min-w-0 xl:col-span-4"><DataGate h="h-72"><TopMovers /></DataGate></div>
-        <div className="min-w-0 xl:col-span-8"><DataGate h="h-72"><CostDistribution /></DataGate></div>
-        <div className="min-w-0 xl:col-span-4"><DataGate h="h-72"><K8sHealth onOpen={setDetail} /></DataGate></div>
-        <div className="min-w-0 xl:col-span-7"><DataGate h="h-72"><Tilt><Topology3D /></Tilt></DataGate></div>
-        <div className="min-w-0 xl:col-span-5"><DataGate h="h-72"><Tilt><GreenOps /></Tilt></DataGate></div>
-        <div className="min-w-0 xl:col-span-7"><DataGate h="h-64"><Tilt><AnomalyForecast /></Tilt></DataGate></div>
-        <div className="min-w-0 xl:col-span-5"><CardBoundary label="Scenario simulator"><Tilt><WhatIfSimulator /></Tilt></CardBoundary></div>
-        <div className="min-w-0 xl:col-span-12"><DataGate h="h-24"><AnomalyAnalyst /></DataGate></div>
-        <div className="min-w-0 xl:col-span-8"><DataGate h="h-72"><SavingsFeed /></DataGate></div>
-        <div className="min-w-0 xl:col-span-4"><CardBoundary label="Budget forecast"><BudgetForecast /></CardBoundary></div>
-        <div className="min-w-0 xl:col-span-12"><CardBoundary label="Top resources"><TopResourcesCard /></CardBoundary></div>
-      </section>
+      <Reveal delay={0.16}><PageTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Overview sections" /></Reveal>
+      <TabContent tab={tab}>
+        {tab === "summary" && (
+          <section className="grid gap-6 xl:grid-cols-12">
+            <div className="min-w-0 xl:col-span-12"><DataGate h="h-16"><OverviewKpis group="summary" /></DataGate></div>
+            <div className="min-w-0 xl:col-span-8"><DataGate h="h-72"><CostTrendCard /></DataGate></div>
+            <div className="min-w-0 xl:col-span-4"><DataGate h="h-72"><TopMovers /></DataGate></div>
+            <div className="min-w-0 xl:col-span-12"><CardBoundary label="Top resources"><TopResourcesCard /></CardBoundary></div>
+          </section>
+        )}
+        {tab === "unit-economics" && (
+          <section className="grid gap-6 xl:grid-cols-12">
+            <div className="min-w-0 xl:col-span-12"><DataGate h="h-16"><OverviewKpis group="unit" /></DataGate></div>
+            <div className="min-w-0 xl:col-span-7"><DataGate h="h-72"><CostDistribution /></DataGate></div>
+            <div className="min-w-0 xl:col-span-5"><DataGate h="h-72"><Tilt><AnomalyForecast /></Tilt></DataGate></div>
+            <div className="min-w-0 xl:col-span-12"><DataGate h="h-72"><SavingsFeed /></DataGate></div>
+          </section>
+        )}
+        {tab === "infrastructure" && (
+          <section className="grid gap-6 xl:grid-cols-12">
+            <div className="min-w-0 xl:col-span-7"><DataGate h="h-72"><Tilt><Topology3D /></Tilt></DataGate></div>
+            <div className="min-w-0 xl:col-span-5"><DataGate h="h-72"><K8sHealth onOpen={setDetail} /></DataGate></div>
+            <div className="min-w-0 xl:col-span-5"><CardBoundary label="Budget forecast"><BudgetForecast /></CardBoundary></div>
+            <div className="min-w-0 xl:col-span-7"><DataGate h="h-24"><AnomalyAnalyst /></DataGate></div>
+          </section>
+        )}
+        {tab === "carbon" && (
+          <section className="grid gap-6 xl:grid-cols-12">
+            <div className="min-w-0 xl:col-span-5"><DataGate h="h-72"><Tilt><GreenOps /></Tilt></DataGate></div>
+            <div className="min-w-0 xl:col-span-7"><CardBoundary label="Scenario simulator"><Tilt><WhatIfSimulator /></Tilt></CardBoundary></div>
+          </section>
+        )}
+      </TabContent>
       <DetailDrawer detail={detail} onClose={() => setDetail(null)} />
     </>
   );
