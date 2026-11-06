@@ -94,7 +94,7 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
                       <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-medium">{i.title}</p><Pill c={statusTone[s]}>{s}</Pill>{s === "Snoozed" && recs[i.id]?.snoozedUntil && <Pill c="bg-secondary text-muted-foreground">Snoozed until {fmtDemoDate(recs[i.id]!.snoozedUntil!)} · Demo</Pill>}{recs[i.id]?.team && <Pill c="bg-secondary text-muted-foreground">{recs[i.id]!.team}</Pill>}</div>
                       <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         <span>{i.category}</span>
-                        <Link to="/resources" search={{ ids: i.resourceIds.join(",") } as never} className="underline-offset-2 hover:underline">{i.resourceIds.length} resource{i.resourceIds.length > 1 ? "s" : ""}</Link>
+                        <Link to="/resources" search={(prev: Record<string, unknown>) => ({ ...prev, ids: i.resourceIds.join(","), tab: "list" }) as never} className="underline-offset-2 hover:underline">{i.resourceIds.length} resource{i.resourceIds.length > 1 ? "s" : ""}</Link>
                         <span>Effort <Pill c={levelTone[i.effort]}>{i.effort}</Pill></span>
                         <span>Risk <Pill c={levelTone[i.risk]}>{i.risk}</Pill></span>
                         <span className="tabular-nums">{i.confidence}% confidence</span>
