@@ -17,6 +17,7 @@ export const filterSearchSchema = z.object({
   env: fallback(z.string(), "All").default("All"),
   team: fallback(z.string(), "All").default("All"),
   cur: fallback(z.string(), "USD").default("USD"),
+  tab: fallback(z.string(), "").default(""),
 });
 
 export function normalizeFilters(s: { range?: string; providers?: string[]; env?: string; team?: string }): Filters {
