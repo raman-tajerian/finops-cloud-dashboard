@@ -4,6 +4,9 @@ import { z } from "zod";
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
 import { CardBoundary, PageHeader } from "@/components/finops/States";
 import { RecommendationsWorkspace, type RecSearch } from "@/components/finops/Recommendations";
+import { PAGE_TABS, PageTabs, TabContent, usePageTab } from "@/components/finops/PageTabs";
+
+const TABS = PAGE_TABS["/recommendations"].tabs;
 
 const defaults: RecSearch = { cat: "All", effort: "All", risk: "All", status: "All", sort: "savings-desc" };
 const schema = z.object({
@@ -34,11 +37,15 @@ function RecommendationsPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/recommendations" });
   const setSearch = (p: Partial<RecSearch>) => navigate({ search: (prev) => ({ ...prev, ...p }), replace: true, resetScroll: false });
+  const { tab, setTab } = usePageTab(TABS);
   return (
     <>
       <PageHeader title="Recommendations" description="Savings actions ranked by impact" />
       <GlobalFilters />
-      <CardBoundary label="Recommendations"><RecommendationsWorkspace search={search} setSearch={setSearch} /></CardBoundary>
+      <PageTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Recommendations sections" />
+      <TabContent tab={tab}>
+        <CardBoundary label="Recommendations"><RecommendationsWorkspace search={search} setSearch={setSearch} tab={tab} /></CardBoundary>
+      </TabContent>
     </>
   );
 }

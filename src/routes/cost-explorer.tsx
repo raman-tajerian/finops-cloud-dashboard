@@ -1,14 +1,15 @@
 import { createFileRoute, stripSearchParams, useNavigate, type SearchSchemaInput } from "@tanstack/react-router";
 import { fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
+import { useState } from "react";
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
 import { DataGate } from "@/lib/queries";
 import { DenseKpis, DetailDrawer, type Detail } from "@/components/finops/Platform";
-import { AnomalyForecast } from "@/components/finops/Insights";
+import { AnomalyForecast, Tilt } from "@/components/finops/Insights";
 import { CardBoundary, PageHeader, SectionHeading } from "@/components/finops/States";
-import { CostExplorer, type ExplorerState, type SavedView } from "@/components/finops/Explorer";
+import { ExplorerCompare, ExplorerMain, SavedViewsPanel, UnitEconCards, type ExplorerState, type SavedView } from "@/components/finops/Explorer";
+import { PAGE_TABS, PageTabs, TabContent, usePageTab } from "@/components/finops/PageTabs";
 import type { Filters } from "@/lib/filters";
-import { useState } from "react";
 
 const defaults = { group: "service", chart: "area", compare: false, views: "" } as const;
 const schema = z.object({
@@ -33,9 +34,9 @@ export const Route = createFileRoute("/cost-explorer")({
   head: () => ({
     meta: [
       { title: "Cost Explorer · Fern" },
-      { name: "description", content: "Fern — Multi-cloud cost and sustainability dashboard. Group spend by service, provider, region, team, environment or tag and compare with the previous period." },
+      { name: "description", content: "Group spend by service, provider, region, team, environment or tag and compare with the previous period." },
       { property: "og:title", content: "Cost Explorer · Fern" },
-      { property: "og:description", content: "Fern — Multi-cloud cost and sustainability dashboard. Group spend by service, provider, region, team, environment or tag and compare with the previous period." },
+      { property: "og:description", content: "Group spend by service, provider, region, team, environment or tag and compare with the previous period." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -43,21 +44,36 @@ export const Route = createFileRoute("/cost-explorer")({
   component: CostExplorerPage,
 });
 
+const TABS = PAGE_TABS["/cost-explorer"].tabs;
+
 function CostExplorerPage() {
   const s = Route.useSearch();
   const navigate = useNavigate({ from: "/cost-explorer" });
   const [detail, setDetail] = useState<Detail>(null);
+  const { tab, setTab } = usePageTab(TABS);
+  const state: ExplorerState = { group: s.group, chart: s.chart, compare: s.compare };
   const setState = (p: Partial<ExplorerState>, f?: Filters) => navigate({ search: (prev) => ({ ...prev, ...(f ?? {}), ...p }), replace: true, resetScroll: false });
   const views = decodeViews(s.views);
   const setViews = (next: SavedView[]) => navigate({ to: ".", search: (prev) => ({ ...prev, views: encodeURIComponent(JSON.stringify(next)) }), replace: true, resetScroll: false });
+
   return (
     <>
       <PageHeader title="Cost Explorer" description="Slice spend any way you need and compare it with the previous period" />
       <GlobalFilters />
-      <CardBoundary label="Cost explorer"><CostExplorer state={s} views={views} setViews={setViews} setState={setState} /></CardBoundary>
-      <SectionHeading title="Spend details" description="Breakdown cards — click one for the full detail" />
-      <DataGate h="h-16"><DenseKpis onOpen={setDetail} /></DataGate>
-      <DataGate h="h-64"><AnomalyForecast /></DataGate>
+      <PageTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Cost Explorer sections" />
+      <TabContent tab={tab}>
+        {tab === "explore" && <CardBoundary label="Cost explorer"><ExplorerMain state={state} setState={setState} /></CardBoundary>}
+        {tab === "compare" && (
+          <div className="space-y-6">
+            <CardBoundary label="Compare periods"><ExplorerCompare state={state} setState={setState} /></CardBoundary>
+            <SectionHeading title="Spend details" description="Breakdown cards — click one for the full detail" />
+            <DataGate h="h-16"><DenseKpis onOpen={setDetail} /></DataGate>
+            <DataGate h="h-64"><Tilt><AnomalyForecast /></Tilt></DataGate>
+          </div>
+        )}
+        {tab === "unit-economics" && <CardBoundary label="Unit economics"><UnitEconCards /></CardBoundary>}
+        {tab === "saved-views" && <CardBoundary label="Saved views"><SavedViewsPanel state={state} views={views} setViews={setViews} setState={setState} /></CardBoundary>}
+      </TabContent>
       <DetailDrawer detail={detail} onClose={() => setDetail(null)} />
     </>
   );

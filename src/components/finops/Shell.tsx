@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { PAGE_TABS } from "@/components/finops/PageTabs";
 import { useDashboard } from "@/lib/queries";
 import { CURRENCIES, CurrencySync, useCurrency, useSetCurrency } from "@/lib/money";
 import { useTableDensity } from "@/lib/density";
@@ -50,6 +51,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
   const scan = () => { setScanning(true); window.setTimeout(() => { setScanning(false); toast.success("Scan complete — 1,872 resources checked"); }, 1600); };
   const go = (to: string) => { setPalette(false); navigate({ to }); };
+  const goTab = (to: string, tab: string) => { setPalette(false); navigate({ to, search: (prev: Record<string, unknown>) => ({ ...prev, tab }) } as never); };
   useGlobalShortcuts({
     navigate: (to) => { setPalette(false); setHelp(false); navigate({ to }); },
     openPalette: () => setPalette(true),
@@ -161,6 +163,9 @@ export function Shell({ children }: { children: ReactNode }) {
             <CommandItem onSelect={() => { setPalette(false); scan(); }}>Run full scan</CommandItem>
             <CommandItem onSelect={() => go("/reports")}>Export CSV</CommandItem>
             <CommandItem onSelect={() => { setPalette(false); setHelp(true); }}>Keyboard shortcuts<span className="ml-auto text-xs text-muted-foreground">?</span></CommandItem>
+          </CommandGroup>
+          <CommandGroup heading="Sections">
+            {Object.entries(PAGE_TABS).flatMap(([to, p]) => p.tabs.map((t) => <CommandItem key={`${to}:${t.id}`} value={`${p.label} ${t.label}`} onSelect={() => goTab(to, t.id)}>{p.label} › {t.label}</CommandItem>))}
           </CommandGroup>
           <CommandGroup heading="Shortcuts">
             {SHORTCUTS.filter((s) => s.to).map((s) => <CommandItem key={s.keys} onSelect={() => go(s.to!)}>{s.action}<span className="ml-auto text-xs text-muted-foreground">{s.keys}</span></CommandItem>)}

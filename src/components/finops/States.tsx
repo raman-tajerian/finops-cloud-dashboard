@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Component, type ReactNode } from "react";
+import { Component, useState, type ReactNode } from "react";
 import { AlertCircle, CheckCircle2, CircleDashed, OctagonAlert, TriangleAlert, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -73,6 +73,20 @@ export function DataTableView({ columns, rows, caption }: { columns: string[]; r
         <thead className="sticky top-0 bg-card text-xs text-muted-foreground"><tr>{columns.map((c) => <th key={c} scope="col" className={`px-4 ${d.pyHead} font-medium`}>{c}</th>)}</tr></thead>
         <tbody>{rows.map((r, i) => <tr key={i} className="border-t border-border">{r.map((v, j) => <td key={j} className={`px-4 ${d.py} ${j ? "metric-numbers" : ""}`}>{v}</td>)}</tr>)}</tbody>
       </table>
+    </div>
+  );
+}
+
+/** Progressive disclosure: show the first `n` rows with a "Show all" expander. */
+export function useLimited<T>(rows: T[], n = 10) {
+  const [all, setAll] = useState(false);
+  return { shown: all ? rows : rows.slice(0, n), limited: !all && rows.length > n, total: rows.length, showAll: () => setAll(true) };
+}
+
+export function ShowAllButton({ total, onClick }: { total: number; onClick: () => void }) {
+  return (
+    <div className="flex justify-center border-t border-border p-3">
+      <Button variant="ghost" size="sm" className="h-10 text-xs text-muted-foreground" onClick={onClick}>Show all {total} rows</Button>
     </div>
   );
 }

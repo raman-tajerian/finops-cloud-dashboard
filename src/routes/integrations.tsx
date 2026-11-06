@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CardBoundary, PageHeader } from "@/components/finops/States";
 import { IntegrationsWorkspace } from "@/components/finops/Integrations";
+import { PAGE_TABS, PageTabs, TabContent, usePageTab } from "@/components/finops/PageTabs";
+
+const TABS = PAGE_TABS["/integrations"].tabs;
 
 export const Route = createFileRoute("/integrations")({
   head: () => ({
@@ -17,10 +20,14 @@ export const Route = createFileRoute("/integrations")({
 });
 
 function IntegrationsPage() {
+  const { tab, setTab } = usePageTab(TABS);
   return (
     <>
       <PageHeader title="Integrations" description="Cloud accounts and tool connections" />
-      <CardBoundary label="Integrations"><IntegrationsWorkspace /></CardBoundary>
+      <PageTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Integrations sections" />
+      <TabContent tab={tab}>
+        <CardBoundary label="Integrations"><IntegrationsWorkspace tab={tab} /></CardBoundary>
+      </TabContent>
     </>
   );
 }

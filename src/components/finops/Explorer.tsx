@@ -1,17 +1,16 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ArrowDown, ArrowUp, Bookmark, Download, FileJson, FileSpreadsheet } from "lucide-react";
+import { ArrowDown, ArrowUp, Bookmark, Download, FileJson, FileSpreadsheet, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useExplore } from "@/lib/queries";
 import { useGlobalFilters, type Filters } from "@/lib/filters";
-import { CardSkeleton, DataTableView, ErrorState, TableToggle } from "./States";
+import { CardSkeleton, DataTableView, ErrorState, ShowAllButton, TableToggle, useLimited } from "./States";
 import { Spark } from "./Platform";
 import type { ExploreDto, ExploreRow, GroupBy } from "@/types/finops";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export type ChartType = "area" | "bar" | "line";
 export interface ExplorerState { group: GroupBy; chart: ChartType; compare: boolean }
@@ -28,34 +27,6 @@ const Seg = <T extends string>({ value, options, onChange, label }: { value: T; 
 
 export interface SavedView { name: string; filters: Filters; state: ExplorerState }
 
-function SavedViews({ state, views, onSave, onApply }: { state: ExplorerState; views: SavedView[]; onSave: (v: SavedView) => void; onApply: (v: SavedView) => void }) {
-  const { filters } = useGlobalFilters();
-  const [name, setName] = useState("");
-  return (
-    <div className="flex gap-2">
-      <Popover>
-        <PopoverTrigger asChild><Button variant="secondary" className="rounded-xl"><Bookmark />Save view</Button></PopoverTrigger>
-        <PopoverContent align="end" className="w-64 space-y-3">
-          <Label>View name</Label>
-          <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (!name.trim()) return; onSave({ name: name.trim(), filters, state }); toast.success(`Saved view "${name.trim()}"`); setName(""); }}>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Prod by team" maxLength={40} aria-label="View name" />
-            <Button type="submit" disabled={!name.trim()}>Save</Button>
-          </form>
-          <p className="text-[11px] text-muted-foreground">Saved in this page URL so it survives reload and can be shared.</p>
-        </PopoverContent>
-      </Popover>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild><Button variant="secondary" className="rounded-xl">Views{views.length > 0 && <span className="rounded-full bg-accent px-1.5 text-[10px]">{views.length}</span>}</Button></DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Saved views</DropdownMenuLabel><DropdownMenuSeparator />
-          {views.length === 0 && <DropdownMenuItem disabled>No saved views yet</DropdownMenuItem>}
-          {views.map((v) => <DropdownMenuItem key={v.name} onClick={() => onApply(v)}>{v.name}<span className="ml-auto pl-3 text-[11px] text-muted-foreground">{groupLabels[v.state.group]}</span></DropdownMenuItem>)}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
-}
-
 /* ---------- Export ---------- */
 function download(name: string, body: string, type: string) {
   const url = URL.createObjectURL(new Blob([body], { type }));
@@ -67,14 +38,18 @@ export function toCsv(rows: ExploreRow[], group: GroupBy) {
   return [[groupLabels[group], "current_usd", "previous_usd", "change_pct", "share_pct"].join(","), ...rows.map((r) => [esc(r.name), r.current.toFixed(2), r.previous.toFixed(2), r.changePct.toFixed(2), r.share.toFixed(2)].join(","))].join("\n");
 }
 
-/* ---------- Page body ---------- */
-type SortKey = "name" | "current" | "previous" | "changePct" | "share";
-export function CostExplorer({ state, views, setViews, setState }: { state: ExplorerState; views: SavedView[]; setViews: (v: SavedView[]) => void; setState: (s: Partial<ExplorerState>, f?: Filters) => void }) {
-  const q = useExplore(state.group);
-  const { filters } = useGlobalFilters();
+function useExploreData(group: GroupBy) {
+  const q = useExplore(group);
   if (q.isPending) return <CardSkeleton h="h-96" />;
-  if (q.isError) return <ErrorState message="We couldn't load cost data. Try again." onRetry={() => q.refetch()} />;
-  const d = q.data;
+  if (q.isError || !q.data) return <ErrorState message="We couldn't load cost data. Try again." onRetry={() => q.refetch()} />;
+  return q.data;
+}
+
+/* ---------- Explore tab: controls + chart + table ---------- */
+export function ExplorerMain({ state, setState }: { state: ExplorerState; setState: (s: Partial<ExplorerState>, f?: Filters) => void }) {
+  const d = useExploreData(state.group);
+  if (!d || "type" in d) return d;
+  const { filters } = useGlobalFilters();
   const exportAs = (kind: "csv" | "json") => {
     const stamp = `fern-${state.group}-${filters.range}`;
     if (kind === "csv") download(`${stamp}.csv`, toCsv(d.rows, state.group), "text/csv");
@@ -86,11 +61,7 @@ export function CostExplorer({ state, views, setViews, setState }: { state: Expl
       <div className="flex flex-wrap items-center gap-3">
         <Seg label="Group by" value={state.group} onChange={(group) => setState({ group })} options={(Object.keys(groupLabels) as GroupBy[]).map((g) => [g, groupLabels[g]])} />
         <Seg label="Chart type" value={state.chart} onChange={(chart) => setState({ chart })} options={[["area", "Area"], ["bar", "Stacked bar"], ["line", "Line"]]} />
-        <label className="flex min-h-10 cursor-pointer items-center gap-2 rounded-xl bg-secondary px-3 text-xs">
-          <input type="checkbox" checked={state.compare} onChange={(e) => setState({ compare: e.target.checked })} className="accent-[var(--primary)]" />Compare to previous period
-        </label>
         <div className="ml-auto flex flex-wrap gap-2">
-          <SavedViews state={state} views={views} onSave={(v) => setViews([...views.filter((x) => x.name !== v.name), v].slice(-8))} onApply={(v) => { setState(v.state, v.filters); toast(`Opened "${v.name}"`); }} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild><Button variant="secondary" className="rounded-xl"><Download />Export</Button></DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -100,17 +71,82 @@ export function CostExplorer({ state, views, setViews, setState }: { state: Expl
           </DropdownMenu>
         </div>
       </div>
-      <section aria-label="Unit economics" className="grid gap-6 sm:grid-cols-2">
-        {[{ label: "Cost per active user", value: d.unitEconomics.perUser, previous: d.unitEconomics.previousPerUser, decimals: 4 }, { label: "Cost per API request", value: d.unitEconomics.perRequest, previous: d.unitEconomics.previousPerRequest, decimals: 6 }].map((u) => (
-          <article key={u.label} className="organic-card p-6"><Label>{u.label}</Label><p className="metric-numbers mt-2 text-[32px]">{fmtMoney(u.value, { decimals: u.decimals })}</p><p className="mt-2 text-xs text-muted-foreground">{u.previous > 0 ? `${((u.value / u.previous - 1) * 100).toFixed(1)}%` : "—"} vs prev</p></article>
-        ))}
-      </section>
       <ExplorerChart d={d} state={state} />
       <ExplorerTable d={d} group={state.group} />
     </div>
   );
 }
 
+/* ---------- Compare tab: same chart with the previous-period overlay locked on ---------- */
+export function ExplorerCompare({ state, setState }: { state: ExplorerState; setState: (s: Partial<ExplorerState>, f?: Filters) => void }) {
+  const d = useExploreData(state.group);
+  if (!d || "type" in d) return d;
+  const compared = { ...state, compare: true };
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center gap-3">
+        <Seg label="Group by" value={state.group} onChange={(group) => setState({ group })} options={(Object.keys(groupLabels) as GroupBy[]).map((g) => [g, groupLabels[g]])} />
+        <p className="text-xs text-muted-foreground">Previous period overlay is always on in this view.</p>
+      </div>
+      <ExplorerChart d={d} state={compared} />
+      <ExplorerTable d={d} group={state.group} />
+    </div>
+  );
+}
+
+/* ---------- Unit economics tab ---------- */
+export function UnitEconCards() {
+  const d = useExploreData("service");
+  if (!d || "type" in d) return d;
+  return (
+    <section aria-label="Unit economics" className="grid gap-6 sm:grid-cols-2">
+      {[{ label: "Cost per active user", value: d.unitEconomics.perUser, previous: d.unitEconomics.previousPerUser, decimals: 4 }, { label: "Cost per API request", value: d.unitEconomics.perRequest, previous: d.unitEconomics.previousPerRequest, decimals: 6 }].map((u) => (
+        <article key={u.label} className="organic-card p-6"><Label>{u.label}</Label><p className="metric-numbers mt-2 text-[32px]">{fmtMoney(u.value, { decimals: u.decimals })}</p><p className="mt-2 text-xs text-muted-foreground">{u.previous > 0 ? `${((u.value / u.previous - 1) * 100).toFixed(1)}%` : "—"} vs prev</p></article>
+      ))}
+    </section>
+  );
+}
+
+/* ---------- Saved views tab ---------- */
+export function SavedViewsPanel({ state, views, setViews, setState }: { state: ExplorerState; views: SavedView[]; setViews: (v: SavedView[]) => void; setState: (s: Partial<ExplorerState>, f?: Filters) => void }) {
+  const { filters } = useGlobalFilters();
+  const [name, setName] = useState("");
+  const save = () => {
+    if (!name.trim()) return;
+    setViews([...views.filter((x) => x.name !== name.trim()), { name: name.trim(), filters, state }].slice(-8));
+    toast.success(`Saved view "${name.trim()}"`);
+    setName("");
+  };
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <section className="organic-card p-6" aria-label="Save current view">
+        <Label>Save the current view</Label>
+        <p className="mt-1 text-[13px] text-muted-foreground">Captures the grouping, chart type and the active global filters.</p>
+        <form className="mt-4 flex gap-2" onSubmit={(e) => { e.preventDefault(); save(); }}>
+          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Prod by team" maxLength={40} aria-label="View name" />
+          <Button type="submit" disabled={!name.trim()}><Bookmark />Save</Button>
+        </form>
+        <p className="mt-3 text-[11px] text-muted-foreground">Saved in this page URL so it survives reload and can be shared.</p>
+      </section>
+      <section className="organic-card p-6" aria-label="Saved views">
+        <Label>Saved views{views.length > 0 ? ` · ${views.length}` : ""}</Label>
+        {views.length === 0 ? <p className="mt-4 rounded-xl bg-secondary p-6 text-center text-sm text-muted-foreground">No saved views yet. Save the current view to find it here.</p> : (
+          <ul className="mt-4 divide-y divide-border">
+            {views.map((v) => (
+              <li key={v.name} className="flex items-center gap-3 py-3">
+                <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{v.name}</p><p className="text-xs text-muted-foreground">{groupLabels[v.state.group]} · {v.filters.range}{v.filters.env !== "All" ? ` · ${v.filters.env}` : ""}{v.filters.team !== "All" ? ` · ${v.filters.team}` : ""}</p></div>
+                <Button size="sm" variant="secondary" className="h-10" onClick={() => { setState(v.state, v.filters); toast(`Opened "${v.name}"`); }}>Apply</Button>
+                <Button size="icon" variant="ghost" className="size-10" aria-label={`Delete ${v.name}`} onClick={() => setViews(views.filter((x) => x.name !== v.name))}><Trash2 /></Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  );
+}
+
+/* ---------- Chart and table ---------- */
 function ExplorerChart({ d, state }: { d: ExploreDto; state: ExplorerState }) {
   const [asTable, setAsTable] = useState(false);
   const change = d.previousTotal ? ((d.total - d.previousTotal) / d.previousTotal) * 100 : 0;
@@ -146,9 +182,11 @@ function ExplorerChart({ d, state }: { d: ExploreDto; state: ExplorerState }) {
   );
 }
 
+type SortKey = "name" | "current" | "previous" | "changePct" | "share";
 function ExplorerTable({ d, group }: { d: ExploreDto; group: GroupBy }) {
   const [sort, setSort] = useState<{ k: SortKey; dir: 1 | -1 }>({ k: "current", dir: -1 });
   const rows = useMemo(() => [...d.rows].sort((a, b) => (sort.k === "name" ? a.name.localeCompare(b.name) : a[sort.k] - b[sort.k]) * sort.dir), [d.rows, sort]);
+  const lim = useLimited(rows);
   const th = (k: SortKey, l: string, right = true) => (
     <th scope="col" aria-sort={sort.k === k ? (sort.dir === 1 ? "ascending" : "descending") : "none"} className={`px-4 py-3 font-medium ${right ? "text-right" : ""}`}>
       <button className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => setSort((s) => ({ k, dir: s.k === k ? (s.dir === 1 ? -1 : 1) : -1 }))}>{l}{sort.k === k && (sort.dir === 1 ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />)}</button>
@@ -162,7 +200,7 @@ function ExplorerTable({ d, group }: { d: ExploreDto; group: GroupBy }) {
           <caption className="sr-only">Cost by {group}</caption>
           <thead className="font-mono text-[10px] text-muted-foreground"><tr>{th("name", groupLabels[group], false)}{th("current", "Current")}{th("previous", "Previous")}{th("changePct", "Change")}{th("share", "Share")}<th scope="col" className="px-4 py-3 font-medium">Trend</th></tr></thead>
           <tbody>
-            {rows.map((r, i) => (
+            {lim.shown.map((r, i) => (
               <tr key={r.name} className="border-t border-border hover:bg-secondary">
                 <td className="sticky left-0 bg-card px-4 py-3 font-medium"><span className="mr-2 inline-block size-2 rounded-full" style={{ background: col(d.keys.indexOf(r.name)) }} />{r.name}</td>
                 <td className="metric-numbers px-4 py-3 text-right">{fmtMoney(r.current)}</td>
@@ -182,6 +220,7 @@ function ExplorerTable({ d, group }: { d: ExploreDto; group: GroupBy }) {
           </tr></tfoot>
         </table>
       </div>
+      {lim.limited && <ShowAllButton total={lim.total} onClick={lim.showAll} />}
     </article>
   );
 }

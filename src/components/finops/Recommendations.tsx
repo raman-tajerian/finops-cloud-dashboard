@@ -27,14 +27,17 @@ const Pill = ({ c, children }: { c: string; children: ReactNode }) => <span clas
 const levelTone: Record<Level, string> = { Low: "bg-success-soft text-success", Medium: "bg-warning-soft text-warning", High: "bg-destructive-soft text-destructive" };
 const statusTone: Record<RecStatus, string> = { Open: "bg-secondary text-foreground", "In progress": "bg-warning-soft text-warning", Done: "bg-success-soft text-success", Ignored: "bg-secondary text-muted-foreground", Snoozed: "bg-secondary text-muted-foreground" };
 
-export function RecommendationsWorkspace({ search, setSearch }: { search: RecSearch; setSearch: (p: Partial<RecSearch>) => void }) {
+/** Status sets locked by the page sub-tabs; "tracker" shows the summary instead of a list. */
+const tabStatuses: Record<string, RecStatus[]> = { open: ["Open"], "in-progress": ["In progress"], done: ["Done", "Ignored", "Snoozed"] };
+
+export function RecommendationsWorkspace({ search, setSearch, tab }: { search: RecSearch; setSearch: (p: Partial<RecSearch>) => void; tab: string }) {
   const q = useSavings();
   if (q.isPending) return <div className="grid gap-6"><CardSkeleton h="h-20" /><CardSkeleton h="h-64" /></div>;
   if (q.isError || !q.data) return <ErrorState message="We couldn't load recommendations. Check your connection and try again." onRetry={() => q.refetch()} />;
-  return <CardBoundary onReset={() => q.refetch()}><Workspace d={q.data} search={search} setSearch={setSearch} /></CardBoundary>;
+  return <CardBoundary onReset={() => q.refetch()}><Workspace d={q.data} search={search} setSearch={setSearch} tab={tab} /></CardBoundary>;
 }
 
-function Workspace({ d, search, setSearch }: { d: SavingsDto; search: RecSearch; setSearch: (p: Partial<RecSearch>) => void }) {
+function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSearch; setSearch: (p: Partial<RecSearch>) => void; tab: string }) {
   const recs = useSession((s) => s.recs);
   const [review, setReview] = useState<SavingItemDto | null>(null);
   const [ignore, setIgnore] = useState<SavingItemDto | null>(null);
@@ -44,13 +47,13 @@ function Workspace({ d, search, setSearch }: { d: SavingsDto; search: RecSearch;
   const done = d.items.filter((i) => st(i.id) === "Done").reduce((a, b) => a + b.savings, 0);
   const setStatus = (id: string, status: RecStatus, extra: { team?: string; reason?: string; snoozedUntil?: string } = {}) => setSession((s) => ({ ...s, recs: { ...s.recs, [id]: { ...s.recs[id], status, ...extra } } }));
 
+  const lock = tabStatuses[tab];
   const list = d.items
-    .filter((i) => (search.cat === "All" || i.category === search.cat) && (search.effort === "All" || i.effort === search.effort) && (search.risk === "All" || i.risk === search.risk) && (search.status === "All" || st(i.id) === search.status))
+    .filter((i) => (search.cat === "All" || i.category === search.cat) && (search.effort === "All" || i.effort === search.effort) && (search.risk === "All" || i.risk === search.risk) && (lock ? lock.includes(st(i.id)) : search.status === "All" || st(i.id) === search.status))
     .sort((a, b) => (search.sort === "savings-asc" ? a.savings - b.savings : b.savings - a.savings));
   const filtersOn = search.cat !== "All" || search.effort !== "All" || search.risk !== "All" || search.status !== "All";
 
-  return (
-    <div className="grid gap-6">
+  const summary = (
       <section className="organic-card p-6 md:p-8" aria-label="Savings summary">
         <div className="grid gap-6 sm:grid-cols-3">
           <div><p className="text-[13px] text-muted-foreground">Open savings</p><p className="mt-1 metric-numbers text-[30px] leading-none">{fmtMoney(open)}<span className="text-base text-muted-foreground">/mo</span></p></div>
@@ -65,14 +68,15 @@ function Workspace({ d, search, setSearch }: { d: SavingsDto; search: RecSearch;
           <p className="mt-2 text-xs text-muted-foreground">Target = {Math.round(d.targetShare * 100)}% of total potential ({fmtMoney(d.total)}/mo). Statuses are demo-only and reset when you reload.</p>
         </div>
       </section>
+  );
 
-      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
+  const listSection = (
         <section className="organic-card min-w-0 p-6" aria-label="Recommendations">
           <div className="flex flex-wrap items-center gap-2">
             <FilterSelect label="Category" value={search.cat} options={categories} onChange={(v) => setSearch({ cat: v })} />
             <FilterSelect label="Effort" value={search.effort} options={levels} onChange={(v) => setSearch({ effort: v })} />
             <FilterSelect label="Risk" value={search.risk} options={levels} onChange={(v) => setSearch({ risk: v })} />
-            <FilterSelect label="Status" value={search.status} options={statuses} onChange={(v) => setSearch({ status: v })} />
+            {!lock && <FilterSelect label="Status" value={search.status} options={statuses} onChange={(v) => setSearch({ status: v })} />}
             <Select value={search.sort} onValueChange={(v) => setSearch({ sort: v })}>
               <SelectTrigger className="h-10 w-auto min-w-40 rounded-xl" aria-label="Sort"><SelectValue /></SelectTrigger>
               <SelectContent><SelectItem value="savings-desc">Savings: high to low</SelectItem><SelectItem value="savings-asc">Savings: low to high</SelectItem></SelectContent>
@@ -90,7 +94,7 @@ function Workspace({ d, search, setSearch }: { d: SavingsDto; search: RecSearch;
                       <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-medium">{i.title}</p><Pill c={statusTone[s]}>{s}</Pill>{s === "Snoozed" && recs[i.id]?.snoozedUntil && <Pill c="bg-secondary text-muted-foreground">Snoozed until {fmtDemoDate(recs[i.id]!.snoozedUntil!)} · Demo</Pill>}{recs[i.id]?.team && <Pill c="bg-secondary text-muted-foreground">{recs[i.id]!.team}</Pill>}</div>
                       <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         <span>{i.category}</span>
-                        <Link to="/resources" search={{ ids: i.resourceIds.join(",") } as never} className="underline-offset-2 hover:underline">{i.resourceIds.length} resource{i.resourceIds.length > 1 ? "s" : ""}</Link>
+                        <Link to="/resources" search={(prev: Record<string, unknown>) => ({ ...prev, ids: i.resourceIds.join(","), tab: "list" }) as never} className="underline-offset-2 hover:underline">{i.resourceIds.length} resource{i.resourceIds.length > 1 ? "s" : ""}</Link>
                         <span>Effort <Pill c={levelTone[i.effort]}>{i.effort}</Pill></span>
                         <span>Risk <Pill c={levelTone[i.risk]}>{i.risk}</Pill></span>
                         <span className="tabular-nums">{i.confidence}% confidence</span>
@@ -114,11 +118,19 @@ function Workspace({ d, search, setSearch }: { d: SavingsDto; search: RecSearch;
             </ul>
           )}
         </section>
-        <div className="grid content-start gap-6">
+  );
+
+  return (
+    <div className="grid gap-6">
+      {summary}
+      {tab === "tracker" ? (
+        <div className="grid gap-6 xl:grid-cols-2">
           <Tracker d={d} open={open} />
           <Rules d={d} />
         </div>
-      </div>
+      ) : (
+        listSection
+      )}
 
       <ReviewDrawer item={review} onClose={() => setReview(null)} />
       <IgnoreDialog item={ignore} onClose={() => setIgnore(null)} onConfirm={(reason) => { setStatus(ignore!.id, "Ignored", { reason }); toast("Ignored (demo)"); setIgnore(null); }} />

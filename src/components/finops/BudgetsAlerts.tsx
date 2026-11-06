@@ -35,19 +35,19 @@ const seeded = [
   { id: "b-prod", name: "Production", key: "Environment:Production" },
 ];
 
-export function BudgetsAlertsWorkspace() {
+export function BudgetsAlertsWorkspace({ tab }: { tab: string }) {
   const q = useAlerts();
   if (q.isPending) return <div className="grid gap-6"><CardSkeleton h="h-32" /><CardSkeleton h="h-48" /></div>;
   if (q.isError || !q.data) return <ErrorState message="We couldn't load budgets and alerts. Check your connection and try again." onRetry={() => q.refetch()} />;
-  return <CardBoundary onReset={() => q.refetch()}><Workspace d={q.data} /></CardBoundary>;
+  return <CardBoundary onReset={() => q.refetch()}><Workspace d={q.data} tab={tab} /></CardBoundary>;
 }
 
-function Workspace({ d }: { d: AlertsDto }) {
+function Workspace({ d, tab }: { d: AlertsDto; tab: string }) {
   return (
     <div className="grid gap-6">
-      <BudgetCards d={d} />
-      <Anomalies rows={d.anomalies} />
-      <AlertRules />
+      {tab === "budgets" && <BudgetCards d={d} />}
+      {tab === "anomalies" && <Anomalies rows={d.anomalies} />}
+      {tab === "alerts" && <AlertRules />}
     </div>
   );
 }

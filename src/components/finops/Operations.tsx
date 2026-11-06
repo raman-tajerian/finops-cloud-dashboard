@@ -27,13 +27,13 @@ function Gate<T>({ q, h, children }: { q: UseQueryResult<T>; h?: string; childre
 /* ================= Kubernetes ================= */
 const podColor: Record<K8sPodDto["status"], string> = { Running: "var(--success)", Pending: "var(--warning)", Failed: "var(--destructive)" };
 
-export function KubernetesWorkspace() {
+export function KubernetesWorkspace({ tab = "clusters" }: { tab?: string }) {
   const q = useKubernetes();
-  return <Gate q={q} h="h-72">{(d) => d.clusters.length ? <Clusters clusters={d.clusters} /> : <EmptyState icon={Boxes} title="No Kubernetes clusters match the current filters." action="Reload" onAction={() => q.refetch()} />}</Gate>;
+  return <Gate q={q} h="h-72">{(d) => d.clusters.length ? <Clusters clusters={d.clusters} tab={tab} /> : <EmptyState icon={Boxes} title="No Kubernetes clusters match the current filters." action="Reload" onAction={() => q.refetch()} />}</Gate>;
 }
 
 type SortKey = "name" | "cost" | "efficiency";
-function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
+function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string }) {
   const [id, setId] = useState(clusters[0]!.id);
   const c = clusters.find((x) => x.id === id) ?? clusters[0]!;
   const [asTable, setAsTable] = useState(false);
@@ -55,11 +55,14 @@ function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
           <SelectContent>{clusters.map((x) => <SelectItem key={x.id} value={x.id}>{x.name} · {x.service}</SelectItem>)}</SelectContent>
         </Select>
       </section>
+      {tab === "clusters" && (
       <section aria-label="Cluster metrics" className="grid gap-4 sm:grid-cols-3">
         {[["Monthly cost", fmtMoney(c.monthlyCost), "Last 30 days"], ["Nodes", String(c.nodes), `max(3, cost / ${fmtMoney(350)})`], ["Pod health", `${c.podsHealthy}/${c.podsTotal}`, `${c.podsFailed} failed or pending`]].map(([l, v, n]) => (
           <div key={l} className="organic-card p-5"><p className="text-[13px] text-muted-foreground">{l}</p><p className="mt-2 metric-numbers text-[32px] leading-none">{v}</p><p className="mt-3 text-xs text-muted-foreground">{n}</p></div>
         ))}
       </section>
+      )}
+      {tab === "namespaces" && (
       <div className="grid gap-6 xl:grid-cols-2">
         <article className="organic-card min-w-0 p-6">
           <div className="flex items-start justify-between gap-3"><Title sub="Fixed namespace weights; sums to the cluster cost">Cost per namespace</Title><TableToggle on={asTable} onChange={setAsTable} /></div>
@@ -87,6 +90,8 @@ function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
           </div>
         </article>
       </div>
+      )}
+      {tab === "pods" && (
       <article className="organic-card p-6">
         <div className="flex flex-wrap items-start justify-between gap-3"><Title sub="Each square is one pod. Hover for details, click to open.">Pod status</Title>
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground"><TableToggle on={podTable} onChange={setPodTable} />{(["Running", "Pending", "Failed"] as const).map((s) => <span key={s} className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-[3px]" style={{ background: podColor[s] }} />{s}</span>)}</div></div>
@@ -94,6 +99,7 @@ function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
           {c.pods.map((p) => <Button key={p.name} variant="ghost" role="listitem" title={`${p.name} · ${p.status} · ${p.restarts} restarts`} aria-label={`${p.name}, ${p.status}, ${p.restarts} restarts`} onClick={() => setPod(p)} className="pod-target size-10 shrink-0 p-0 lg:size-3.5"><span className="size-3.5 rounded-[3px]" style={{ background: podColor[p.status], opacity: p.status === "Running" ? 0.55 : 1 }} /></Button>)}
         </div>}
       </article>
+      )}
       <Sheet open={!!pod} onOpenChange={(o) => !o && setPod(null)}>
         <SheetContent>
           {pod && <><SheetHeader><SheetTitle className="break-all">{pod.name}</SheetTitle><SheetDescription>{c.name} · namespace {pod.namespace}</SheetDescription></SheetHeader>

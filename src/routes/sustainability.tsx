@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
 import { SustainabilityDashboard } from "@/components/finops/Sustainability";
 import { CardBoundary, PageHeader } from "@/components/finops/States";
+import { PAGE_TABS, PageTabs, TabContent, usePageTab } from "@/components/finops/PageTabs";
+
+const TABS = PAGE_TABS["/sustainability"].tabs;
 
 export const Route = createFileRoute("/sustainability")({
   head: () => ({
@@ -18,11 +21,15 @@ export const Route = createFileRoute("/sustainability")({
 });
 
 function SustainabilityPage() {
+  const { tab, setTab } = usePageTab(TABS);
   return (
     <>
       <PageHeader title="Sustainability" description="Estimated carbon footprint by region and provider — figures are estimates" />
       <GlobalFilters />
-      <CardBoundary label="Sustainability"><SustainabilityDashboard /></CardBoundary>
+      <PageTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Sustainability sections" />
+      <TabContent tab={tab}>
+        <CardBoundary label="Sustainability"><SustainabilityDashboard tab={tab} /></CardBoundary>
+      </TabContent>
     </>
   );
 }
