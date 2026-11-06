@@ -27,13 +27,13 @@ function Gate<T>({ q, h, children }: { q: UseQueryResult<T>; h?: string; childre
 /* ================= Kubernetes ================= */
 const podColor: Record<K8sPodDto["status"], string> = { Running: "var(--success)", Pending: "var(--warning)", Failed: "var(--destructive)" };
 
-export function KubernetesWorkspace() {
+export function KubernetesWorkspace({ tab = "clusters" }: { tab?: string }) {
   const q = useKubernetes();
-  return <Gate q={q} h="h-72">{(d) => d.clusters.length ? <Clusters clusters={d.clusters} /> : <EmptyState icon={Boxes} title="No Kubernetes clusters match the current filters." action="Reload" onAction={() => q.refetch()} />}</Gate>;
+  return <Gate q={q} h="h-72">{(d) => d.clusters.length ? <Clusters clusters={d.clusters} tab={tab} /> : <EmptyState icon={Boxes} title="No Kubernetes clusters match the current filters." action="Reload" onAction={() => q.refetch()} />}</Gate>;
 }
 
 type SortKey = "name" | "cost" | "efficiency";
-function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
+function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string }) {
   const [id, setId] = useState(clusters[0]!.id);
   const c = clusters.find((x) => x.id === id) ?? clusters[0]!;
   const [asTable, setAsTable] = useState(false);
@@ -55,6 +55,7 @@ function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
           <SelectContent>{clusters.map((x) => <SelectItem key={x.id} value={x.id}>{x.name} · {x.service}</SelectItem>)}</SelectContent>
         </Select>
       </section>
+      {tab === "clusters" && (
       <section aria-label="Cluster metrics" className="grid gap-4 sm:grid-cols-3">
         {[["Monthly cost", fmtMoney(c.monthlyCost), "Last 30 days"], ["Nodes", String(c.nodes), `max(3, cost / ${fmtMoney(350)})`], ["Pod health", `${c.podsHealthy}/${c.podsTotal}`, `${c.podsFailed} failed or pending`]].map(([l, v, n]) => (
           <div key={l} className="organic-card p-5"><p className="text-[13px] text-muted-foreground">{l}</p><p className="mt-2 metric-numbers text-[32px] leading-none">{v}</p><p className="mt-3 text-xs text-muted-foreground">{n}</p></div>
