@@ -50,9 +50,9 @@ export function SettingsWorkspace({ tab, dialog, onTab, onDialog }: { tab: strin
           <thead className="text-left text-xs text-muted-foreground"><tr><th className="px-3 py-2 font-medium">Event</th>{d.channels.map((c) => <th key={c} className="px-3 py-2 font-medium">{c}</th>)}</tr></thead>
           <tbody>{d.events.map((e) => <tr key={e} className="border-t border-border"><td className="px-3 py-2">{e}</td>{d.channels.map((c) => { const k = `${e}|${c}`; const on = ss.notify[k] ?? c === "Email"; return <td key={c} className="px-3 py-2"><Switch checked={on} aria-label={`${e} via ${c}`} onCheckedChange={(v) => setSession((s) => ({ ...s, settings: { ...s.settings, notify: { ...s.settings.notify, [k]: v } } }))} /></td>; })}</tr>)}</tbody>
         </table></div>
-      </TabsContent>
-      <TabsContent value="keys"><Keys d={d} open={dialog === "create-key"} onOpen={(o) => onDialog(o ? "create-key" : "")} save={save} /></TabsContent>
-      <TabsContent value="appearance">
+      )}
+      {tab === "keys" && <Keys d={d} open={dialog === "create-key"} onOpen={(o) => onDialog(o ? "create-key" : "")} save={save} />}
+      {tab === "appearance" && (<>
         <div className="organic-card space-y-3 p-6"><Label>Table density</Label>
           <div className="flex gap-2">{(["comfortable", "compact"] as const).map((v) => <Button key={v} variant={ss.density === v ? "default" : "secondary"} aria-pressed={ss.density === v} className="capitalize" onClick={() => save({ density: v })}>{v}</Button>)}</div>
           <p className="text-xs text-muted-foreground">Applies to every data table in the app.</p>
@@ -67,8 +67,9 @@ export function SettingsWorkspace({ tab, dialog, onTab, onDialog }: { tab: strin
           </div>
           <Switch checked={ss.reduceMotion} aria-label="Reduce motion" onCheckedChange={(v) => save({ reduceMotion: v }, v ? "Motion reduced (demo, this session only)" : "Motion restored (demo, this session only)")} />
         </div>
-      </TabsContent>
-    </Tabs>
+      </>)}
+      </TabContent>
+    </div>
   );
 }
 
