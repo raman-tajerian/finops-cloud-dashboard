@@ -13,32 +13,34 @@ const Label = ({ children }: { children: ReactNode }) => <p className="text-[15p
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
 type To = "/cost-explorer" | "/recommendations" | "/resources" | "/budgets";
 
-/** Card header link that drills down; global filters are retained by the root search middleware. */
-export function DrillLink({ to, children = "Open" }: { to: To; children?: ReactNode }) {
-  return <Link to={to} className="group inline-flex min-h-8 items-center gap-1 rounded-lg px-2 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground">{children}<ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" /></Link>;
+/** Card header link that drills down to a page (optionally a sub-tab); global filters are retained. */
+export function DrillLink({ to, tab, children = "Open" }: { to: To; tab?: string; children?: ReactNode }) {
+  return <Link to={to} search={tab ? (prev: Record<string, unknown>) => ({ ...prev, tab }) : undefined} className="group inline-flex min-h-8 items-center gap-1 rounded-lg px-2 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground">{children}<ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" /></Link>;
 }
 
 const pctDelta = (k: KpiValue) => (k.previous ? ((k.value - k.previous) / k.previous) * 100 : 0);
 
-export function OverviewKpis() {
+/** KPI cards, split into the "summary" and "unit" groups used by the Overview sub-tabs. */
+export function OverviewKpis({ group = "summary" }: { group?: "summary" | "unit" }) {
   const o = useDashboardData().overview;
   const money = (n: number) => fmtMoney(n);
-  const items: { label: string; k: KpiValue; f: (n: number) => string; suffix?: string; to: To; goodWhenUp?: boolean; color: string }[] = [
-    { label: "Total spend", k: o.totalSpend, f: money, to: "/cost-explorer", color: "var(--chart-1)" },
-    { label: "Forecast end of month", k: o.forecastEom, f: money, to: "/budgets", color: "var(--chart-1)" },
-    { label: "Daily burn rate", k: o.dailyBurn, f: money, suffix: "/d", to: "/cost-explorer", color: "var(--chart-2)" },
-    { label: "Savings opportunity", k: o.savings, f: money, suffix: "/mo", to: "/recommendations", goodWhenUp: true, color: "var(--success)" },
-    { label: `Idle waste · ${o.idleCount} res.`, k: o.idleWaste, f: money, suffix: "/mo", to: "/resources", color: "var(--chart-3)" },
-    { label: "Active anomalies", k: o.anomalies, f: (n) => `${Math.round(n)}`, to: "/budgets", color: "var(--destructive)" },
-    { label: "Cost per active user", k: o.costPerUser, f: (n) => fmtMoney(n, { decimals: 4 }), to: "/cost-explorer", color: "var(--chart-4)" },
-    { label: "Cost per API request", k: o.costPerRequest, f: (n) => fmtMoney(n, { decimals: 6 }), to: "/cost-explorer", color: "var(--chart-4)" },
+  const all: { label: string; k: KpiValue; f: (n: number) => string; suffix?: string; to: To; tab: string; goodWhenUp?: boolean; color: string; g: "summary" | "unit" }[] = [
+    { label: "Total spend", k: o.totalSpend, f: money, to: "/cost-explorer", tab: "explore", color: "var(--chart-1)", g: "summary" },
+    { label: "Forecast end of month", k: o.forecastEom, f: money, to: "/budgets", tab: "forecast", color: "var(--chart-1)", g: "summary" },
+    { label: "Savings opportunity", k: o.savings, f: money, suffix: "/mo", to: "/recommendations", tab: "open", goodWhenUp: true, color: "var(--success)", g: "summary" },
+    { label: "Active anomalies", k: o.anomalies, f: (n) => `${Math.round(n)}`, to: "/budgets", tab: "anomalies", color: "var(--destructive)", g: "summary" },
+    { label: "Cost per active user", k: o.costPerUser, f: (n) => fmtMoney(n, { decimals: 4 }), to: "/cost-explorer", tab: "unit-economics", color: "var(--chart-4)", g: "unit" },
+    { label: "Cost per API request", k: o.costPerRequest, f: (n) => fmtMoney(n, { decimals: 6 }), to: "/cost-explorer", tab: "unit-economics", color: "var(--chart-4)", g: "unit" },
+    { label: `Idle waste · ${o.idleCount} res.`, k: o.idleWaste, f: money, suffix: "/mo", to: "/resources", tab: "idle", color: "var(--chart-3)", g: "unit" },
+    { label: "Daily burn rate", k: o.dailyBurn, f: money, suffix: "/d", to: "/cost-explorer", tab: "explore", color: "var(--chart-2)", g: "unit" },
   ];
+  const items = all.filter((i) => i.g === group);
   return (
     <section aria-label="Key metrics" className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((it) => {
         const d = pctDelta(it.k), up = d > 0, good = it.goodWhenUp ? up : !up;
         return (
-          <Link key={it.label} to={it.to} className="organic-card subtle-lift group flex h-full flex-col p-5">
+          <Link key={it.label} to={it.to} search={(prev: Record<string, unknown>) => ({ ...prev, tab: it.tab })} className="organic-card subtle-lift group flex h-full flex-col p-5">
             <div className="flex items-center justify-between gap-2"><p className="truncate text-[13px] text-muted-foreground">{it.label}</p><ChevronRight className="size-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></div>
             <div className="mt-2 flex items-end justify-between gap-2">
               <p className="metric-numbers whitespace-nowrap text-[32px] leading-none" aria-live="polite"><CountUp value={it.k.value} format={it.f} />{it.suffix && <span className="text-base font-normal text-muted-foreground">{it.suffix}</span>}</p>
