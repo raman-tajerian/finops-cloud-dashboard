@@ -35,7 +35,7 @@ function useDebounced(value: string, ms = 300) {
   return v;
 }
 
-export function SecurityWorkspace({ search, setSearch }: { search: SecSearch; setSearch: (p: Partial<SecSearch>) => void }) {
+export function SecurityWorkspace({ search, setSearch, tab = "score" }: { search: SecSearch; setSearch: (p: Partial<SecSearch>) => void; tab?: string }) {
   const session = useSession((s) => s.findings);
   return (
     <div className="space-y-6">
@@ -43,11 +43,9 @@ export function SecurityWorkspace({ search, setSearch }: { search: SecSearch; se
         <ShieldAlert className="mt-0.5 size-4 shrink-0 text-warning" />
         <p>Findings on this page are <span className="font-medium text-foreground">simulated</span> — derived deterministically from the demo dataset. No real scanning takes place. Status changes last for this session only (Demo).</p>
       </div>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-        <SecGate h="h-48">{({ scoreTrend }) => <ScoreCard trend={scoreTrend} />}</SecGate>
-        <SecGate h="h-48">{({ findings, frameworks }) => <ComplianceCards findings={withStatus(findings, session)} frameworks={frameworks} />}</SecGate>
-      </div>
-      <SecGate h="h-72">{({ findings }) => <FindingsTable findings={withStatus(findings, session)} search={search} setSearch={setSearch} />}</SecGate>
+      {tab === "score" && <SecGate h="h-48">{({ scoreTrend }) => <ScoreCard trend={scoreTrend} />}</SecGate>}
+      {tab === "compliance" && <SecGate h="h-48">{({ findings, frameworks }) => <ComplianceCards findings={withStatus(findings, session)} frameworks={frameworks} />}</SecGate>}
+      {tab === "findings" && <SecGate h="h-72">{({ findings }) => <FindingsTable findings={withStatus(findings, session)} search={search} setSearch={setSearch} />}</SecGate>}
       <SecGate h="h-24">{({ findings }) => <FindingDrawer finding={withStatus(findings, session).find((x) => x.id === search.finding) ?? null} onClose={() => setSearch({ finding: "" })} />}</SecGate>
     </div>
   );
