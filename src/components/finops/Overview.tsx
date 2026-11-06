@@ -67,7 +67,7 @@ export function CostTrendCard() {
     <article className="organic-card h-full p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><Label>Cost trend by provider</Label><p className="mt-1 text-[13px] text-muted-foreground">Daily spend, dashed forecast with 95% band · {markers.length} anomaly marker{markers.length === 1 ? "" : "s"}</p></div>
-        <div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><DrillLink to="/cost-explorer">Explore</DrillLink></div>
+        <div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><DrillLink to="/cost-explorer" tab="explore">Explore</DrillLink></div>
       </div>
       <div className="mt-4 h-72">
         {asTable ? <DataTableView caption="Daily cost by provider with forecast" columns={["Day", ...providers, "Forecast", "Band", "Anomaly"]} rows={trend.map((t) => [t.day, ...providers.map((p) => (t.total ? fmtMoney(t[p]) : "—")), t.forecast === null ? "—" : fmtMoney(t.forecast), t.band ? `${fmtMoney(t.band[0])} – ${fmtMoney(t.band[1])}` : "—", t.anomaly ?? ""])} /> :
@@ -109,7 +109,7 @@ export function TopMovers() {
   );
   return (
     <article className="organic-card h-full p-6">
-      <div className="flex items-start justify-between gap-3"><div><Label>Top movers</Label><p className="mt-1 text-[13px] text-muted-foreground">Largest changes vs previous period</p></div><DrillLink to="/resources">Resources</DrillLink></div>
+      <div className="flex items-start justify-between gap-3"><div><Label>Top movers</Label><p className="mt-1 text-[13px] text-muted-foreground">Largest changes vs previous period</p></div><DrillLink to="/resources" tab="list">Resources</DrillLink></div>
       <div className="mt-4 grid gap-5"><List title="Increases" items={up} inc /><List title="Decreases" items={down} inc={false} /></div>
     </article>
   );
