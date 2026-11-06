@@ -53,8 +53,9 @@ export function toCsv(rows: ResourceRow[]) {
 
 type Bulk = "tag" | "assign" | "stop" | null;
 
-export function ResourcesWorkspace({ search, setSearch }: { search: TableSearch; setSearch: (p: Partial<TableSearch>) => void }) {
+export function ResourcesWorkspace({ search, setSearch, presetStatus }: { search: TableSearch; setSearch: (p: Partial<TableSearch>) => void; presetStatus?: string }) {
   const s = normalizeTable(search);
+  const effStatus = presetStatus ?? s.status;
   const q = useResources();
   const [text, setText] = useState(s.q);
   const [hidden, setHidden] = useState<Set<SortKey>>(new Set());
@@ -70,7 +71,7 @@ export function ResourcesWorkspace({ search, setSearch }: { search: TableSearch;
   const services = useMemo(() => [...new Set(items.map((r) => r.service))].sort(), [items]);
   const filtered = useMemo(() => {
     const needle = s.q.toLowerCase();
-    const rows = items.filter((r) => (!s.ids.length || s.ids.includes(r.id)) && (s.status === "All" || r.status === s.status) && (s.service === "All" || r.service === s.service) && (!needle || `${r.name} ${r.id} ${r.service} ${r.region} ${r.team} ${r.sku}`.toLowerCase().includes(needle)));
+    const rows = items.filter((r) => (!s.ids.length || s.ids.includes(r.id)) && (effStatus === "All" || r.status === effStatus) && (s.service === "All" || r.service === s.service) && (!needle || `${r.name} ${r.id} ${r.service} ${r.region} ${r.team} ${r.sku}`.toLowerCase().includes(needle)));
     const dir = s.dir === "asc" ? 1 : -1;
     return rows.sort((a, b) => { const x = a[s.sort], y = b[s.sort]; return (typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y))) * dir; });
   }, [items, s.q, s.status, s.service, s.sort, s.dir, s.ids]);
@@ -111,10 +112,12 @@ export function ResourcesWorkspace({ search, setSearch }: { search: TableSearch;
             <Search className="size-4 shrink-0 text-muted-foreground" />
             <input aria-label="Search resources" className="w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground" value={text} onChange={(e) => setText(e.target.value)} placeholder="Search name, region, team…" />
           </label>
-          <Select value={s.status} onValueChange={(v) => setSearch({ status: v, page: 1 })}>
-            <SelectTrigger className="h-10 w-[130px] rounded-xl" aria-label="Status"><SelectValue /></SelectTrigger>
-            <SelectContent>{["All", "Running", "Warning", "Idle"].map((x) => <SelectItem key={x} value={x}>{x === "All" ? "All statuses" : x}</SelectItem>)}</SelectContent>
-          </Select>
+          {!presetStatus && (
+            <Select value={s.status} onValueChange={(v) => setSearch({ status: v, page: 1 })}>
+              <SelectTrigger className="h-10 w-[130px] rounded-xl" aria-label="Status"><SelectValue /></SelectTrigger>
+              <SelectContent>{["All", "Running", "Warning", "Idle"].map((x) => <SelectItem key={x} value={x}>{x === "All" ? "All statuses" : x}</SelectItem>)}</SelectContent>
+            </Select>
+          )}
           <Select value={s.service} onValueChange={(v) => setSearch({ service: v, page: 1 })}>
             <SelectTrigger className="h-10 w-[150px] rounded-xl" aria-label="Service"><SelectValue /></SelectTrigger>
             <SelectContent>{["All", ...services].map((x) => <SelectItem key={x} value={x}>{x === "All" ? "All services" : x}</SelectItem>)}</SelectContent>
