@@ -27,14 +27,17 @@ const Pill = ({ c, children }: { c: string; children: ReactNode }) => <span clas
 const levelTone: Record<Level, string> = { Low: "bg-success-soft text-success", Medium: "bg-warning-soft text-warning", High: "bg-destructive-soft text-destructive" };
 const statusTone: Record<RecStatus, string> = { Open: "bg-secondary text-foreground", "In progress": "bg-warning-soft text-warning", Done: "bg-success-soft text-success", Ignored: "bg-secondary text-muted-foreground", Snoozed: "bg-secondary text-muted-foreground" };
 
-export function RecommendationsWorkspace({ search, setSearch }: { search: RecSearch; setSearch: (p: Partial<RecSearch>) => void }) {
+/** Status sets locked by the page sub-tabs; "tracker" shows the summary instead of a list. */
+const tabStatuses: Record<string, RecStatus[]> = { open: ["Open"], "in-progress": ["In progress"], done: ["Done", "Ignored", "Snoozed"] };
+
+export function RecommendationsWorkspace({ search, setSearch, tab }: { search: RecSearch; setSearch: (p: Partial<RecSearch>) => void; tab: string }) {
   const q = useSavings();
   if (q.isPending) return <div className="grid gap-6"><CardSkeleton h="h-20" /><CardSkeleton h="h-64" /></div>;
   if (q.isError || !q.data) return <ErrorState message="We couldn't load recommendations. Check your connection and try again." onRetry={() => q.refetch()} />;
-  return <CardBoundary onReset={() => q.refetch()}><Workspace d={q.data} search={search} setSearch={setSearch} /></CardBoundary>;
+  return <CardBoundary onReset={() => q.refetch()}><Workspace d={q.data} search={search} setSearch={setSearch} tab={tab} /></CardBoundary>;
 }
 
-function Workspace({ d, search, setSearch }: { d: SavingsDto; search: RecSearch; setSearch: (p: Partial<RecSearch>) => void }) {
+function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSearch; setSearch: (p: Partial<RecSearch>) => void; tab: string }) {
   const recs = useSession((s) => s.recs);
   const [review, setReview] = useState<SavingItemDto | null>(null);
   const [ignore, setIgnore] = useState<SavingItemDto | null>(null);
