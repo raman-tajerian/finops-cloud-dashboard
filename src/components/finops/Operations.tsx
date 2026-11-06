@@ -27,13 +27,13 @@ function Gate<T>({ q, h, children }: { q: UseQueryResult<T>; h?: string; childre
 /* ================= Kubernetes ================= */
 const podColor: Record<K8sPodDto["status"], string> = { Running: "var(--success)", Pending: "var(--warning)", Failed: "var(--destructive)" };
 
-export function KubernetesWorkspace() {
+export function KubernetesWorkspace({ tab = "clusters" }: { tab?: string }) {
   const q = useKubernetes();
-  return <Gate q={q} h="h-72">{(d) => d.clusters.length ? <Clusters clusters={d.clusters} /> : <EmptyState icon={Boxes} title="No Kubernetes clusters match the current filters." action="Reload" onAction={() => q.refetch()} />}</Gate>;
+  return <Gate q={q} h="h-72">{(d) => d.clusters.length ? <Clusters clusters={d.clusters} tab={tab} /> : <EmptyState icon={Boxes} title="No Kubernetes clusters match the current filters." action="Reload" onAction={() => q.refetch()} />}</Gate>;
 }
 
 type SortKey = "name" | "cost" | "efficiency";
-function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
+function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string }) {
   const [id, setId] = useState(clusters[0]!.id);
   const c = clusters.find((x) => x.id === id) ?? clusters[0]!;
   const [asTable, setAsTable] = useState(false);
@@ -46,20 +46,26 @@ function Clusters({ clusters }: { clusters: K8sClusterDto[] }) {
       <button className="inline-flex min-h-10 items-center gap-1 hover:text-foreground" onClick={() => setSort({ k, dir: sort.k === k && sort.dir === -1 ? 1 : -1 })}>{label}{sort.k === k && (sort.dir === 1 ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />)}</button>
     </th>
   );
+  const picker = (
+    <section className="organic-card grid gap-4 p-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+      <Title sub={`${c.provider} ${c.service} · ${c.region} · ${c.environment}`}>Cluster</Title>
+      <Select value={c.id} onValueChange={setId}>
+        <SelectTrigger className="h-10 w-full rounded-xl sm:w-72" aria-label="Cluster"><SelectValue /></SelectTrigger>
+        <SelectContent>{clusters.map((x) => <SelectItem key={x.id} value={x.id}>{x.name} · {x.service}</SelectItem>)}</SelectContent>
+      </Select>
+    </section>
+  );
   return (
     <div className="space-y-6">
-      <section className="organic-card grid gap-4 p-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-        <Title sub={`${c.provider} ${c.service} · ${c.region} · ${c.environment}`}>Cluster</Title>
-        <Select value={c.id} onValueChange={setId}>
-          <SelectTrigger className="h-10 w-full rounded-xl sm:w-72" aria-label="Cluster"><SelectValue /></SelectTrigger>
-          <SelectContent>{clusters.map((x) => <SelectItem key={x.id} value={x.id}>{x.name} · {x.service}</SelectItem>)}</SelectContent>
-        </Select>
-      </section>
+      {picker}
+      {tab === "clusters" && (
       <section aria-label="Cluster metrics" className="grid gap-4 sm:grid-cols-3">
         {[["Monthly cost", fmtUSD(c.monthlyCost), "Last 30 days"], ["Nodes", String(c.nodes), "max(3, cost / $350)"], ["Pod health", `${c.podsHealthy}/${c.podsTotal}`, `${c.podsFailed} failed or pending`]].map(([l, v, n]) => (
           <div key={l} className="organic-card p-5"><p className="text-[13px] text-muted-foreground">{l}</p><p className="mt-2 font-display text-[32px] leading-none tracking-tight tabular-nums">{v}</p><p className="mt-3 text-xs text-muted-foreground">{n}</p></div>
         ))}
       </section>
+      )}
+      {tab === "namespaces" && (
       <div className="grid gap-6 xl:grid-cols-2">
         <article className="organic-card min-w-0 p-6">
           <div className="flex items-start justify-between gap-3"><Title sub="Fixed namespace weights; sums to the cluster cost">Cost per namespace</Title><TableToggle on={asTable} onChange={setAsTable} /></div>
