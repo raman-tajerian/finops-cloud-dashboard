@@ -102,6 +102,7 @@ function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string })
           {c.pods.map((p) => <button key={p.name} role="listitem" title={`${p.name} · ${p.status} · ${p.restarts} restarts`} aria-label={`${p.name}, ${p.status}, ${p.restarts} restarts`} onClick={() => setPod(p)} className="size-3.5 rounded-[3px] transition-transform hover:scale-125 focus-visible:scale-125" style={{ background: podColor[p.status], opacity: p.status === "Running" ? 0.55 : 1 }} />)}
         </div>}
       </article>
+      )}
       <Sheet open={!!pod} onOpenChange={(o) => !o && setPod(null)}>
         <SheetContent>
           {pod && <><SheetHeader><SheetTitle className="break-all">{pod.name}</SheetTitle><SheetDescription>{c.name} · namespace {pod.namespace}</SheetDescription></SheetHeader>
