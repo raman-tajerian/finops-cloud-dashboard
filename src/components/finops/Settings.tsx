@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageTabs, TabContent } from "./PageTabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CardSkeleton, EmptyState, ErrorState } from "./States";
@@ -37,14 +37,15 @@ export function SettingsWorkspace({ tab, dialog, onTab, onDialog }: { tab: strin
   const d: SettingsDto = { ...q.data, ...Object.fromEntries(Object.entries(ss).filter(([, v]) => v !== undefined)) } as SettingsDto;
   const save = (patch: Partial<typeof ss>, msg = "Saved (demo, this session only)") => { setSession((s) => ({ ...s, settings: { ...s.settings, ...patch } })); toast.success(msg); };
   return (
-    <Tabs value={tab} onValueChange={onTab} className="space-y-4">
-      <div className="overflow-x-auto"><TabsList className="w-max">{SETTINGS_TABS.map(([v, l]) => <TabsTrigger key={v} value={v}>{l}</TabsTrigger>)}</TabsList></div>
+    <div className="space-y-4">
+      <PageTabs tabs={SETTINGS_TABS.map(([id, label]) => ({ id, label }))} value={tab} onChange={onTab} ariaLabel="Settings sections" />
       <p className="flex items-center gap-2 text-xs text-muted-foreground"><Demo /> Changes are kept for this session only.</p>
-      <TabsContent value="profile"><FormCard fields={[["name", "Name"], ["email", "Email"], ["title", "Title"]]} value={d.profile} validate={(v) => (isEmail(v["email"] ?? "") ? null : { email: "Enter a valid email." })} onSave={(v) => save({ profile: v as SettingsDto["profile"] })} /></TabsContent>
-      <TabsContent value="workspace"><FormCard fields={[["name", "Workspace name"], ["currency", "Currency"], ["timezone", "Timezone"]]} value={d.workspace} validate={(v) => ((v["name"] ?? "").trim() ? null : { name: "Name is required." })} onSave={(v) => save({ workspace: v as SettingsDto["workspace"] })} /></TabsContent>
-      <TabsContent value="members"><Members d={d} open={dialog === "invite"} onOpen={(o) => onDialog(o ? "invite" : "")} save={save} /></TabsContent>
-      <TabsContent value="allocation"><Allocation rows={d.mappings} save={save} /></TabsContent>
-      <TabsContent value="notifications">
+      <TabContent tab={tab}>
+      {tab === "profile" && <FormCard fields={[["name", "Name"], ["email", "Email"], ["title", "Title"]]} value={d.profile} validate={(v) => (isEmail(v["email"] ?? "") ? null : { email: "Enter a valid email." })} onSave={(v) => save({ profile: v as SettingsDto["profile"] })} />}
+      {tab === "workspace" && <FormCard fields={[["name", "Workspace name"], ["currency", "Currency"], ["timezone", "Timezone"]]} value={d.workspace} validate={(v) => ((v["name"] ?? "").trim() ? null : { name: "Name is required." })} onSave={(v) => save({ workspace: v as SettingsDto["workspace"] })} />}
+      {tab === "members" && <Members d={d} open={dialog === "invite"} onOpen={(o) => onDialog(o ? "invite" : "")} save={save} />}
+      {tab === "allocation" && <Allocation rows={d.mappings} save={save} />}
+      {tab === "notifications" && (
         <div className="organic-card overflow-x-auto p-2"><table className="density-table w-full min-w-[420px] text-sm">
           <thead className="text-left text-xs text-muted-foreground"><tr><th className="px-3 py-2 font-medium">Event</th>{d.channels.map((c) => <th key={c} className="px-3 py-2 font-medium">{c}</th>)}</tr></thead>
           <tbody>{d.events.map((e) => <tr key={e} className="border-t border-border"><td className="px-3 py-2">{e}</td>{d.channels.map((c) => { const k = `${e}|${c}`; const on = ss.notify[k] ?? c === "Email"; return <td key={c} className="px-3 py-2"><Switch checked={on} aria-label={`${e} via ${c}`} onCheckedChange={(v) => setSession((s) => ({ ...s, settings: { ...s.settings, notify: { ...s.settings.notify, [k]: v } } }))} /></td>; })}</tr>)}</tbody>
