@@ -34,7 +34,7 @@ const TABS = PAGE_TABS["/resources"].tabs;
 
 function ResourcesPage() {
   const s = Route.useSearch();
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: "/resources" });
   const { tab, setTab } = usePageTab(TABS);
   const search: TableSearch = { q: s.q ?? "", sort: s.sort ?? "monthlyCost", dir: s.dir ?? "desc", page: s.page ?? 1, size: s.size ?? 25, id: s.id ?? "", status: s.status ?? "All", service: s.service ?? "All", ids: s.ids ?? "" };
   const setSearch = (p: Partial<TableSearch>) => navigate({ search: (prev) => ({ ...prev, ...p }), replace: true, resetScroll: false });

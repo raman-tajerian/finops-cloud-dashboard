@@ -76,7 +76,7 @@ export const PAGE_TABS = {
     { id: "keys", label: "API keys" },
     { id: "appearance", label: "Appearance" },
   ] },
-};
+} satisfies Record<string, { label: string; tabs: PageTab[] }>;
 
 /** Resolves a raw ?tab= value to a valid tab id; invalid or missing falls back to the first tab. */
 export function resolveTab(tabs: PageTab[], raw: string | undefined): string {
