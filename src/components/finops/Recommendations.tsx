@@ -68,14 +68,15 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
           <p className="mt-2 text-xs text-muted-foreground">Target = {Math.round(d.targetShare * 100)}% of total potential ({fmtMoney(d.total)}/mo). Statuses are demo-only and reset when you reload.</p>
         </div>
       </section>
+  );
 
-      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
+  const listSection = (
         <section className="organic-card min-w-0 p-6" aria-label="Recommendations">
           <div className="flex flex-wrap items-center gap-2">
             <FilterSelect label="Category" value={search.cat} options={categories} onChange={(v) => setSearch({ cat: v })} />
             <FilterSelect label="Effort" value={search.effort} options={levels} onChange={(v) => setSearch({ effort: v })} />
             <FilterSelect label="Risk" value={search.risk} options={levels} onChange={(v) => setSearch({ risk: v })} />
-            <FilterSelect label="Status" value={search.status} options={statuses} onChange={(v) => setSearch({ status: v })} />
+            {!lock && <FilterSelect label="Status" value={search.status} options={statuses} onChange={(v) => setSearch({ status: v })} />}
             <Select value={search.sort} onValueChange={(v) => setSearch({ sort: v })}>
               <SelectTrigger className="h-10 w-auto min-w-40 rounded-xl" aria-label="Sort"><SelectValue /></SelectTrigger>
               <SelectContent><SelectItem value="savings-desc">Savings: high to low</SelectItem><SelectItem value="savings-asc">Savings: low to high</SelectItem></SelectContent>
