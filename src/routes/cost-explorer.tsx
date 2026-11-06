@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, stripSearchParams, type SearchSchemaInput } from "@tanstack/react-router";
 import { z } from "zod";
 import { ExplorerCompare, ExplorerMain, SavedViewsPanel, UnitEconCards, type ExplorerState, type SavedView } from "@/components/finops/Explorer";
 import { PAGE_TABS, PageTabs, TabContent, usePageTab } from "@/components/finops/PageTabs";
@@ -18,8 +18,8 @@ const explorerSearchSchema = z.object({
 });
 
 export const Route = createFileRoute("/cost-explorer")({
-  validateSearch: (search: Record<string, unknown> & Partial<z.infer<typeof explorerSearchSchema>>) => explorerSearchSchema.parse(search),
-  search: { middlewares: [] },
+  validateSearch: (search: Partial<z.infer<typeof explorerSearchSchema>> & SearchSchemaInput) => explorerSearchSchema.parse(search),
+  search: { middlewares: [stripSearchParams({ group: "service", chart: "area", compare: false, views: [] })] },
   head: () => ({
     meta: [
       { title: "Cost Explorer · Fern" },
