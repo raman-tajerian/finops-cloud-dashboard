@@ -41,8 +41,9 @@ export function OverviewKpis({ group = "summary" }: { group?: "summary" | "unit"
       {items.map((it) => {
         const d = pctDelta(it.k), up = d > 0, good = it.goodWhenUp ? up : !up;
         return (
-          <article key={it.label} className="organic-card subtle-lift group flex h-full flex-col p-5">
-            <div className="flex items-center justify-between gap-1"><Link to={it.to} state={{ drilldown: true } as never} search={(prev: Record<string, unknown>) => ({ ...prev, tab: it.tab })} className="min-w-0 flex-1 text-[13px] text-muted-foreground">{it.label}</Link><MetricInfo label={it.label} /><ChevronRight className="size-3.5 shrink-0 text-muted-foreground" /></div>
+          <article key={it.label} className="organic-card subtle-lift group relative flex h-full flex-col p-5">
+            <Link aria-label={it.label} to={it.to} state={{ drilldown: true } as never} search={(prev: Record<string, unknown>) => ({ ...prev, tab: it.tab })} className="absolute inset-0 z-0 rounded-[inherit]" />
+            <div className="pointer-events-none relative flex items-center justify-between gap-1"><p className="min-w-0 flex-1 text-[13px] text-muted-foreground">{it.label}</p><span className="pointer-events-auto relative z-10"><MetricInfo label={it.label} /></span><ChevronRight className="size-3.5 shrink-0 text-muted-foreground" /></div>
             <div className="mt-2 flex items-end justify-between gap-2">
               <p className="metric-numbers whitespace-nowrap text-[32px] leading-none" aria-live="polite"><CountUp value={it.k.value} format={it.f} />{it.suffix && <span className="text-base font-normal text-muted-foreground">{it.suffix}</span>}</p>
               <Spark data={it.k.spark} color={it.color} className="h-8 w-20" />
