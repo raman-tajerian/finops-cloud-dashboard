@@ -60,7 +60,7 @@ describe("notification read state and empty selections", () => {
     expect(unreadNotifications(items, {}).length).toBe(items.length);
     const reads = markNotificationsRead(items, { other: true });
     expect(unreadNotifications(items, reads)).toEqual([]);
-    expect(reads.other).toBe(true);
+    expect(reads["other"]).toBe(true);
     expect(unreadNotifications(items, {}).length).toBe(items.length);
   });
   it("empty datasets return zero commitments, teams and notification totals", () => {
