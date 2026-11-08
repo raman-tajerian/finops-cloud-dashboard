@@ -1,5 +1,10 @@
 # Roadmap
 
+- [ ] Motion v2: upgrade shared framer-motion presets, odometer numbers, reusable spring ProgressRing and reduced-motion/hidden-tab guardrails.
+- [ ] Add first-session skippable brand intro, Overview scroll/pointer hero motion, viewport reveals and shared card/drawer transitions.
+- [ ] Polish charts, controls, palette, toasts and list motion without changing data, routes or existing behavior.
+- [ ] Add focused motion tests; run all tests and check layout, focus and console at 375/768/1024/1440px.
+
 - [x] Visual design v2: quieter tinted cards and 32px rhythm, centered 1280px workspace, consistent icons and AA secondary text.
 - [x] Add a data-driven hero strip to every page's first tab; simplify charts, tables, controls, badges and loading/empty states.
 - [x] Add session-only Appearance > Theme (Light default / warm graphite Dark) and replace remaining hard-coded component colors with tokens.
