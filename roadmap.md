@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Sub-tab restructure (2026-11-06): shared PageTabs (?tab= URL, pill indicator, keyboard nav), tabs on all 11 pages, progressive disclosure (Show all), deep links page›tab, palette tab entries, tests + responsive checks. No data/API/theme changes.
+- [x] Sub-tab restructure (2026-11-06): shared PageTabs (?tab= URL, pill indicator, keyboard nav), tabs on all 11 pages, progressive disclosure (Show all), deep links page›tab, palette tab entries, tests + responsive checks. No data/API/theme changes.
 
 - [x] Documentation refresh (4 November): README, demo formulas/invariants, all 14 API functions and factual demo limitations; markdown-only changes, 172 tests passed, automatic build OK. Manual typecheck/build not run under workspace restrictions.
 
