@@ -4,6 +4,7 @@ import { AnimatedNumber, ProgressRing } from "@/components/motion";
 import { MOTION, pageExit } from "@/lib/motion";
 import { fmtMoney, setActiveCurrency } from "@/data/currency";
 import { setSession } from "@/lib/session-store";
+import { focusResourceRow } from "@/components/finops/ResourcesTable";
 
 const visibleText = (container: HTMLElement) => container.querySelector('[aria-hidden="true"]')?.textContent ?? "";
 
@@ -36,6 +37,17 @@ describe("Motion v2 numbers and rings", () => {
     const active = container.querySelectorAll("circle")[1]!;
     const expected = 2 * Math.PI * 42 * (1 - 0.625);
     await waitFor(() => expect(Number(active.getAttribute("stroke-dashoffset"))).toBeCloseTo(expected, 6), { timeout: 1800 });
+  });
+
+  it("returns focus to the originating resource row after a drawer transition", () => {
+    const row = document.createElement("tr");
+    row.tabIndex = 0;
+    row.dataset["resourceRow"] = "eks-04";
+    document.body.appendChild(row);
+    expect(focusResourceRow("eks-04")).toBe(true);
+    expect(document.activeElement).toBe(row);
+    row.remove();
+    expect(focusResourceRow("eks-04")).toBe(false);
   });
 
   it("reduced motion is immediate and every timed preset stays within 200–700ms", async () => {
