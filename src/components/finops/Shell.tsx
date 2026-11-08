@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { navGroups, navItems } from "@/lib/nav";
 import { dataSource } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { unreadNotifications } from "@/lib/notifications";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { NavigationPalette } from "./NavigationPalette";
 import { HelpDrawer, CalculationNotes } from "./Help";
@@ -14,19 +14,13 @@ import { navigationCounts } from "@/lib/findability";
 
 import { CreateBudgetDialog } from "./BudgetsAlerts";
 import { PAGE_TABS } from "@/components/finops/PageTabs";
-import { useDashboard, useSecurity, useAlerts } from "@/lib/queries";
+import { useDashboard, useSecurity, useAlerts, useNotifications } from "@/lib/queries";
 import { CURRENCIES, CurrencySync, useCurrency, useSetCurrency } from "@/lib/money";
 import { useTableDensity } from "@/lib/density";
 import { recordVisit, setSession, targetKey, togglePin, useSession, type NavTarget } from "@/lib/session-store";
 import { useGlobalShortcuts } from "@/lib/shortcuts";
 
 import { CardSkeleton, FilterEmptyState } from "./States";
-
-const seedNotes = [
-  { id: 1, kind: "Anomaly", text: "+140% Azure Blob Storage egress", time: "2h ago" },
-  { id: 2, kind: "Budget", text: "Q4 budget passed 80% threshold", time: "5h ago" },
-  { id: 3, kind: "Remediation", text: "Auto-scaler removed 3 idle nodes", time: "1d ago" },
-];
 
 export function Shell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -42,7 +36,9 @@ export function Shell({ children }: { children: ReactNode }) {
   const showHelp = () => { captureFocus(); setHelp(true); };
   const [backTarget, setBackTarget] = useState<{ href: string; label: string } | null>(null);
   const [scanning, setScanning] = useState(false);
-  const [unread, setUnread] = useState<number[]>(seedNotes.map((n) => n.id));
+  const notificationQuery = useNotifications();
+  const notificationReads = useSession((s) => s.notificationReads);
+  const unread = unreadNotifications(notificationQuery.data?.items ?? [], notificationReads);
   const location = useRouterState({ select: (s) => s.location });
   const path = location.pathname;
   const previousLocation = useRef(location);
@@ -50,14 +46,14 @@ export function Shell({ children }: { children: ReactNode }) {
   const dashboard = useDashboard();
   const resources = dashboard.data?.resources ?? [];
   const filteredPage = path !== "/settings" && path !== "/integrations";
-  const current = navItems.find((i) => i.to === path) ?? { label: "Overview", to: "/", icon: Radar };
+  const current = navItems.find((i) => i.to === path || (i.to === "/teams" && path.startsWith("/teams/"))) ?? { label: "Overview", to: "/", icon: Radar };
   const security = useSecurity();
   const alerts = useAlerts();
   const navigation = useSession((s) => s.navigation);
   const recs = useSession((s) => s.recs);
   const findings = useSession((s) => s.findings);
   const counts = navigationCounts(dashboard.isPlaceholderData ? undefined : dashboard.data, security.isPlaceholderData ? undefined : security.data, recs, findings);
-  const page = PAGE_TABS[path as keyof typeof PAGE_TABS];
+  const page = PAGE_TABS[(path.startsWith("/teams/") ? "/teams" : path) as keyof typeof PAGE_TABS];
   const rawTab = (location.search as { tab?: string }).tab;
   const activeTab = page?.tabs.find((t) => t.id === rawTab) ?? page?.tabs[0];
   const pageTarget: NavTarget = { to: path, label: current.label };
@@ -123,7 +119,7 @@ export function Shell({ children }: { children: ReactNode }) {
               {!collapsed && <Button variant="ghost" className="h-10 w-full justify-between px-3 text-[11px] font-medium uppercase text-muted-foreground" aria-expanded={!navigation.collapsed[g.label]} onClick={() => setSession((s) => ({ ...s, navigation: { ...s.navigation, collapsed: { ...s.navigation.collapsed, [g.label]: !s.navigation.collapsed[g.label] } } }))}>{g.label}<ChevronDown className={`size-3 ${navigation.collapsed[g.label] ? "-rotate-90" : ""}`} /></Button>}
               <div className={`space-y-0.5 ${!collapsed && navigation.collapsed[g.label] ? "hidden" : ""}`}>
                 {g.items.map(({ to, label, icon: Icon }) => {
-                  const active = path === to;
+                  const active = path === to || (to === "/teams" && path.startsWith("/teams/"));
                   return (
                     <Link key={to} to={to} onClick={() => setOpen(false)} title={collapsed ? label : undefined} aria-current={active ? "page" : undefined}
                       className={`flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm transition-colors ${active ? "bg-primary-soft text-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"} ${collapsed ? "lg:justify-center lg:px-0" : ""}`}>
@@ -154,22 +150,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <div className="ml-auto flex items-center gap-2">
             <Button variant="outline" className="hidden h-10 gap-2 border-border bg-card text-muted-foreground shadow-none md:flex" onClick={showPalette}><Search />Search<kbd className="rounded border border-border px-1.5 font-mono text-[10px]">⌘K</kbd></Button>
             <Button ref={searchButton} variant="ghost" size="icon" className="size-10 md:hidden" onClick={showPalette} aria-label="Search"><Search /></Button>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative size-10" aria-label={`Notifications, ${unread.length} unread`}>
-                  <Bell />{unread.length > 0 && <span className="absolute right-1.5 top-1.5 grid min-w-4 place-items-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">{unread.length}</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-80 p-0">
-                <div className="flex items-center justify-between border-b border-border px-4 py-3"><p className="text-sm font-medium">Notifications</p><Button size="sm" variant="ghost" disabled={!unread.length} onClick={() => setUnread([])}>Mark all as read</Button></div>
-                <ul>{seedNotes.map((n) => (
-                  <li key={n.id}><button onClick={() => setUnread((u) => u.filter((x) => x !== n.id))} className="flex w-full gap-3 px-4 py-3 text-left hover:bg-secondary">
-                    <span className={`mt-1.5 size-2 shrink-0 rounded-full ${unread.includes(n.id) ? "bg-primary" : "bg-transparent"}`} aria-hidden />
-                    <span className="min-w-0"><span className="block text-xs text-muted-foreground">{n.kind} · {n.time}</span><span className="block text-sm">{n.text}</span></span>
-                  </button></li>
-                ))}</ul>
-              </PopoverContent>
-            </Popover>
+            <Button asChild variant="ghost" size="icon" className="relative size-10"><Link to="/notifications" search={(p) => ({ ...p, tab: "all" })} aria-label={`Notifications, ${unread.length} unread`}><Bell />{unread.length > 0 && <span className="absolute right-1 top-1 grid min-w-4 place-items-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">{unread.length}</span>}</Link></Button>
             <Button onClick={scan} disabled={scanning} className="h-10 rounded-xl"><Radar className="" /><span className="hidden sm:inline">{scanning ? "Scanning…" : "Run scan"}</span></Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild><button className="grid size-10 place-items-center rounded-full border border-border bg-card text-xs font-medium" aria-label="User menu">RT</button></DropdownMenuTrigger>

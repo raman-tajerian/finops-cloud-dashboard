@@ -1,5 +1,9 @@
 # Roadmap
 
+- [x] Add Commitments, Teams/showback and Notifications through typed APIs and master-data builders, preserving totals.
+- [x] Add navigation, team detail URLs, chart tables, verified CSV export and shared session-only read state; bell/center count agrees.
+- [x] Document three read contracts and rules; all 226 tests pass. Four new views × four widths × three tabs checked with no overflow/console errors; keyboard, source links, filter preservation and loading/error/retry/empty/reset verified. Automatic build OK. Read endpoints follow existing demo/future C# API pattern, not hosted handlers.
+
 - [x] Add filter-derived Fern score and daily briefing through typed API builders, preserving existing totals.
 - [x] Document both read endpoints and deterministic formulas; 18 new aggregate reconciliation and edge-case tests.
 - [x] All 212 tests pass; Overview and drawer checked at 375/768/1024/1440px, links and loading/error/retry/empty states verified, no console errors or overflow. Default score 40 with five insights. Read paths follow existing demo/C# API pattern; no hosted API handlers added.

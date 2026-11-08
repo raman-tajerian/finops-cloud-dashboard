@@ -11,6 +11,7 @@
 
 - Keep FinOps feature data local and typed so it can later be replaced by the planned C# API without changing presentation components.
 - Fern score and daily briefing are read-only projections in src/data/insights.ts exposed through the typed API; sentence templates carry structured figures for display-only currency conversion and never alter source totals.
+- Commitments, team showback and notification read models use pure builders in src/data/workspaces.ts; notifications share an ID-keyed session read map with the bell, and Teams uses an Outlet layout with index/detail leaves so team URLs remain independently addressable.
 - Treat the dashboard as a single responsive bento workspace; operational widgets own their temporary interactive state.
 - AI features stream from server routes under src/routes/api with prompts and keys in *.server.ts — keeps secrets server-side.
 - Shared app chrome (Shell, sidebar, command palette) lives in __root around <Outlet />; nav config in src/lib/nav.ts drives sidebar, breadcrumbs and palette.

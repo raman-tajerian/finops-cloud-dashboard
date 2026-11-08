@@ -10,6 +10,9 @@ export interface PageTab { id: string; label: string }
 
 /** Tab registry: single source for the tab bars, deep links and the command palette. */
 export const PAGE_TABS = {
+  "/commitments": { label: "Commitments", tabs: [{ id: "coverage", label: "Coverage" }, { id: "commitments", label: "Commitments" }, { id: "recommendations", label: "Recommendations" }] },
+  "/teams": { label: "Teams", tabs: [{ id: "overview", label: "Overview" }, { id: "resources", label: "Resources" }, { id: "budgets", label: "Budgets" }] },
+  "/notifications": { label: "Notifications", tabs: [{ id: "all", label: "All" }, { id: "unread", label: "Unread" }, { id: "read", label: "Read" }] },
   "/": { label: "Overview", tabs: [
     { id: "summary", label: "Summary" },
     { id: "unit-economics", label: "Unit economics" },
