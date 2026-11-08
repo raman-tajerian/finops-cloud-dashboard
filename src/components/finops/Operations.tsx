@@ -8,7 +8,7 @@ import { budgetTone, simulate } from "@/lib/scenario";
 import { useGlobalFilters } from "@/lib/filters";
 import { MetricInfo } from "./Help";
 import type { K8sClusterDto, K8sPodDto } from "@/types/finops";
-import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, StatusBadge, TableToggle } from "./States";
+import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, PageHero, StatusBadge, TableToggle } from "./States";
 import { CountUp } from "./Insights";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,8 +50,9 @@ function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string })
     </th>
   );
   return (
-    <div className="space-y-6">
-      <section className="organic-card grid gap-4 p-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+    <div className="space-y-8">
+      {tab === "clusters" && <PageHero label={`${c.name} · monthly cost`} value={fmtMoney(c.monthlyCost)} change={`${c.podsHealthy}/${c.podsTotal} pods healthy`} description={`${c.provider} ${c.service} in ${c.region}, with ${c.nodes} nodes and resource-derived cluster health.`} />}
+      <section className="organic-card grid gap-4 p-7 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <Title sub={`${c.provider} ${c.service} · ${c.region} · ${c.environment}`}>Cluster</Title>
         <Select value={c.id} onValueChange={setId}>
           <SelectTrigger className="h-10 w-full rounded-xl sm:w-72" aria-label="Cluster"><SelectValue /></SelectTrigger>

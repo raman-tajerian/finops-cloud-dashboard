@@ -130,7 +130,7 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const reduceMotion = useSession((s) => s.settings.reduceMotion);
-  const theme = useSession((s) => s.settings.theme);
+  const theme = useSession((s) => s.settings.theme) ?? "light";
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");

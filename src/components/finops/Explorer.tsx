@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useExplore } from "@/lib/queries";
 import { useGlobalFilters, type Filters } from "@/lib/filters";
-import { CardSkeleton, DataTableView, ErrorState, ShowAllButton, TableToggle, useLimited } from "./States";
+import { CardSkeleton, DataTableView, ErrorState, PageHero, ShowAllButton, TableToggle, useLimited } from "./States";
 import { Spark } from "./Platform";
 import type { ExploreDto, ExploreRow, GroupBy } from "@/types/finops";
 import { Button } from "@/components/ui/button";

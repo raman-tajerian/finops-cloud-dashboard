@@ -4,7 +4,7 @@ import { Area, ComposedChart, CartesianGrid, Line, ReferenceDot, ResponsiveConta
 import { ArrowDownRight, ArrowUpRight, ChevronRight, Minus } from "lucide-react";
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useDashboardData } from "@/lib/queries";
-import { DataTableView, TableToggle } from "./States";
+import { DataTableView, PageHero, TableToggle } from "./States";
 import { CountUp } from "./Insights";
 import { Spark } from "./Platform";
 import type { KpiValue } from "@/types/finops";
@@ -20,6 +20,12 @@ export function DrillLink({ to, tab, children = "Open" }: { to: To; tab?: string
 }
 
 const pctDelta = (k: KpiValue) => (k.previous ? ((k.value - k.previous) / k.previous) * 100 : 0);
+
+export function OverviewHero() {
+  const { totalSpend } = useDashboardData().overview;
+  const change = pctDelta(totalSpend);
+  return <PageHero label="Total cloud spend" value={fmtMoney(totalSpend.value)} change={<span className={change > 0 ? "text-warning" : "text-success"}>{change > 0 ? "+" : ""}{change.toFixed(1)}% vs previous period</span>} description="Your selected cloud spend in one view, with the trends and actions that need attention below." />;
+}
 
 /** KPI cards, split into the "summary" and "unit" groups used by the Overview sub-tabs. */
 export function OverviewKpis({ group = "summary" }: { group?: "summary" | "unit" }) {

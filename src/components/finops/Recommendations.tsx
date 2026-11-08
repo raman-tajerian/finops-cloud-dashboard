@@ -12,7 +12,7 @@ import { fmtDemoDate, snoozeUntil, SNOOZE_OPTIONS } from "@/data/resources";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { recStatus, setSession, useSession, type RecStatus } from "@/lib/session-store";
 import type { Level, SavingCategory, SavingItemDto, SavingsDto } from "@/types/finops";
-import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, TableToggle } from "./States";
+import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, PageHero, TableToggle } from "./States";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -125,7 +125,8 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
   );
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-8">
+      {tab === "open" && <PageHero label="Open savings opportunity" value={<>{fmtMoney(open)}<span className="text-xl text-muted-foreground">/mo</span></>} change={`${d.items.filter((i) => st(i.id) === "Open" || st(i.id) === "In progress").length} actions to review`} description="Prioritized actions with clear effort, risk and estimated monthly impact." />}
       {summary}
       {tab === "tracker" ? (
         <div className="grid gap-6 xl:grid-cols-2">

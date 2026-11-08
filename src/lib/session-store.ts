@@ -11,7 +11,7 @@ export interface FindingState { status: FindingSessionStatus; reason?: string }
 
 export interface PastReport { id: string; template: string; title: string; format: string; range: string; created: string; content: string }
 export interface ScheduleRow { id: string; template: string; cadence: "weekly" | "monthly"; recipients: string[]; format: string; enabled: boolean }
-export interface DemoSettings { profile?: { name: string; email: string; title: string }; workspace?: { name: string; currency: string; timezone: string }; members?: import("@/types/finops").MemberDto[]; mappings?: import("@/types/finops").TagMappingDto[]; keys?: import("@/types/finops").ApiKeyDto[]; notify: Record<string, boolean>; density: "compact" | "comfortable"; reduceMotion: boolean; theme: "light" | "dark" }
+export interface DemoSettings { profile?: { name: string; email: string; title: string }; workspace?: { name: string; currency: string; timezone: string }; members?: import("@/types/finops").MemberDto[]; mappings?: import("@/types/finops").TagMappingDto[]; keys?: import("@/types/finops").ApiKeyDto[]; notify: Record<string, boolean>; density: "compact" | "comfortable"; reduceMotion: boolean; theme?: "light" | "dark" }
 export interface NavTarget { to: string; tab?: string; label: string }
 export interface NavigationSession { pinned: NavTarget[]; recent: NavTarget[]; searches: string[]; collapsed: Record<string, boolean> }
 export const emptyNavigation = (): NavigationSession => ({ pinned: [], recent: [], searches: [], collapsed: {} });
