@@ -75,7 +75,7 @@ export function AnimatedNumber({ value, format }: { value: number; format: (n: n
       },
     });
     return () => controls.stop();
-  }, [value, format, reduce]);
+  }, [value, reduce]);
 
   const finalText = format(current);
   const shown = rolling?.to ?? finalText;
