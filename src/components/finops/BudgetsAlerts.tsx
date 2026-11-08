@@ -9,7 +9,7 @@ import { budgetTone } from "@/lib/scenario";
 import { parseAmount, scopeKey, validateBudget } from "@/data/budgets";
 import { setSession, useSession, type AlertRule, type AnomalyStatus, type SessionBudget } from "@/lib/session-store";
 import type { AlertsDto, AnomalyRowDto, ScopeSpendDto } from "@/types/finops";
-import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, StatusBadge, TableToggle } from "./States";
+import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, PageHero, StatusBadge, TableToggle } from "./States";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -62,8 +62,12 @@ function BudgetCards({ d }: { d: AlertsDto }) {
     ...seeded.map((b) => { const s = byKey.get(b.key)!; return { id: b.id, name: b.name, s, amount: s.defaultAmount, period: "monthly" as const, demo: false }; }),
     ...session.map((b) => ({ id: b.id, name: b.name, s: byKey.get(b.scope)!, amount: b.period === "quarterly" ? b.amount / 3 : b.amount, period: b.period, demo: true })),
   ].filter((c) => c.s);
+  const lead = cards[0];
+  const leadPct = lead && lead.amount > 0 ? (lead.s.forecast / lead.amount) * 100 : 0;
   return (
-    <section className="organic-card p-6 md:p-8" aria-label="Budgets">
+    <div className="space-y-8">
+    {lead && <PageHero label="Company cloud forecast" value={fmtMoney(lead.s.forecast)} change={`${leadPct.toFixed(0)}% of ${fmtMoney(lead.amount)} monthly budget`} description="Projected end-of-month spend, followed by budgets and their current forecast positions." />}
+    <section className="organic-card p-7" aria-label="Budgets">
       <Title sub="Spent uses the same totals as Overview for the selected period; forecast is the Overview end-of-month forecast for each scope." right={<Button className="h-10" onClick={() => setOpen(true)}><Plus />Create budget</Button>}>Budgets</Title>
       {cards.length === 0 ? <div className="mt-5"><EmptyState icon={Wallet} title="No budgets have been created for these scopes." action="Create budget" onAction={() => setOpen(true)} /></div> : (
         <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -83,6 +87,7 @@ function BudgetCards({ d }: { d: AlertsDto }) {
       )}
       <CreateBudgetDialog open={open} onOpenChange={setOpen} scopes={d.scopes} />
     </section>
+    </div>
   );
 }
 
