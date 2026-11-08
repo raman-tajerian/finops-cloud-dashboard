@@ -87,7 +87,7 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
             </Select>
           </div>
           {list.length === 0 ? (
-            <div className="mt-5"><EmptyState icon={Lightbulb} title={d.items.length ? "No recommendations have the status and filters selected in this tab." : "No savings found for the selected global filters."} action={!d.items.length ? "Reset filters" : filtersOn ? "Clear filters" : "View savings tracker"} onAction={() => { if (!d.items.length) reset(); else if (filtersOn) setSearch({ cat: "All", effort: "All", risk: "All", status: "All" }); else navigate({ to: "/recommendations", search: (p) => ({ ...p, tab: "tracker" }) }); }} /></div>
+            <div className="mt-5"><EmptyState icon={Lightbulb} title={d.items.length ? "No recommendations have the status and filters selected in this tab." : "No savings found for the selected global filters."} action={!d.items.length ? "Reset filters" : filtersOn ? "Clear filters" : "View savings tracker"} onAction={() => { if (!d.items.length) reset(); else if (filtersOn) setSearch({ cat: "All", effort: "All", risk: "All", status: "All" }); else navigate({ to: "/recommendations", search: (p: Record<string, unknown>) => ({ ...p, tab: "tracker" }) } as never); }} /></div>
           ) : (
             <ul className="mt-5 divide-y divide-border">
               {list.map((i) => {
