@@ -5,7 +5,7 @@ import { ArrowDownRight, ArrowUpRight, ChevronRight, Minus } from "lucide-react"
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useDashboardData } from "@/lib/queries";
 import { DataTableView, PageHero, TableToggle } from "./States";
-import { CountUp } from "./Insights";
+import { AnimatedNumber } from "@/components/motion";
 import { Spark } from "./Platform";
 import type { KpiValue } from "@/types/finops";
 import { MetricInfo } from "./Help";
@@ -24,7 +24,7 @@ const pctDelta = (k: KpiValue) => (k.previous ? ((k.value - k.previous) / k.prev
 export function OverviewHero() {
   const { totalSpend } = useDashboardData().overview;
   const change = pctDelta(totalSpend);
-  return <PageHero label="Total cloud spend" value={fmtMoney(totalSpend.value)} change={<span className={change > 0 ? "text-warning" : "text-success"}>{change > 0 ? "+" : ""}{change.toFixed(1)}% vs previous period</span>} description="Your selected cloud spend in one view, with the trends and actions that need attention below." />;
+  return <PageHero scrollMotion label="Total cloud spend" value={<AnimatedNumber value={totalSpend.value} format={fmtMoney} />} change={<span className={change > 0 ? "text-warning" : "text-success"}>{change > 0 ? "+" : ""}{change.toFixed(1)}% vs previous period</span>} description="Your selected cloud spend in one view, with the trends and actions that need attention below." />;
 }
 
 /** KPI cards, split into the "summary" and "unit" groups used by the Overview sub-tabs. */
@@ -51,7 +51,7 @@ export function OverviewKpis({ group = "summary" }: { group?: "summary" | "unit"
             <Link aria-label={it.label} to={it.to} state={{ drilldown: true } as never} search={(prev: Record<string, unknown>) => ({ ...prev, tab: it.tab })} className="absolute inset-0 z-0 rounded-[inherit]" />
             <div className="pointer-events-none relative flex items-center justify-between gap-1"><p className="min-w-0 flex-1 text-[13px] text-muted-foreground">{it.label}</p><span className="pointer-events-auto relative z-10"><MetricInfo label={it.label} /></span><ChevronRight className="size-3.5 shrink-0 text-muted-foreground" /></div>
             <div className="mt-2 flex items-end justify-between gap-2">
-              <p className="metric-numbers whitespace-nowrap text-[32px] leading-none" aria-live="polite"><CountUp value={it.k.value} format={it.f} />{it.suffix && <span className="text-base font-normal text-muted-foreground">{it.suffix}</span>}</p>
+              <p className="metric-numbers whitespace-nowrap text-[32px] leading-none" aria-live="polite"><AnimatedNumber value={it.k.value} format={it.f} />{it.suffix && <span className="text-base font-normal text-muted-foreground">{it.suffix}</span>}</p>
               <Spark data={it.k.spark} color={it.color} className="h-8 w-20" />
             </div>
             <p title={`Previous period: ${it.f(it.k.previous)}`} className={`mt-auto flex items-center gap-1 whitespace-nowrap pt-3 text-xs tabular-nums ${Math.abs(d) < 0.05 ? "text-muted-foreground" : good ? "text-success" : "text-warning"}`}>

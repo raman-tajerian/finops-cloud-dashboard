@@ -144,7 +144,7 @@ export function TabContent({ tab, children }: { tab: string; children: ReactNode
   const reduce = useReducedMotion();
   if (reduce) return <div role="tabpanel" id={`tabpanel-${tab}`} aria-labelledby={`tab-${tab}`}>{children}</div>;
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="popLayout" initial={false}>
       <motion.div key={tab} role="tabpanel" id={`tabpanel-${tab}`} aria-labelledby={`tab-${tab}`}
         initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, transition: { duration: MOTION.duration.fast } }}
         transition={{ duration: MOTION.duration.base, ease: MOTION.ease }}>

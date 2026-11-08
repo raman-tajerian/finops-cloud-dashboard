@@ -9,7 +9,7 @@ import { useGlobalFilters } from "@/lib/filters";
 import { MetricInfo } from "./Help";
 import type { K8sClusterDto, K8sPodDto } from "@/types/finops";
 import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, PageHero, StatusBadge, TableToggle } from "./States";
-import { CountUp } from "./Insights";
+import { AnimatedNumber } from "@/components/motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -129,8 +129,8 @@ function BudgetCard({ d }: { d: NonNullable<ReturnType<typeof useBudget>["data"]
     <article className="organic-card flex h-full flex-col p-7 md:p-8">
       <div className="flex items-start justify-between gap-3"><Title sub={`${d.period} · day ${d.dayOfMonth} of ${d.monthDays}`}>Budget & forecast</Title><StatusBadge tone={tone}>{budget > 0 ? `${pct.toFixed(1)}%` : "—"} of budget</StatusBadge></div>
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <div><p className="text-[13px] text-muted-foreground">Spend to date</p><p className="mt-1 metric-numbers text-[30px] leading-none"><CountUp value={d.spendToDate} format={(n) => fmtMoney(n)} /></p></div>
-        <div><p className="flex items-center text-[13px] text-muted-foreground">Projected end of month<MetricInfo label="Forecast end of month" /></p><p className="mt-1 metric-numbers text-[30px] leading-none"><CountUp value={d.forecastEom} format={(n) => fmtMoney(n)} /></p></div>
+        <div><p className="text-[13px] text-muted-foreground">Spend to date</p><p className="mt-1 metric-numbers text-[30px] leading-none"><AnimatedNumber value={d.spendToDate} format={(n) => fmtMoney(n)} /></p></div>
+        <div><p className="flex items-center text-[13px] text-muted-foreground">Projected end of month<MetricInfo label="Forecast end of month" /></p><p className="mt-1 metric-numbers text-[30px] leading-none"><AnimatedNumber value={d.forecastEom} format={(n) => fmtMoney(n)} /></p></div>
       </div>
       <div className="mt-6">
         <div className="mb-2 flex justify-between text-xs text-muted-foreground"><span>Projected % of budget</span><span className="tabular-nums">{budget > 0 ? `${pct.toFixed(1)}%` : "—"}</span></div>
@@ -179,7 +179,7 @@ function Simulator({ d }: { d: NonNullable<ReturnType<typeof useScenario>["data"
       </div>
       <div className="mt-6 grid gap-3 border-t border-border pt-5 text-sm sm:grid-cols-3">
         <div><p className="text-[13px] text-muted-foreground">Baseline</p><p className="mt-1 metric-numbers text-2xl">{fmtMoney(d.baseline)}</p></div>
-        <div><p className="text-[13px] text-muted-foreground">Projected</p><p className="mt-1 metric-numbers text-2xl"><CountUp value={r.projected} format={(n) => fmtMoney(n)} /></p></div>
+        <div><p className="text-[13px] text-muted-foreground">Projected</p><p className="mt-1 metric-numbers text-2xl"><AnimatedNumber value={r.projected} format={(n) => fmtMoney(n)} /></p></div>
         <div><p className="text-[13px] text-muted-foreground">Savings</p><p className={`mt-1 metric-numbers text-2xl ${r.savings >= 0 ? "text-success" : "text-warning"}`}>{fmtMoney(r.savings)}</p><p className="text-xs text-muted-foreground tabular-nums">{r.pct.toFixed(1)}%</p></div>
       </div>
       <div className="mt-4 flex justify-end"><TableToggle on={asTable} onChange={setAsTable} /></div>

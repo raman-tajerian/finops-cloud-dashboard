@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { AnimatedNumber, ProgressRing } from "@/components/motion";
 
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
 const toneColor = { success: "var(--success)", warning: "var(--warning)", critical: "var(--destructive)" } as const;
@@ -66,7 +67,7 @@ function BudgetCards({ d }: { d: AlertsDto }) {
   const leadPct = lead && lead.amount > 0 ? (lead.s.forecast / lead.amount) * 100 : 0;
   return (
     <div className="space-y-8">
-    {lead && <PageHero label="Company cloud forecast" value={fmtMoney(lead.s.forecast)} change={`${leadPct.toFixed(0)}% of ${fmtMoney(lead.amount)} monthly budget`} description="Projected end-of-month spend, followed by budgets and their current forecast positions." />}
+    {lead && <PageHero label="Company cloud forecast" value={<AnimatedNumber value={lead.s.forecast} format={fmtMoney} />} change={`${leadPct.toFixed(0)}% of ${fmtMoney(lead.amount)} monthly budget`} description="Projected end-of-month spend, followed by budgets and their current forecast positions." />}
     <section className="organic-card p-7" aria-label="Budgets">
       <Title sub="Spent uses the same totals as Overview for the selected period; forecast is the Overview end-of-month forecast for each scope." right={<Button className="h-10" onClick={() => setOpen(true)}><Plus />Create budget</Button>}>Budgets</Title>
       {cards.length === 0 ? <div className="mt-5"><EmptyState icon={Wallet} title="No budgets have been created for these scopes." action="Create budget" onAction={() => setOpen(true)} /></div> : (
@@ -77,8 +78,8 @@ function BudgetCards({ d }: { d: AlertsDto }) {
               <article key={c.id} className="rounded-2xl border border-border bg-card p-7">
                 <div className="flex items-start justify-between gap-2"><div className="min-w-0"><p className="truncate text-sm font-medium">{c.name}</p><p className="text-xs text-muted-foreground">{scopeLabel(c.s.scope)} · {c.period}</p></div><div className="flex shrink-0 items-center gap-1.5">{c.demo && <Demo />}<StatusBadge tone={tone}>{c.amount > 0 ? `${pct.toFixed(0)}%` : "—"}</StatusBadge></div></div>
                 <dl className="mt-4 grid grid-cols-3 gap-2 text-xs"><div><dt className="text-muted-foreground">Budget / mo</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtMoney(c.amount)}</dd></div><div><dt className="text-muted-foreground">Spent</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtMoney(c.s.spent)}</dd></div><div><dt className="text-muted-foreground">Forecast</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtMoney(c.s.forecast)}</dd></div></dl>
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label={`${c.name} forecast vs budget`} aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
-                  <div className="h-full origin-left rounded-full transition-transform duration-500" style={{ transform: `scaleX(${Math.min(100, pct) / 100})`, background: toneColor[tone] }} />
+                <div className="mt-5 flex justify-center" role="progressbar" aria-label={`${c.name} forecast vs budget`} aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
+                  <ProgressRing value={pct} label={`${c.name} forecast vs budget`} size={84} stroke={7} color={toneColor[tone]} />
                 </div>
               </article>
             );
