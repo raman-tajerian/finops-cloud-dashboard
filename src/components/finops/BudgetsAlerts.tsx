@@ -4,6 +4,7 @@ import { BellRing, Pencil, Plus, Trash2, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useAlerts } from "@/lib/queries";
+import { useGlobalFilters } from "@/lib/filters";
 import { budgetTone } from "@/lib/scenario";
 import { parseAmount, scopeKey, validateBudget } from "@/data/budgets";
 import { setSession, useSession, type AlertRule, type AnomalyStatus, type SessionBudget } from "@/lib/session-store";
@@ -64,7 +65,7 @@ function BudgetCards({ d }: { d: AlertsDto }) {
   return (
     <section className="organic-card p-6 md:p-8" aria-label="Budgets">
       <Title sub="Spent uses the same totals as Overview for the selected period; forecast is the Overview end-of-month forecast for each scope." right={<Button className="h-10" onClick={() => setOpen(true)}><Plus />Create budget</Button>}>Budgets</Title>
-      {cards.length === 0 ? <div className="mt-5"><EmptyState icon={Wallet} title="No budgets yet." action="Create budget" onAction={() => setOpen(true)} /></div> : (
+      {cards.length === 0 ? <div className="mt-5"><EmptyState icon={Wallet} title="No budgets have been created for these scopes." action="Create budget" onAction={() => setOpen(true)} /></div> : (
         <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {cards.map((c) => {
             const pct = c.amount > 0 ? (c.s.forecast / c.amount) * 100 : 0, tone = budgetTone(pct);
@@ -87,7 +88,7 @@ function BudgetCards({ d }: { d: AlertsDto }) {
 
 const thresholdsAll = [50, 80, 100] as const;
 const channelsAll = ["Email", "Slack", "Teams"] as const;
-function CreateBudgetDialog({ open, onOpenChange, scopes }: { open: boolean; onOpenChange: (o: boolean) => void; scopes: ScopeSpendDto[] }) {
+export function CreateBudgetDialog({ open, onOpenChange, scopes }: { open: boolean; onOpenChange: (o: boolean) => void; scopes: ScopeSpendDto[] }) {
   const blank = { name: "", scope: "", amount: "", period: "monthly", thresholds: [80, 100] as number[], channels: ["Email"] as string[] };
   const [f, setF] = useState(blank);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -133,7 +134,7 @@ function AlertRules() {
   return (
     <section className="organic-card min-w-0 p-6" aria-label="Alert rules">
       <Title sub="Demo — changes last for this session only.">Alert rules</Title>
-      {rules.length === 0 ? <div className="mt-5"><EmptyState icon={BellRing} title="No alert rules." action="Restore defaults" onAction={() => window.location.reload()} /></div> : (
+      {rules.length === 0 ? <div className="mt-5"><EmptyState icon={BellRing} title="All alert rules have been removed from this session." action="Restore defaults" onAction={() => window.location.reload()} /></div> : (
         <div className="mt-4 overflow-x-auto">
           <table className="density-table w-full min-w-[480px] text-left text-sm">
             <thead className="text-xs text-muted-foreground"><tr><th className="py-2 font-medium">Rule</th><th className="py-2 font-medium">Channel</th><th className="py-2 font-medium">Enabled</th><th className="py-2"><span className="sr-only">Actions</span></th></tr></thead>
@@ -181,12 +182,13 @@ function EditRuleDialog({ rule, onClose, onSave }: { rule: AlertRule | null; onC
 /* ---------- Anomalies ---------- */
 const anomalyStatuses: AnomalyStatus[] = ["New", "Investigating", "Resolved"];
 function Anomalies({ rows }: { rows: AnomalyRowDto[] }) {
+  const { reset } = useGlobalFilters();
   const status = useSession((s) => s.anomalies);
   const [open, setOpen] = useState<AnomalyRowDto | null>(null);
   return (
     <section className="organic-card min-w-0 p-6" aria-label="Anomalies">
       <Title sub="Same anomalies as Overview: last 3 days vs the prior 14-day baseline. Status is demo-only.">Anomalies · {rows.length}</Title>
-      {rows.length === 0 ? <p className="mt-5 rounded-xl bg-secondary p-6 text-center text-sm text-muted-foreground">No active anomalies for the selected filters.</p> : (
+      {rows.length === 0 ? <div className="mt-5"><EmptyState icon={BellRing} title="No cost increases meet the anomaly rule for the selected filters." action="Reset filters" onAction={reset} /></div> : (
         <div className="mt-4 overflow-x-auto">
           <table className="density-table w-full min-w-[640px] text-left text-sm">
             <thead className="text-xs text-muted-foreground"><tr><th className="py-2 font-medium">Date</th><th className="py-2 font-medium">Service</th><th className="py-2 text-right font-medium">Expected</th><th className="py-2 text-right font-medium">Actual</th><th className="py-2 text-right font-medium">Deviation</th><th className="py-2 pl-3 font-medium">Probable cause</th><th className="py-2 font-medium">Status</th></tr></thead>

@@ -1,0 +1,21 @@
+export interface GlossaryTerm { id: string; name: string; definition: string; to: string; tab: string; anchor?: string }
+export const GLOSSARY: GlossaryTerm[] = [
+  { id: "spend", name: "Total spend", definition: "The cloud charges added together for the selected dates and filters. Display currency changes the label, not the underlying USD costs.", to: "/cost-explorer", tab: "explore", anchor: "calculation-spend" },
+  { id: "idle", name: "Idle waste", definition: "Money spent on resources marked Idle. They still incur charges even when they are not doing useful work.", to: "/resources", tab: "idle", anchor: "calculation-idle" },
+  { id: "rightsizing", name: "Right-sizing", definition: "Choosing a smaller resource when it has more capacity than needed. Fern estimates savings only for eligible underused resources.", to: "/recommendations", tab: "tracker", anchor: "calculation-savings" },
+  { id: "savings", name: "Savings opportunity", definition: "Estimated monthly savings from the recommendations. These are opportunities, not savings already achieved.", to: "/recommendations", tab: "tracker", anchor: "calculation-savings" },
+  { id: "forecast", name: "Forecast end of month", definition: "An estimate of the final monthly bill based on the demo cost history. It is not a guarantee.", to: "/budgets", tab: "forecast", anchor: "calculation-forecast" },
+  { id: "band", name: "Forecast band", definition: "The shaded range around a forecast shows possible lower and higher outcomes. This demo uses an estimated 95% band, not a promise.", to: "/budgets", tab: "forecast", anchor: "calculation-forecast" },
+  { id: "unit", name: "Unit economics", definition: "Cost for one unit of activity. Cost per active user divides period spend by average daily active users; cost per request divides it by total API requests.", to: "/cost-explorer", tab: "unit-economics", anchor: "calculation-unit" },
+  { id: "co2e", name: "CO2e", definition: "Carbon dioxide equivalent: a common measure of climate impact. Fern estimates it from cloud cost, energy per dollar and the region’s electricity emissions.", to: "/sustainability", tab: "how" },
+  { id: "control", name: "Compliance control", definition: "One check in a standard such as CIS or SOC 2. Passing means no mapped open finding; a check without a mapped rule is not assessed, not passed.", to: "/security", tab: "compliance", anchor: "calculation-compliance" },
+  { id: "score", name: "Security score", definition: "Starts at 100 and subtracts 8 per open Critical finding, 4 per High, 1.5 per Medium and 0.5 per Low. It never falls below zero.", to: "/security", tab: "score", anchor: "calculation-security" },
+  { id: "anomaly", name: "Active anomalies", definition: "Unexpected cost increases detected in the selected data. Compare expected and actual cost before deciding whether the increase needs action.", to: "/budgets", tab: "anomalies", anchor: "calculation-anomaly" },
+  { id: "burn", name: "Daily burn rate", definition: "Average cloud spend per day in the selected period.", to: "/cost-explorer", tab: "explore", anchor: "calculation-spend" },
+  { id: "region", name: "Carbon intensity", definition: "The amount of greenhouse gases emitted per unit of electricity in a region. A lower number means cleaner electricity, not necessarily a cheaper service.", to: "/sustainability", tab: "how" },
+  { id: "reserved", name: "Reserved capacity", definition: "A discount in exchange for committing to compute usage. In the simulator, only the compute share moved to a commitment receives the discount.", to: "/budgets", tab: "forecast", anchor: "calculation-forecast" },
+];
+export function metricTerm(label: string) {
+  const s = label.toLowerCase();
+  return GLOSSARY.find((t) => t.name.toLowerCase() === s) ?? (s.includes("cost per") ? GLOSSARY.find((t) => t.id === "unit") : s.includes("idle waste") ? GLOSSARY.find((t) => t.id === "idle") : s.includes("co₂") || s.includes("co2") ? GLOSSARY.find((t) => t.id === "co2e") : undefined);
+}

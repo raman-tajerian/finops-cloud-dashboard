@@ -95,7 +95,7 @@ export function ReportsWorkspace({ tab = "generate", onTab }: { tab?: string; on
       {tab === "history" && (
       <section className="space-y-4">
         <div className="flex items-center gap-2"><SectionHeading title="Past reports" description="Generated this session only." /><Demo /></div>
-        {reports.length === 0 ? <EmptyState icon={FileText} title="No reports yet. Generate one from a template above." action="Generate executive summary" onAction={() => open("executive")} /> : (
+        {reports.length === 0 ? <EmptyState icon={FileText} title="No reports have been generated in this session." action="Generate executive summary" onAction={() => open("executive")} /> : (
           <div className="organic-card overflow-x-auto"><table className="density-table w-full min-w-[560px] text-sm">
             <thead className="text-left text-xs text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Report</th><th className="px-4 py-3 font-medium">Range</th><th className="px-4 py-3 font-medium">Format</th><th className="px-4 py-3 font-medium">Created</th><th className="px-4 py-3" /></tr></thead>
             <tbody>{reports.map((r) => (
@@ -109,7 +109,7 @@ export function ReportsWorkspace({ tab = "generate", onTab }: { tab?: string; on
       {tab === "schedules" && (
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><SectionHeading title="Scheduled reports" description="Nothing is actually sent." /><Demo /></div><Button variant="secondary" onClick={() => setSched(true)}>New schedule</Button></div>
-        {schedules.length === 0 ? <EmptyState icon={FileText} title="No schedules yet." action="Create schedule" onAction={() => setSched(true)} /> : (
+        {schedules.length === 0 ? <EmptyState icon={FileText} title="No report schedules have been created in this session." action="Create schedule" onAction={() => setSched(true)} /> : (
           <div className="organic-card overflow-x-auto"><table className="density-table w-full min-w-[620px] text-sm">
             <thead className="text-left text-xs text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Template</th><th className="px-4 py-3 font-medium">Cadence</th><th className="px-4 py-3 font-medium">Recipients</th><th className="px-4 py-3 font-medium">Format</th><th className="px-4 py-3 font-medium">On</th><th className="px-4 py-3" /></tr></thead>
             <tbody>{schedules.map((s) => (

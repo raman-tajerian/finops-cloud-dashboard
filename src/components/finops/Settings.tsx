@@ -97,7 +97,7 @@ function Members({ d, open, onOpen, save }: { d: SettingsDto; open: boolean; onO
   return (
     <div className="space-y-3">
       <div className="flex justify-end"><Button onClick={() => onOpen(true)}><Plus className="size-4" />Invite member</Button></div>
-      {d.members.length === 0 ? <EmptyState icon={Users} title="No members yet." action="Invite member" onAction={() => onOpen(true)} /> : (
+      {d.members.length === 0 ? <EmptyState icon={Users} title="No team members have been added to this workspace." action="Invite member" onAction={() => onOpen(true)} /> : (
         <div className="organic-card overflow-x-auto"><table className="density-table w-full min-w-[560px] text-sm">
           <thead className="text-left text-xs text-muted-foreground"><tr><th className="px-4 py-2 font-medium">Name</th><th className="px-4 py-2 font-medium">Email</th><th className="px-4 py-2 font-medium">Role</th><th className="px-4 py-2 font-medium">Last active</th></tr></thead>
           <tbody>{d.members.map((m) => <tr key={m.id} className="border-t border-border"><td className="px-4 py-2 font-medium">{m.name}</td><td className="px-4 py-2">{m.email}</td>
@@ -129,7 +129,7 @@ function Allocation({ rows, save }: { rows: TagMappingDto[]; save: Saver }) {
   return (
     <div className="space-y-3">
       <div className="flex justify-end"><Button onClick={() => setEdit({ id: `t-${rows.length + 1}-${rows.at(-1)?.id ?? "0"}`, tagKey: "costCenter", tagValue: "", team: "Platform" })}><Plus className="size-4" />Add mapping</Button></div>
-      {rows.length === 0 ? <EmptyState icon={Users} title="No tag mappings." action="Add mapping" onAction={() => setEdit({ id: "t-1", tagKey: "costCenter", tagValue: "", team: "Platform" })} /> : (
+      {rows.length === 0 ? <EmptyState icon={Users} title="No allocation tag rules have been added to this workspace." action="Add mapping" onAction={() => setEdit({ id: "t-1", tagKey: "costCenter", tagValue: "", team: "Platform" })} /> : (
         <div className="organic-card overflow-x-auto"><table className="density-table w-full min-w-[480px] text-sm">
           <thead className="text-left text-xs text-muted-foreground"><tr><th className="px-4 py-2 font-medium">Tag key</th><th className="px-4 py-2 font-medium">Tag value</th><th className="px-4 py-2 font-medium">Team</th><th className="px-4 py-2" /></tr></thead>
           <tbody>{rows.map((r) => <tr key={r.id} className="border-t border-border"><td className="px-4 py-2">{r.tagKey}</td><td className="px-4 py-2">{r.tagValue}</td><td className="px-4 py-2">{r.team}</td>

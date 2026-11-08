@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CardSkeleton, EmptyState, ErrorState, SectionHeading, StatusBadge } from "./States";
 import { Demo } from "./Reports";
+import { useNavigate } from "@tanstack/react-router";
 
 const CRED: Record<string, { label: string; placeholder: string }> = {
   "aws-role-arn": { label: "IAM role ARN", placeholder: "arn:aws:iam::123456789012:role/FernReadOnly" },
@@ -20,6 +21,7 @@ const CRED: Record<string, { label: string; placeholder: string }> = {
 const fmtTime = (iso: string) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }) + " UTC";
 
 export function IntegrationsWorkspace({ tab = "connected" }: { tab?: string }) {
+  const navigate = useNavigate();
   const q = useIntegrations();
   const overrides = useSession((s) => s.integrations);
   const [active, setActive] = useState<IntegrationDto | null>(null);
@@ -32,7 +34,7 @@ export function IntegrationsWorkspace({ tab = "connected" }: { tab?: string }) {
     <div className="space-y-8">
       <p className="organic-card flex flex-wrap items-center gap-2 p-4 text-sm text-muted-foreground"><Demo /> All integrations are simulated. No network calls are made and no credentials are stored.</p>
       {tab === "sync-history" ? <SyncHistory rows={q.data.history} /> : shown.length === 0 ? (
-        <EmptyState icon={Plug} title={tab === "available" ? "No more integrations to connect." : "Nothing connected yet."} action="Reload" onAction={() => q.refetch()} />
+        <EmptyState icon={Plug} title={tab === "available" ? "All available integrations are already connected." : "No integrations have been connected in this workspace."} action={tab === "available" ? "View connected" : "Browse integrations"} onAction={() => navigate({ to: "/integrations", search: (p) => ({ ...p, tab: tab === "available" ? "connected" : "available" }) })} />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {shown.map((i) => (

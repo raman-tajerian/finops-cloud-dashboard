@@ -11,6 +11,7 @@ import type { ExploreDto, ExploreRow, GroupBy } from "@/types/finops";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MetricInfo } from "./Help";
 
 export type ChartType = "area" | "bar" | "line";
 export interface ExplorerState { group: GroupBy; chart: ChartType; compare: boolean }
@@ -48,8 +49,8 @@ function useExploreData(group: GroupBy) {
 /* ---------- Explore tab: controls + chart + table ---------- */
 export function ExplorerMain({ state, setState }: { state: ExplorerState; setState: (s: Partial<ExplorerState>, f?: Filters) => void }) {
   const d = useExploreData(state.group);
-  if (!d || "type" in d) return d;
   const { filters } = useGlobalFilters();
+  if (!d || "type" in d) return d;
   const exportAs = (kind: "csv" | "json") => {
     const stamp = `fern-${state.group}-${filters.range}`;
     if (kind === "csv") download(`${stamp}.csv`, toCsv(d.rows, state.group), "text/csv");
@@ -101,7 +102,7 @@ export function UnitEconCards() {
   return (
     <section aria-label="Unit economics" className="grid gap-6 sm:grid-cols-2">
       {[{ label: "Cost per active user", value: d.unitEconomics.perUser, previous: d.unitEconomics.previousPerUser, decimals: 4 }, { label: "Cost per API request", value: d.unitEconomics.perRequest, previous: d.unitEconomics.previousPerRequest, decimals: 6 }].map((u) => (
-        <article key={u.label} className="organic-card p-6"><Label>{u.label}</Label><p className="metric-numbers mt-2 text-[32px]">{fmtMoney(u.value, { decimals: u.decimals })}</p><p className="mt-2 text-xs text-muted-foreground">{u.previous > 0 ? `${((u.value / u.previous - 1) * 100).toFixed(1)}%` : "—"} vs prev</p></article>
+        <article key={u.label} className="organic-card p-6"><div className="flex items-center"><Label>{u.label}</Label><MetricInfo label={u.label} /></div><p className="metric-numbers mt-2 text-[32px]">{fmtMoney(u.value, { decimals: u.decimals })}</p><p className="mt-2 text-xs text-muted-foreground">{u.previous > 0 ? `${((u.value / u.previous - 1) * 100).toFixed(1)}%` : "—"} vs prev</p></article>
       ))}
     </section>
   );
@@ -130,7 +131,7 @@ export function SavedViewsPanel({ state, views, setViews, setState }: { state: E
       </section>
       <section className="organic-card p-6" aria-label="Saved views">
         <Label>Saved views{views.length > 0 ? ` · ${views.length}` : ""}</Label>
-        {views.length === 0 ? <p className="mt-4 rounded-xl bg-secondary p-6 text-center text-sm text-muted-foreground">No saved views yet. Save the current view to find it here.</p> : (
+        {views.length === 0 ? <div className="mt-4 space-y-3 rounded-xl bg-secondary p-6 text-center"><p className="text-sm text-muted-foreground">No views have been saved in this link yet.</p><Button variant="secondary" onClick={() => document.querySelector<HTMLInputElement>('[aria-label="View name"]')?.focus()}>Name current view</Button></div> : (
           <ul className="mt-4 divide-y divide-border">
             {views.map((v) => (
               <li key={v.name} className="flex items-center gap-3 py-3">

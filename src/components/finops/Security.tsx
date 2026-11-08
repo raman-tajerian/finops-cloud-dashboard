@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import { MetricInfo } from "./Help";
 
 export interface SecSearch { sev: string; fstatus: string; prov: string; rule: string; q: string; sort: string; finding: string }
 
@@ -71,7 +72,7 @@ function ScoreCard({ trend }: { trend: SecurityDto["scoreTrend"] }) {
   return (
     <article className="organic-card h-full p-6">
       <div className="flex items-start justify-between gap-3">
-        <div><p className="font-mono text-[10px] text-muted-foreground">Security score</p><p className="mt-1 text-[13px] text-muted-foreground">100 − weighted open findings (Critical 8 · High 4 · Medium 1.5 · Low 0.5), clamped at 0.</p></div>
+        <div><p className="flex items-center font-mono text-[10px] text-muted-foreground">Security score<MetricInfo label="Security score" /></p><p className="mt-1 text-[13px] text-muted-foreground">100 − weighted open findings (Critical 8 · High 4 · Medium 1.5 · Low 0.5), clamped at 0.</p></div>
         <TableToggle on={asTable} onChange={setAsTable} />
       </div>
       <div className="mt-4 flex items-center gap-6">
@@ -109,7 +110,7 @@ function ComplianceCards({ findings, frameworks }: { findings: SecurityFindingDt
   const active = results.find((x) => x.fw.id === open);
   return (
     <article className="organic-card h-full p-6">
-      <SectionHeading title="Compliance posture · Illustrative" description="Illustrative: these controls are simplified examples, not an audit. A control fails when an open finding of a mapped rule exists. Click a card to inspect its controls." />
+      <div className="flex items-start gap-1"><SectionHeading title="Compliance posture · Illustrative" description="Illustrative: these controls are simplified examples, not an audit. A control fails when an open finding of a mapped rule exists. Click a card to inspect its controls." /><MetricInfo label="Compliance control" /></div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {results.map(({ fw, r }) => (
           <button key={fw.id} onClick={() => setOpen(open === fw.id ? null : fw.id)} aria-expanded={open === fw.id} className={`rounded-xl border p-4 text-left transition-colors ${open === fw.id ? "border-foreground/40 bg-secondary" : "border-border hover:bg-secondary/50"}`}>

@@ -8,6 +8,7 @@ import { DataTableView, TableToggle } from "./States";
 import { CountUp } from "./Insights";
 import { Spark } from "./Platform";
 import type { KpiValue } from "@/types/finops";
+import { MetricInfo } from "./Help";
 
 const Label = ({ children }: { children: ReactNode }) => <p className="text-[15px] font-medium leading-snug text-foreground">{children}</p>;
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
@@ -15,7 +16,7 @@ type To = "/cost-explorer" | "/recommendations" | "/resources" | "/budgets";
 
 /** Card header link that drills down to a page (optionally a sub-tab); global filters are retained. */
 export function DrillLink({ to, tab, children = "Open" }: { to: To; tab?: string; children?: ReactNode }) {
-  return <Link to={to} search={(prev: Record<string, unknown>) => (tab ? { ...prev, tab } : prev)} className="group inline-flex min-h-8 items-center gap-1 rounded-lg px-2 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground">{children}<ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" /></Link>;
+  return <Link to={to} state={{ drilldown: true } as never} search={(prev: Record<string, unknown>) => (tab ? { ...prev, tab } : prev)} className="group inline-flex min-h-8 items-center gap-1 rounded-lg px-2 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground">{children}<ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" /></Link>;
 }
 
 const pctDelta = (k: KpiValue) => (k.previous ? ((k.value - k.previous) / k.previous) * 100 : 0);
@@ -40,8 +41,9 @@ export function OverviewKpis({ group = "summary" }: { group?: "summary" | "unit"
       {items.map((it) => {
         const d = pctDelta(it.k), up = d > 0, good = it.goodWhenUp ? up : !up;
         return (
-          <Link key={it.label} to={it.to} search={(prev: Record<string, unknown>) => ({ ...prev, tab: it.tab })} className="organic-card subtle-lift group flex h-full flex-col p-5">
-            <div className="flex items-center justify-between gap-2"><p className="truncate text-[13px] text-muted-foreground">{it.label}</p><ChevronRight className="size-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></div>
+          <article key={it.label} className="organic-card subtle-lift group relative flex h-full flex-col p-5">
+            <Link aria-label={it.label} to={it.to} state={{ drilldown: true } as never} search={(prev: Record<string, unknown>) => ({ ...prev, tab: it.tab })} className="absolute inset-0 z-0 rounded-[inherit]" />
+            <div className="pointer-events-none relative flex items-center justify-between gap-1"><p className="min-w-0 flex-1 text-[13px] text-muted-foreground">{it.label}</p><span className="pointer-events-auto relative z-10"><MetricInfo label={it.label} /></span><ChevronRight className="size-3.5 shrink-0 text-muted-foreground" /></div>
             <div className="mt-2 flex items-end justify-between gap-2">
               <p className="metric-numbers whitespace-nowrap text-[32px] leading-none" aria-live="polite"><CountUp value={it.k.value} format={it.f} />{it.suffix && <span className="text-base font-normal text-muted-foreground">{it.suffix}</span>}</p>
               <Spark data={it.k.spark} color={it.color} className="h-8 w-20" />
@@ -49,7 +51,7 @@ export function OverviewKpis({ group = "summary" }: { group?: "summary" | "unit"
             <p title={`Previous period: ${it.f(it.k.previous)}`} className={`mt-auto flex items-center gap-1 whitespace-nowrap pt-3 text-xs tabular-nums ${Math.abs(d) < 0.05 ? "text-muted-foreground" : good ? "text-success" : "text-warning"}`}>
               {Math.abs(d) < 0.05 ? <Minus className="size-3 shrink-0" /> : up ? <ArrowUpRight className="size-3 shrink-0" /> : <ArrowDownRight className="size-3 shrink-0" />}<span>{it.k.previous > 0 ? `${up ? "+" : ""}${Math.abs(d) < 0.05 ? "0.0" : d.toFixed(1)}%` : "—"}</span><span className="text-muted-foreground">vs prev</span>
             </p>
-          </Link>
+          </article>
         );
       })}
     </section>
