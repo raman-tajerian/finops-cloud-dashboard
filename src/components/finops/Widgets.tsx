@@ -37,12 +37,11 @@ export function CostTrend({ data }: { data: CostPoint[] }) {
       <div className="mt-8 h-[290px]">
         <ResponsiveContainer>
           <AreaChart data={data} margin={{ left: -16, right: 4 }}>
-            <defs><linearGradient id="awsFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--aws)" stopOpacity={0.18} /><stop offset="1" stopColor="var(--aws)" stopOpacity={0} /></linearGradient></defs>
             <CartesianGrid stroke="var(--border)" vertical={false} />
             <XAxis dataKey="label" tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} minTickGap={28} />
             <YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tooltipStyle} formatter={(v) => fmtMoney(Number(v))} />
-            <Area type="monotone" dataKey="aws" name="AWS" stroke="var(--aws)" strokeWidth={2} fill="url(#awsFill)" animationDuration={900} animationEasing="ease-out" />
+            <Area type="monotone" dataKey="aws" name="AWS" stroke="var(--aws)" strokeWidth={2} fill="var(--aws)" fillOpacity={0.08} animationDuration={900} animationEasing="ease-out" />
             <Area type="monotone" dataKey="azure" name="Azure" stroke="var(--azure)" strokeWidth={2} fill="transparent" animationDuration={1050} animationEasing="ease-out" />
           </AreaChart>
         </ResponsiveContainer>

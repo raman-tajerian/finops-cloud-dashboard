@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BellOff, Check, Copy, EyeOff, Lightbulb, PlayCircle, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
@@ -162,7 +162,8 @@ function Tracker({ d, open }: { d: SavingsDto; open: number }) {
         <div><p className="flex items-center gap-2 text-[15px] font-medium">Savings tracker <Demo /></p><p className="mt-1 text-[13px] text-muted-foreground">Realized (seeded demo) vs potential, last 6 months</p></div>
         <TableToggle on={table} onChange={setTable} />
       </div>
-      <div className="mt-4 h-60">
+      <div className="mt-4 flex gap-5 text-xs text-muted-foreground"><span className="inline-flex items-center gap-2"><span className="size-2 rounded-full bg-chart-2" />Potential</span><span className="inline-flex items-center gap-2"><span className="size-2 rounded-full bg-chart-1" />Realized (demo)</span></div>
+      <div className="mt-3 h-60">
         {table ? <DataTableView caption="Savings per month" columns={["Month", "Realized (demo)", "Potential"]} rows={data.map((m) => [m.month, fmtMoney(m.realized), fmtMoney(m.potential)])} /> : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ left: 0, right: 8, top: 4 }}>
@@ -170,7 +171,6 @@ function Tracker({ d, open }: { d: SavingsDto; open: number }) {
               <XAxis dataKey="month" tickFormatter={(v: string) => v.slice(0, 3)} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
               <YAxis width={48} tickFormatter={(v: number) => fmtMoneyCompact(Number(v))} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={tip} formatter={(v) => fmtMoney(Number(v))} cursor={{ fill: "var(--secondary)" }} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
               <Bar dataKey="potential" name="Potential" fill="var(--chart-2)" radius={[6, 6, 0, 0]} />
               <Bar dataKey="realized" name="Realized (demo)" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
             </BarChart>

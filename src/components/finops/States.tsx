@@ -8,7 +8,7 @@ import { useGlobalFilters } from "@/lib/filters";
 
 export function PageHeader({ title, description, actions }: { title: string; description: string; actions?: ReactNode }) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 py-2">
+    <div className="grid grid-cols-1 items-end gap-4 py-2 sm:grid-cols-[minmax(0,1fr)_auto]">
       <div className="min-w-0"><h1 className="font-display text-[38px] font-normal leading-[1.15] tracking-normal">{title}</h1><p className="mt-2 text-sm text-muted-foreground">{description}</p></div>
       {actions}
     </div>
