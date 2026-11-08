@@ -67,6 +67,7 @@ export function OverviewKpis({ group = "summary" }: { group?: "summary" | "unit"
 export function CostTrendCard() {
   const { trend, providers, kpis } = useDashboardData();
   const [asTable, setAsTable] = useState(false);
+  const [hovered, setHovered] = useState<string | null>(null);
   const navigate = useNavigate();
   const data = trend.map((t) => (t.total === 0 && t.forecast !== null ? { ...t, AWS: null, Azure: null, GCP: null } : t));
   const markers = trend.filter((t) => t.anomaly);
@@ -85,9 +86,9 @@ export function CostTrendCard() {
             <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} minTickGap={24} />
             <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} formatter={(v, n) => [Array.isArray(v) ? `${fmtMoney(Number(v[0]))} – ${fmtMoney(Number(v[1]))}` : fmtMoney(Number(v)), String(n)]} />
-            {providers.map((p) => <Area key={p} dataKey={p} stackId="p" stroke={colors[p]} fill={colors[p]} fillOpacity={0.08} strokeWidth={1.5} isAnimationActive={false} />)}
-            <Area dataKey="band" name="95% band" stroke="none" fill="var(--muted-foreground)" fillOpacity={0.12} />
-            <Line dataKey="forecast" name="Forecast" stroke="var(--muted-foreground)" strokeDasharray="5 4" dot={false} strokeWidth={1.5} connectNulls />
+            {providers.map((p) => <Area key={p} dataKey={p} stackId="p" stroke={colors[p]} fill={colors[p]} fillOpacity={hovered && hovered !== p ? 0.015 : 0.08} strokeOpacity={hovered && hovered !== p ? 0.25 : 1} strokeWidth={1.5} isAnimationActive={false} onMouseEnter={() => setHovered(p)} onMouseLeave={() => setHovered(null)} />)}
+            <Area dataKey="band" name="95% band" stroke="none" fill="var(--muted-foreground)" fillOpacity={0.12} isAnimationActive={false} />
+            <Line dataKey="forecast" name="Forecast" stroke="var(--muted-foreground)" strokeDasharray="5 4" dot={false} strokeWidth={1.5} connectNulls isAnimationActive={false} />
             {markers.map((m) => (
               <ReferenceDot key={m.day} x={m.day} y={m.total} r={6} fill="var(--destructive)" stroke="var(--card)" strokeWidth={2} className="cursor-pointer"
                 onClick={() => navigate({ to: "/cost-explorer", search: (prev: Record<string, unknown>) => ({ ...prev, group: "service" }) } as never)}

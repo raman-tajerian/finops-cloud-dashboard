@@ -17,7 +17,7 @@ import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMe
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { AnimatedNumber } from "@/components/motion";
+import { AnimatedNumber, ChartReveal } from "@/components/motion";
 
 export type SortKey = "name" | "provider" | "service" | "region" | "environment" | "team" | "monthlyCost" | "cpuAvg" | "memAvg" | "status";
 export interface TableSearch { q: string; sort: string; dir: string; page: number; size: number; id: string; status: string; service: string; ids?: string }
@@ -285,7 +285,7 @@ function ResourceDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                   <ResponsiveContainer><AreaChart data={d.cost} margin={{ left: -6, right: 8 }}>
                     <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} /><XAxis dataKey="day" {...axis} minTickGap={28} /><YAxis {...axis} width={48} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
                     <Tooltip contentStyle={tip} formatter={(v) => [fmtMoney(Number(v), { decimals: 2 }), "Cost"]} />
-                    <Area dataKey="cost" stroke="var(--chart-1)" fill="var(--chart-1)" fillOpacity={0.1} strokeWidth={1.5} />
+                    <Area dataKey="cost" stroke="var(--chart-1)" fill="var(--chart-1)" fillOpacity={0.1} strokeWidth={1.5} isAnimationActive={false} />
                   </AreaChart></ResponsiveContainer>}
                 </div>
               </TabsContent>
@@ -296,7 +296,7 @@ function ResourceDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                   <ResponsiveContainer><LineChart data={d.util} margin={{ left: -6, right: 8 }}>
                     <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} /><XAxis dataKey="day" {...axis} minTickGap={28} /><YAxis {...axis} width={40} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                     <Tooltip contentStyle={tip} formatter={(v, n) => [`${Number(v).toFixed(0)}%`, String(n)]} />
-                    <Line dataKey="cpu" name="CPU" stroke="var(--chart-2)" dot={false} strokeWidth={1.5} /><Line dataKey="mem" name="Memory" stroke="var(--chart-3)" dot={false} strokeWidth={1.5} />
+                    <Line dataKey="cpu" name="CPU" stroke="var(--chart-2)" dot={false} strokeWidth={1.5} isAnimationActive={false} /><Line dataKey="mem" name="Memory" stroke="var(--chart-3)" dot={false} strokeWidth={1.5} isAnimationActive={false} />
                   </LineChart></ResponsiveContainer>}
                 </div>
               </TabsContent>

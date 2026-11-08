@@ -18,7 +18,7 @@ export function BrandIntro() {
   const [target, setTarget] = useState({ x: 0, y: 0, scale: 0.25 });
 
   useEffect(() => {
-    if (reduce) return;
+    if (reduce) { try { sessionStorage.setItem(KEY, "1"); } catch { /* no storage */ } return; }
     try { if (sessionStorage.getItem(KEY)) return; } catch { /* storage can be unavailable */ }
     setShow(true);
   }, [reduce]);

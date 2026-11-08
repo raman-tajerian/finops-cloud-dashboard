@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { AnimatedNumber, ProgressRing } from "@/components/motion";
+import { AnimatedNumber, ChartReveal, ProgressRing } from "@/components/motion";
 
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
 const toneColor = { success: "var(--success)", warning: "var(--warning)", critical: "var(--destructive)" } as const;
@@ -239,8 +239,8 @@ function AnomalyDrawer({ row, onClose }: { row: AnomalyRowDto | null; onClose: (
                     <XAxis dataKey="day" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} interval={4} />
                     <YAxis width={52} tickFormatter={(v: number) => fmtMoneyCompact(Number(v))} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
                     <Tooltip contentStyle={tip} formatter={(v) => (Array.isArray(v) ? `${fmtMoney(Number(v[0]))} – ${fmtMoney(Number(v[1]))}` : fmtMoney(Number(v)))} />
-                    <Area dataKey="band" name="Expected band" stroke="none" fill="var(--chart-2)" fillOpacity={0.25} />
-                    <Line dataKey="actual" name="Actual" stroke="var(--chart-3)" strokeWidth={2} dot={false} />
+                    <Area dataKey="band" name="Expected band" stroke="none" fill="var(--chart-2)" fillOpacity={0.25} isAnimationActive={false} />
+                    <Line dataKey="actual" name="Actual" stroke="var(--chart-3)" strokeWidth={2} dot={false} isAnimationActive={false} />
                   </ComposedChart>
                 </ResponsiveContainer>
               )}

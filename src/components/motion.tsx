@@ -143,15 +143,15 @@ export function ChartReveal({ children, className = "", motionKey = "chart" }: {
 }
 
 /** Recharts bar shape with a baseline grow and a capped 30ms stagger. */
-export function MotionBar({ x = 0, y = 0, width = 0, height = 0, fill = "var(--chart-1)", index = 0, radius = 6 }: {
-  x?: number; y?: number; width?: number; height?: number; fill?: string; index?: number; radius?: number | number[];
+export function MotionBar({ x = 0, y = 0, width = 0, height = 0, fill = "var(--chart-1)", fillOpacity = 1, index = 0, radius = 6 }: {
+  x?: number; y?: number; width?: number; height?: number; fill?: string; fillOpacity?: number; index?: number; radius?: number | number[];
 }) {
   const reduce = useAppReducedMotion();
   const rx = Array.isArray(radius) ? Number(radius[0] ?? 0) : Number(radius);
   const horizontal = width > height;
   return <motion.rect x={x} y={y} width={width} height={height} rx={rx} fill={fill}
     style={{ transformOrigin: horizontal ? `${x}px ${y + height / 2}px` : `${x + width / 2}px ${y + height}px` }}
-    initial={reduce ? { scaleX: 1, scaleY: 1 } : { scaleX: horizontal ? 0 : 1, scaleY: horizontal ? 1 : 0 }} animate={{ scaleX: 1, scaleY: 1 }}
+    initial={reduce ? { scaleX: 1, scaleY: 1, opacity: fillOpacity } : { scaleX: horizontal ? 0 : 1, scaleY: horizontal ? 1 : 0, opacity: fillOpacity }} animate={{ scaleX: 1, scaleY: 1, opacity: fillOpacity }}
     transition={reduce ? { duration: 0 } : { duration: MOTION.duration.slow, delay: Math.min(index, 24) * MOTION.chartStagger, ease: MOTION.easeOut }} />;
 }
 
