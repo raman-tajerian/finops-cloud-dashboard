@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useSavings } from "@/lib/queries";
 import { teams } from "@/lib/filters";
+import { useGlobalFilters } from "@/lib/filters";
+import { useNavigate } from "@tanstack/react-router";
 import { fmtDemoDate, snoozeUntil, SNOOZE_OPTIONS } from "@/data/resources";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { recStatus, setSession, useSession, type RecStatus } from "@/lib/session-store";
@@ -38,6 +40,8 @@ export function RecommendationsWorkspace({ search, setSearch, tab }: { search: R
 }
 
 function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSearch; setSearch: (p: Partial<RecSearch>) => void; tab: string }) {
+  const { reset } = useGlobalFilters();
+  const navigate = useNavigate();
   const recs = useSession((s) => s.recs);
   const [review, setReview] = useState<SavingItemDto | null>(null);
   const [ignore, setIgnore] = useState<SavingItemDto | null>(null);
@@ -83,7 +87,7 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
             </Select>
           </div>
           {list.length === 0 ? (
-            <div className="mt-5"><EmptyState icon={Lightbulb} title={d.items.length ? "No recommendations match these filters." : "No savings found for the selected global filters."} action={filtersOn ? "Clear filters" : "Show all statuses"} onAction={() => setSearch({ cat: "All", effort: "All", risk: "All", status: "All" })} /></div>
+            <div className="mt-5"><EmptyState icon={Lightbulb} title={d.items.length ? "No recommendations have the status and filters selected in this tab." : "No savings found for the selected global filters."} action={!d.items.length ? "Reset filters" : filtersOn ? "Clear filters" : "View savings tracker"} onAction={() => { if (!d.items.length) reset(); else if (filtersOn) setSearch({ cat: "All", effort: "All", risk: "All", status: "All" }); else navigate({ to: "/recommendations", search: (p) => ({ ...p, tab: "tracker" }) }); }} /></div>
           ) : (
             <ul className="mt-5 divide-y divide-border">
               {list.map((i) => {

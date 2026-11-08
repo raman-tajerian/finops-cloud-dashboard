@@ -6,13 +6,15 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { CardSkeleton, DataTableView, EmptyState, ErrorState, StatusBadge, TableToggle } from "./States";
 import type { CarbonBreakdown, SustainabilityRegionDto } from "@/types/finops";
+import { MetricInfo } from "./Help";
+import { useGlobalFilters } from "@/lib/filters";
 
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
 const axis = { tick: { fontSize: 10, fill: "var(--muted-foreground)" }, tickLine: false, axisLine: false } as const;
 const tons = (v: number) => `${v.toFixed(2)} t`;
 
 function Kpi({ label, value, note, good }: { label: string; value: string; note: string; good?: boolean }) {
-  return <article className="organic-card min-w-0 p-5"><p className="font-mono text-[10px] text-muted-foreground">{label}</p><p className="metric-numbers mt-4 text-2xl sm:text-3xl">{value}</p><p className={`mt-2 text-xs ${good ? "text-success" : "text-muted-foreground"}`}>{note}</p></article>;
+  return <article className="organic-card min-w-0 p-5"><p className="flex items-center font-mono text-[10px] text-muted-foreground">{label}<MetricInfo label={label} /></p><p className="metric-numbers mt-4 text-2xl sm:text-3xl">{value}</p><p className={`mt-2 text-xs ${good ? "text-success" : "text-muted-foreground"}`}>{note}</p></article>;
 }
 
 function TrendChart({ data }: { data: { day: string; tons: number }[] }) {
@@ -35,10 +37,11 @@ function RegionTable({ data }: { data: SustainabilityRegionDto[] }) {
 
 export function SustainabilityDashboard({ tab = "overview" }: { tab?: string }) {
   const q = useSustainability();
+  const { reset } = useGlobalFilters();
   if (q.isPending) return <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"><CardSkeleton/><CardSkeleton/><CardSkeleton/></div>;
   if (q.isError) return <ErrorState message="We couldn't load sustainability estimates." onRetry={() => q.refetch()} />;
   const d = q.data;
-  if (!d.regions.length) return <EmptyState icon={Leaf} title="No sustainability data matches these filters." action="Retry" onAction={() => q.refetch()} />;
+  if (!d.regions.length) return <EmptyState icon={Leaf} title="No sustainability data matches these filters." action="Reset filters" onAction={reset} />;
   return <div className="space-y-6">
     {tab === "overview" && <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><Kpi label="Estimated CO₂e" value={tons(d.totalTons)} note={`${d.changePct >= 0 ? "+" : ""}${d.changePct.toFixed(1)}% vs previous period`} good={d.changePct < 0}/><Kpi label="Carbon intensity" value={`${d.kgPerThousandUsd.toFixed(1)} kg`} note="CO₂e per 1,000 USD spend"/><Kpi label="A/B-rated spend" value={`${d.abSpendShare.toFixed(1)}%`} note="Share of selected spend" good={d.abSpendShare >= 50}/><Kpi label="Greener moves" value={String(d.suggestions.length)} note="Prioritized workloads" good={d.suggestions.length > 0}/></div>

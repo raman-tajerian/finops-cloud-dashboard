@@ -130,7 +130,7 @@ export function SavedViewsPanel({ state, views, setViews, setState }: { state: E
       </section>
       <section className="organic-card p-6" aria-label="Saved views">
         <Label>Saved views{views.length > 0 ? ` · ${views.length}` : ""}</Label>
-        {views.length === 0 ? <p className="mt-4 rounded-xl bg-secondary p-6 text-center text-sm text-muted-foreground">No saved views yet. Save the current view to find it here.</p> : (
+        {views.length === 0 ? <div className="mt-4 space-y-3 rounded-xl bg-secondary p-6 text-center"><p className="text-sm text-muted-foreground">No views have been saved in this link yet.</p><Button variant="secondary" onClick={() => document.querySelector<HTMLInputElement>('[aria-label="View name"]')?.focus()}>Name current view</Button></div> : (
           <ul className="mt-4 divide-y divide-border">
             {views.map((v) => (
               <li key={v.name} className="flex items-center gap-3 py-3">

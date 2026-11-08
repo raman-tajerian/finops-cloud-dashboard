@@ -5,6 +5,7 @@ import type { UseQueryResult } from "@tanstack/react-query";
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useBudget, useKubernetes, useScenario } from "@/lib/queries";
 import { budgetTone, simulate } from "@/lib/scenario";
+import { useGlobalFilters } from "@/lib/filters";
 import type { K8sClusterDto, K8sPodDto } from "@/types/finops";
 import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, StatusBadge, TableToggle } from "./States";
 import { CountUp } from "./Insights";
@@ -29,7 +30,8 @@ const podColor: Record<K8sPodDto["status"], string> = { Running: "var(--success)
 
 export function KubernetesWorkspace({ tab = "clusters" }: { tab?: string }) {
   const q = useKubernetes();
-  return <Gate q={q} h="h-72">{(d) => d.clusters.length ? <Clusters clusters={d.clusters} tab={tab} /> : <EmptyState icon={Boxes} title="No Kubernetes clusters match the current filters." action="Reload" onAction={() => q.refetch()} />}</Gate>;
+  const { reset } = useGlobalFilters();
+  return <Gate q={q} h="h-72">{(d) => d.clusters.length ? <Clusters clusters={d.clusters} tab={tab} /> : <EmptyState icon={Boxes} title="No Kubernetes clusters match the current filters." action="Reset filters" onAction={reset} />}</Gate>;
 }
 
 type SortKey = "name" | "cost" | "efficiency";
