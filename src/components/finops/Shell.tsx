@@ -11,14 +11,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { NavigationPalette } from "./NavigationPalette";
 import { HelpDrawer, CalculationNotes } from "./Help";
 import { navigationCounts } from "@/lib/findability";
-import { useGlobalFilters } from "@/lib/filters";
+
 import { CreateBudgetDialog } from "./BudgetsAlerts";
 import { PAGE_TABS } from "@/components/finops/PageTabs";
 import { useDashboard, useSecurity, useAlerts } from "@/lib/queries";
 import { CURRENCIES, CurrencySync, useCurrency, useSetCurrency } from "@/lib/money";
 import { useTableDensity } from "@/lib/density";
 import { recordVisit, setSession, targetKey, togglePin, useSession, type NavTarget } from "@/lib/session-store";
-import { SHORTCUTS, useGlobalShortcuts } from "@/lib/shortcuts";
+import { useGlobalShortcuts } from "@/lib/shortcuts";
 
 import { CardSkeleton, FilterEmptyState } from "./States";
 
@@ -53,7 +53,6 @@ export function Shell({ children }: { children: ReactNode }) {
   const current = navItems.find((i) => i.to === path) ?? { label: "Overview", to: "/", icon: Radar };
   const security = useSecurity();
   const alerts = useAlerts();
-  const { reset } = useGlobalFilters();
   const navigation = useSession((s) => s.navigation);
   const recs = useSession((s) => s.recs);
   const findings = useSession((s) => s.findings);
@@ -62,9 +61,9 @@ export function Shell({ children }: { children: ReactNode }) {
   const rawTab = (location.search as { tab?: string }).tab;
   const activeTab = page?.tabs.find((t) => t.id === rawTab) ?? page?.tabs[0];
   const pageTarget: NavTarget = { to: path, label: current.label };
-  const tabTarget: NavTarget = { to: path, tab: activeTab?.id, label: `${current.label} › ${activeTab?.label ?? ""}` };
+  const tabTarget: NavTarget = { to: path, tab: activeTab?.id ?? "", label: `${current.label} › ${activeTab?.label ?? ""}` };
   const pin = (target: NavTarget) => setSession((s) => ({ ...s, navigation: togglePin(s.navigation, target) }));
-  const targetLink = (target: NavTarget) => <Link to={target.to} search={(p: Record<string, unknown>) => ({ range: p.range, providers: p.providers, env: p.env, team: p.team, cur: p.cur, tab: target.tab ?? "" })} onClick={() => setOpen(false)} className="flex min-h-10 min-w-0 items-center rounded-lg px-3 text-sm text-muted-foreground hover:bg-secondary"><span className="truncate">{target.label}</span></Link>;
+  const targetLink = (target: NavTarget) => <Link to={target.to} search={(p) => ({ range: p.range, providers: p.providers, env: p.env, team: p.team, cur: p.cur, tab: target.tab ?? "" })} onClick={() => setOpen(false)} className="flex min-h-10 min-w-0 items-center rounded-lg px-3 text-sm text-muted-foreground hover:bg-secondary"><span className="truncate">{target.label}</span></Link>;
   const currency = useCurrency();
   const setCurrency = useSetCurrency();
   const { density } = useTableDensity();

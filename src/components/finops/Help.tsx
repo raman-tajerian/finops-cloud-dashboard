@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 
 function CalculationLink({ term, onClick }: { term: GlossaryTerm; onClick?: () => void }) {
-  return <Button variant="link" className="h-auto whitespace-normal p-0 text-left" asChild><Link to={term.to} search={(p: Record<string, unknown>) => ({ ...p, tab: term.tab })} hash={term.anchor} onClick={onClick}>How it is calculated</Link></Button>;
+  return <Button variant="link" className="h-auto whitespace-normal p-0 text-left" asChild><Link to={term.to} search={(p: Record<string, unknown>) => ({ ...p, tab: term.tab })} hash={term.anchor ?? ""} onClick={onClick}>How it is calculated</Link></Button>;
 }
 export function MetricInfo({ label }: { label: string }) {
   const term = metricTerm(label);

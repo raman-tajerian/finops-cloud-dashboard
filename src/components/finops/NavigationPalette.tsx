@@ -22,7 +22,7 @@ export function NavigationPalette({ open, onOpenChange, returnFocus, createBudge
   const recs = useSession((s) => s.recs);
   const remember = () => setSession((s) => ({ ...s, navigation: recordSearch(s.navigation, query) }));
   const run = (fn: () => void) => { remember(); onOpenChange(false); fn(); };
-  const go = (t: SearchTarget) => run(() => navigate({ to: t.to, search: (p: Record<string, unknown>) => ({ range: p.range, providers: p.providers, env: p.env, team: p.team, cur: p.cur, tab: t.tab ?? "", ...t.search }) } as never));
+  const go = (t: SearchTarget) => run(() => navigate({ to: t.to, search: (p: Record<string, unknown>) => ({ range: p["range"], providers: p["providers"], env: p["env"], team: p["team"], cur: p["cur"], tab: t.tab ?? "", ...t.search }) } as never));
   const targets = searchTargets(dashboard.data, security.data).map((t) => {
     if (t.group !== "Recommendations") return t;
     const rec = dashboard.data?.recommendations.find((r) => r.title === t.label);
