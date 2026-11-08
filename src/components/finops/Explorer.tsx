@@ -177,7 +177,7 @@ function ExplorerChart({ d, state }: { d: ExploreDto; state: ExplorerState }) {
           ) : state.chart === "line" ? (
             <LineChart data={d.series}>{children}{d.keys.map((k, i) => <Line key={k} dataKey={k} stroke={col(i)} dot={false} strokeWidth={1.6} />)}{overlay}</LineChart>
           ) : (
-            <AreaChart data={d.series}>{children}{d.keys.map((k, i) => <Area key={k} dataKey={k} stackId="s" stroke={col(i)} fill={col(i)} fillOpacity={0.1} />)}{overlay}</AreaChart>
+            <AreaChart data={d.series}>{children}{d.keys.map((k, i) => <Area key={k} dataKey={k} stackId="s" stroke={col(i)} fill={col(i)} fillOpacity={0.08} />)}{overlay}</AreaChart>
           )}
         </ResponsiveContainer>}
       </div>

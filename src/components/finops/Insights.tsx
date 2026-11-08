@@ -176,7 +176,7 @@ export function AnomalyForecast() {
             <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} minTickGap={24} />
             <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} formatter={(v) => Array.isArray(v) ? `${fmtMoney(Number(v[0]))} – ${fmtMoney(Number(v[1]))}` : fmtMoney(Number(v))} />
-            <Area dataKey="band" name="Confidence" stroke="none" fill="var(--chart-1)" fillOpacity={0.14} animationDuration={900} />
+            <Area dataKey="band" name="Confidence" stroke="none" fill="var(--chart-1)" fillOpacity={0.1} animationDuration={900} />
             <Line dataKey="forecast" name="Forecast" stroke="var(--muted-foreground)" strokeDasharray="4 4" dot={false} strokeWidth={1.2} animationDuration={900} />
             <Line dataKey="actual" name="Actual" stroke="var(--chart-2)" dot={false} strokeWidth={2} connectNulls={false} animationDuration={1100} />
             {spike && <ReferenceDot x={spike.day} y={spike.actual ?? 0} r={5} fill="var(--destructive)" stroke="var(--card)" strokeWidth={2} />}

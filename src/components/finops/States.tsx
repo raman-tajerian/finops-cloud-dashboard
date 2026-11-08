@@ -54,7 +54,7 @@ export function StatusBadge({ tone, children }: { tone: Tone; children: ReactNod
 
 export function EmptyState({ title, action, onAction }: { icon: LucideIcon; title: string; action: string; onAction: () => void }) {
   return (
-    <div className="organic-card grid place-items-center gap-5 p-7 py-10 text-center">
+    <div className="organic-card grid place-items-center gap-5 p-7 text-center">
       <svg aria-hidden viewBox="0 0 112 72" className="h-[72px] w-28">
         <path d="M4 68V20a48 48 0 0 1 48 48Z" className="fill-brand-burgundy" />
         <circle cx="70" cy="24" r="17" className="fill-brand-mustard" />
@@ -73,7 +73,7 @@ export function FilterEmptyState() {
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div role="alert" className="organic-card flex items-center gap-3 p-5">
+    <div role="alert" className="organic-card flex items-center gap-3 p-7">
       <AlertCircle className="size-5 shrink-0 text-destructive" />
       <p className="min-w-0 flex-1 text-sm">{message}</p>
       <Button variant="secondary" onClick={onRetry}>Retry</Button>
