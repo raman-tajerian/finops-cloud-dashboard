@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Pencil, Plus, Trash2, Users } from "lucide-react";
+import { Copy, Moon, Pencil, Plus, Sun, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useSettings } from "@/lib/queries";
 import { setSession, useSession, type DemoSettings } from "@/lib/session-store";
@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { PageTabs, TabContent } from "./PageTabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CardSkeleton, EmptyState, ErrorState } from "./States";
+import { CardSkeleton, EmptyState, ErrorState, PageHero } from "./States";
 import { Demo } from "./Reports";
 import { CURRENCIES, useCurrency, useSetCurrency, type Currency } from "@/lib/money";
 
@@ -36,12 +36,14 @@ export function SettingsWorkspace({ tab, dialog, onTab, onDialog }: { tab: strin
   if (q.isError) return <ErrorState message="We couldn't load settings." onRetry={() => q.refetch()} />;
   const d: SettingsDto = { ...q.data, ...Object.fromEntries(Object.entries(ss).filter(([, v]) => v !== undefined)) } as SettingsDto;
   const save = (patch: Partial<typeof ss>, msg = "Saved (demo, this session only)") => { setSession((s) => ({ ...s, settings: { ...s.settings, ...patch } })); toast.success(msg); };
+  const profileFields = Object.values(d.profile);
+  const profileCompleteness = Math.round((profileFields.filter((v) => v.trim()).length / Math.max(1, profileFields.length)) * 100);
   return (
     <div className="space-y-4">
       <PageTabs tabs={SETTINGS_TABS.map(([id, label]) => ({ id, label }))} value={tab} onChange={onTab} ariaLabel="Settings sections" />
       <p className="flex items-center gap-2 text-xs text-muted-foreground"><Demo /> Changes are kept for this session only.</p>
       <TabContent tab={tab}>
-      {tab === "profile" && <FormCard fields={[["name", "Name"], ["email", "Email"], ["title", "Title"]]} value={d.profile} validate={(v) => (isEmail(v["email"] ?? "") ? null : { email: "Enter a valid email." })} onSave={(v) => save({ profile: v as SettingsDto["profile"] })} />}
+      {tab === "profile" && <div className="space-y-8"><PageHero label="Profile completeness" value={`${profileCompleteness}%`} change={`${d.members.length} workspace members`} description="Your personal details and workspace preferences, kept together in one calm place." /><FormCard fields={[["name", "Name"], ["email", "Email"], ["title", "Title"]]} value={d.profile} validate={(v) => (isEmail(v["email"] ?? "") ? null : { email: "Enter a valid email." })} onSave={(v) => save({ profile: v as SettingsDto["profile"] })} /></div>}
       {tab === "workspace" && <FormCard fields={[["name", "Workspace name"], ["currency", "Currency"], ["timezone", "Timezone"]]} value={d.workspace} validate={(v) => ((v["name"] ?? "").trim() ? null : { name: "Name is required." })} onSave={(v) => save({ workspace: v as SettingsDto["workspace"] })} />}
       {tab === "members" && <Members d={d} open={dialog === "invite"} onOpen={(o) => onDialog(o ? "invite" : "")} save={save} />}
       {tab === "allocation" && <Allocation rows={d.mappings} save={save} />}
@@ -52,22 +54,26 @@ export function SettingsWorkspace({ tab, dialog, onTab, onDialog }: { tab: strin
         </table></div>
       )}
       {tab === "keys" && <Keys d={d} open={dialog === "create-key"} onOpen={(o) => onDialog(o ? "create-key" : "")} save={save} />}
-      {tab === "appearance" && (<>
-        <div className="organic-card space-y-3 p-6"><Label>Table density</Label>
+      {tab === "appearance" && (<div className="space-y-6">
+        <div className="organic-card space-y-4 p-7"><Label>Theme</Label>
+          <div className="flex gap-2">{(["light", "dark"] as const).map((v) => <Button key={v} variant={ss.theme === v ? "default" : "secondary"} aria-pressed={ss.theme === v} className="capitalize" onClick={() => save({ theme: v }, `${v === "dark" ? "Dark" : "Light"} theme enabled (demo, this session only)`)}>{v === "light" ? <Sun /> : <Moon />}{v}</Button>)}</div>
+          <p className="text-xs text-muted-foreground">Light is the default. Your choice lasts for this session only.</p>
+        </div>
+        <div className="organic-card space-y-4 p-7"><Label>Table density</Label>
           <div className="flex gap-2">{(["comfortable", "compact"] as const).map((v) => <Button key={v} variant={ss.density === v ? "default" : "secondary"} aria-pressed={ss.density === v} className="capitalize" onClick={() => save({ density: v })}>{v}</Button>)}</div>
           <p className="text-xs text-muted-foreground">Applies to every data table in the app.</p>
         </div>
-        <div className="organic-card space-y-3 p-6"><Label>Display currency</Label>
+        <div className="organic-card space-y-4 p-7"><Label>Display currency</Label>
           <div className="flex gap-2">{CURRENCIES.map((c) => <CurrencyButton key={c} c={c} />)}</div>
           <p className="text-xs text-muted-foreground">Demo rates — all figures are computed in USD and converted for display. Saved in the page link.</p>
         </div>
-        <div className="organic-card flex items-center justify-between gap-4 p-6">
+        <div className="organic-card flex items-center justify-between gap-4 p-7">
           <div><Label>Reduce motion</Label>
             <p className="mt-1 text-xs text-muted-foreground">Turns off counters, draw-ins, staggers and page transitions — content simply fades in. Also follows your system setting.</p>
           </div>
           <Switch checked={ss.reduceMotion} aria-label="Reduce motion" onCheckedChange={(v) => save({ reduceMotion: v }, v ? "Motion reduced (demo, this session only)" : "Motion restored (demo, this session only)")} />
         </div>
-      </>)}
+      </div>)}
       </TabContent>
     </div>
   );
@@ -79,7 +85,7 @@ function FormCard({ fields, value, validate, onSave }: { fields: [string, string
   const [v, setV] = useState(value);
   const [errors, setErrors] = useState<Record<string, string>>({});
   return (
-    <form className="organic-card grid max-w-xl gap-4 p-6" onSubmit={(e) => { e.preventDefault(); const er = validate(v); setErrors(er ?? {}); if (!er) onSave(v); }}>
+    <form className="organic-card grid max-w-xl gap-4 p-7" onSubmit={(e) => { e.preventDefault(); const er = validate(v); setErrors(er ?? {}); if (!er) onSave(v); }}>
       {fields.map(([k, l]) => <div key={k} className="grid gap-1.5"><Label htmlFor={`f-${k}`}>{l}</Label><Input id={`f-${k}`} value={v[k] ?? ""} aria-invalid={!!errors[k]} onChange={(e) => setV({ ...v, [k]: e.target.value })} />{errors[k] && <p className="text-xs text-destructive">{errors[k]}</p>}</div>)}
       <Button type="submit" className="justify-self-start">Save</Button>
     </form>

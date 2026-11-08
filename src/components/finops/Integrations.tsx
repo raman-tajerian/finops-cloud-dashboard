@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CardSkeleton, EmptyState, ErrorState, SectionHeading, StatusBadge } from "./States";
+import { CardSkeleton, EmptyState, ErrorState, PageHero, SectionHeading, StatusBadge } from "./States";
 import { Demo } from "./Reports";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -33,12 +33,13 @@ export function IntegrationsWorkspace({ tab = "connected" }: { tab?: string }) {
   return (
     <div className="space-y-8">
       <p className="organic-card flex flex-wrap items-center gap-2 p-4 text-sm text-muted-foreground"><Demo /> All integrations are simulated. No network calls are made and no credentials are stored.</p>
+      {tab === "connected" && <PageHero label="Connected integrations" value={shown.length} change={`${list.filter((i) => i.status === "Error").length} need attention`} description="Cloud accounts and tools connected to this demo workspace, with configuration close at hand." />}
       {tab === "sync-history" ? <SyncHistory rows={q.data.history} /> : shown.length === 0 ? (
         <EmptyState icon={Plug} title={tab === "available" ? "All available integrations are already connected." : "No integrations have been connected in this workspace."} action={tab === "available" ? "View connected" : "Browse integrations"} onAction={() => navigate({ to: "/integrations", search: (p) => ({ ...p, tab: tab === "available" ? "connected" : "available" }) })} />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {shown.map((i) => (
-            <article key={i.id} className="organic-card flex flex-col gap-3 p-5">
+            <article key={i.id} className="organic-card flex flex-col gap-3 p-7">
               <div className="flex items-start justify-between gap-2"><h3 className="font-semibold">{i.name}</h3>
                 <StatusBadge tone={i.status === "Connected" ? "success" : i.status === "Error" ? "critical" : "idle"}>{i.status}</StatusBadge></div>
               <p className="text-xs text-muted-foreground">{i.lastSync ? `Last sync ${fmtTime(i.lastSync)}` : "Never synced"}</p>

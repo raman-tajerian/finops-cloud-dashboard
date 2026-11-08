@@ -4,7 +4,7 @@ import { Area, ComposedChart, CartesianGrid, Line, ReferenceDot, ResponsiveConta
 import { ArrowDownRight, ArrowUpRight, ChevronRight, Minus } from "lucide-react";
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useDashboardData } from "@/lib/queries";
-import { DataTableView, TableToggle } from "./States";
+import { DataTableView, PageHero, TableToggle } from "./States";
 import { CountUp } from "./Insights";
 import { Spark } from "./Platform";
 import type { KpiValue } from "@/types/finops";
@@ -20,6 +20,12 @@ export function DrillLink({ to, tab, children = "Open" }: { to: To; tab?: string
 }
 
 const pctDelta = (k: KpiValue) => (k.previous ? ((k.value - k.previous) / k.previous) * 100 : 0);
+
+export function OverviewHero() {
+  const { totalSpend } = useDashboardData().overview;
+  const change = pctDelta(totalSpend);
+  return <PageHero label="Total cloud spend" value={fmtMoney(totalSpend.value)} change={<span className={change > 0 ? "text-warning" : "text-success"}>{change > 0 ? "+" : ""}{change.toFixed(1)}% vs previous period</span>} description="Your selected cloud spend in one view, with the trends and actions that need attention below." />;
+}
 
 /** KPI cards, split into the "summary" and "unit" groups used by the Overview sub-tabs. */
 export function OverviewKpis({ group = "summary" }: { group?: "summary" | "unit" }) {
@@ -37,11 +43,11 @@ export function OverviewKpis({ group = "summary" }: { group?: "summary" | "unit"
   ];
   const items = all.filter((i) => i.g === group);
   return (
-    <section aria-label="Key metrics" className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <section aria-label="Key metrics" className="grid items-stretch gap-7 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((it) => {
         const d = pctDelta(it.k), up = d > 0, good = it.goodWhenUp ? up : !up;
         return (
-          <article key={it.label} className="organic-card subtle-lift group relative flex h-full flex-col p-5">
+          <article key={it.label} className="organic-card subtle-lift group relative flex h-full flex-col p-7">
             <Link aria-label={it.label} to={it.to} state={{ drilldown: true } as never} search={(prev: Record<string, unknown>) => ({ ...prev, tab: it.tab })} className="absolute inset-0 z-0 rounded-[inherit]" />
             <div className="pointer-events-none relative flex items-center justify-between gap-1"><p className="min-w-0 flex-1 text-[13px] text-muted-foreground">{it.label}</p><span className="pointer-events-auto relative z-10"><MetricInfo label={it.label} /></span><ChevronRight className="size-3.5 shrink-0 text-muted-foreground" /></div>
             <div className="mt-2 flex items-end justify-between gap-2">
@@ -66,7 +72,7 @@ export function CostTrendCard() {
   const markers = trend.filter((t) => t.anomaly);
   const colors = { AWS: "var(--aws)", Azure: "var(--azure)", GCP: "var(--gcp)" } as const;
   return (
-    <article className="organic-card h-full p-6">
+    <article className="organic-card h-full p-7">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><Label>Cost trend by provider</Label><p className="mt-1 text-[13px] text-muted-foreground">Daily spend, dashed forecast with 95% band · {markers.length} anomaly marker{markers.length === 1 ? "" : "s"}</p></div>
         <div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><DrillLink to="/cost-explorer" tab="explore">Explore</DrillLink></div>
@@ -79,7 +85,7 @@ export function CostTrendCard() {
             <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} minTickGap={24} />
             <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} formatter={(v, n) => [Array.isArray(v) ? `${fmtMoney(Number(v[0]))} – ${fmtMoney(Number(v[1]))}` : fmtMoney(Number(v)), String(n)]} />
-            {providers.map((p) => <Area key={p} dataKey={p} stackId="p" stroke={colors[p]} fill={colors[p]} fillOpacity={0.1} strokeWidth={1.5} animationDuration={700} />)}
+            {providers.map((p) => <Area key={p} dataKey={p} stackId="p" stroke={colors[p]} fill={colors[p]} fillOpacity={0.08} strokeWidth={1.5} animationDuration={700} />)}
             <Area dataKey="band" name="95% band" stroke="none" fill="var(--muted-foreground)" fillOpacity={0.12} />
             <Line dataKey="forecast" name="Forecast" stroke="var(--muted-foreground)" strokeDasharray="5 4" dot={false} strokeWidth={1.5} connectNulls />
             {markers.map((m) => (
@@ -110,7 +116,7 @@ export function TopMovers() {
     </div>
   );
   return (
-    <article className="organic-card h-full p-6">
+    <article className="organic-card h-full p-7">
       <div className="flex items-start justify-between gap-3"><div><Label>Top movers</Label><p className="mt-1 text-[13px] text-muted-foreground">Largest changes vs previous period</p></div><DrillLink to="/resources" tab="list">Resources</DrillLink></div>
       <div className="mt-4 grid gap-5"><List title="Increases" items={up} inc /><List title="Decreases" items={down} inc={false} /></div>
     </article>

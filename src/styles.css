@@ -55,38 +55,45 @@
   --color-primary-soft: var(--primary-soft);
   --color-gcp: var(--gcp);
   --color-destructive-soft: var(--destructive-soft);
+  --color-hero: var(--hero);
+  --color-row-hover: var(--row-hover);
 }
 
 :root {
   --radius: 0.75rem;
   --background: #F6F3EE;
   --foreground: #1F2421;
-  --card: #FFFFFF;
+  --card: #FFFDF9;
   --card-foreground: var(--foreground);
-  --popover: #FFFFFF;
+  --popover: #FFFDF9;
   --popover-foreground: var(--foreground);
   --primary: #7A1F3D;
   --primary-hover: #641830;
-  --primary-soft: rgb(122 31 61 / 9%);
+  --primary-soft: rgb(122 31 61 / 8%);
   --primary-foreground: #FFFFFF;
-  --secondary: #EFEAE2;
+  --secondary: #F0EBE3;
   --secondary-foreground: var(--foreground);
   --muted: #EFEAE2;
-  --muted-foreground: #6B6F68;
-  --accent: #EDF1EC;
+  --muted-foreground: #656A63;
+  --accent: #E9EFEA;
   --accent-foreground: var(--foreground);
   --destructive: #B5483A;
-  --destructive-soft: rgb(181 72 58 / 13%);
+  --destructive-soft: rgb(181 72 58 / 11%);
   --destructive-foreground: #FFFFFF;
   --border: #E7E1D8;
-  --input: #DCD4C8;
+  --input: #D8D0C4;
   --ring: #7A1F3D;
   --success: #4F6F5A;
-  --success-soft: rgb(79 111 90 / 13%);
-  --warning: #8F6A1C;
-  --warning-soft: rgb(201 154 62 / 15%);
-  --sidebar-bg: #EFEAE2;
+  --success-soft: rgb(79 111 90 / 11%);
+  --warning: #8A651A; /* 4.72:1 on warning-soft */
+  --warning-soft: rgb(201 154 62 / 13%);
+  --sidebar-bg: #F0EBE3;
   --overlay: rgb(31 36 33 / 35%);
+  --hero: #EDE7DE;
+  --row-hover: rgb(31 36 33 / 3%);
+  --scrollbar: #CFC5B7;
+  --skeleton-base: #ECE6DD;
+  --skeleton-highlight: #F7F3ED;
   --aws: #C99A3E;
   --azure: #5B7083;
   --gcp: #4F6F5A;
@@ -100,25 +107,79 @@
   --brand-mustard: #D9A441;
   --brand-sand: #E8D8C0;
   --brand-ink: #1F2421;
-  --shadow-card: 0 1px 2px rgb(31 36 33 / 4%), 0 8px 24px rgb(31 36 33 / 4%);
+  --shadow-card: 0 1px 2px rgb(31 36 33 / 3%);
 }
 
-.recharts-cartesian-grid line { stroke: var(--border); }
-.recharts-area-area { fill-opacity: .14; }
-.recharts-line-curve, .recharts-area-curve { stroke-width: 2px; }
-.recharts-tooltip-wrapper .recharts-default-tooltip { background: var(--card) !important; border: 1px solid var(--border) !important; border-radius: 12px !important; box-shadow: var(--shadow-card); }
+.dark {
+  color-scheme: dark;
+  --background: #161512;
+  --foreground: #F2EEE6;
+  --card: #1F1D19;
+  --card-foreground: var(--foreground);
+  --popover: #24211C;
+  --popover-foreground: var(--foreground);
+  --primary: #C87591;
+  --primary-hover: #D78DA4;
+  --primary-soft: rgb(200 117 145 / 15%);
+  --primary-foreground: #241B20;
+  --secondary: #292620;
+  --secondary-foreground: var(--foreground);
+  --muted: #2A2721;
+  --muted-foreground: #B9B2A8;
+  --accent: #2C332C;
+  --accent-foreground: var(--foreground);
+  --destructive: #E08878;
+  --destructive-soft: rgb(224 136 120 / 13%);
+  --destructive-foreground: #241B18;
+  --border: #3A362E;
+  --input: #4A4439;
+  --ring: #D9A441;
+  --success: #8FAE96;
+  --success-soft: rgb(143 174 150 / 13%);
+  --warning: #D9A441;
+  --warning-soft: rgb(217 164 65 / 13%);
+  --sidebar-bg: #1B1915;
+  --overlay: rgb(0 0 0 / 58%);
+  --hero: #24211C;
+  --row-hover: rgb(242 238 230 / 4%);
+  --scrollbar: #514A3F;
+  --skeleton-base: #292620;
+  --skeleton-highlight: #353128;
+  --aws: #D9A441;
+  --azure: #8DA4B5;
+  --gcp: #8FAE96;
+  --chart-1: #8FAE96;
+  --chart-2: #8DA4B5;
+  --chart-3: #D58C72;
+  --chart-4: #D9A441;
+  --chart-5: #C99A9A;
+  --chart-6: #746B5D;
+  --brand-burgundy: #C87591;
+  --brand-mustard: #D9A441;
+  --brand-sand: #E8D8C0;
+  --brand-ink: #1F2421;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 12%);
+}
+
+svg.lucide { stroke-width: 1.5; }
+.recharts-cartesian-grid line { stroke: var(--border); stroke-opacity: .48; }
+.recharts-cartesian-grid-horizontal line:nth-child(even) { display: none; }
+.recharts-area-area { fill-opacity: .08; }
+.recharts-line-curve, .recharts-area-curve { stroke-width: 2px; stroke-linecap: round; stroke-linejoin: round; }
+.recharts-tooltip-wrapper .recharts-default-tooltip { background: var(--popover) !important; border: 1px solid var(--border) !important; border-radius: 12px !important; box-shadow: var(--shadow-card); padding: 8px 10px !important; }
 .recharts-text { fill: var(--muted-foreground); }
 @keyframes sand-shimmer { from { background-position: -200% 0 } to { background-position: 200% 0 } }
-[data-slot="skeleton"], .animate-pulse.bg-muted { background: linear-gradient(90deg, #EFEAE2 25%, #F6F3EE 50%, #EFEAE2 75%); background-size: 200% 100%; animation: sand-shimmer 1.6s linear infinite; }
-table thead { position: sticky; top: 0; z-index: 1; backdrop-filter: blur(8px); }
-table td, table th { border-left: 0; border-right: 0; }
-table tbody tr { border-bottom: 1px solid var(--border); }
-table tbody tr:hover { background: var(--background); }
+[data-slot="skeleton"], .animate-pulse.bg-muted { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: sand-shimmer 1.6s linear infinite; }
+table thead { position: sticky; top: 0; z-index: 1; background: color-mix(in srgb, var(--card) 88%, transparent); backdrop-filter: blur(12px); }
+table td, table th { border: 0; }
+main table :is(tbody tr, tfoot tr) { border: 0; }
+table tbody tr { transition: background-color 160ms ease; }
+table tbody tr:hover { background: var(--row-hover); }
 html { scroll-padding-top: 64px; }
-* { scrollbar-width: thin; scrollbar-color: #D9CDBB transparent; }
+* { scrollbar-width: thin; scrollbar-color: var(--scrollbar) transparent; }
 *::-webkit-scrollbar { width: 6px; height: 6px; }
 *::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb { background: #D9CDBB; border-radius: 9999px; }
+*::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 9999px; }
 
 @layer base {
   * { border-color: var(--color-border); }
@@ -136,18 +197,15 @@ html { scroll-padding-top: 64px; }
     -webkit-font-smoothing: antialiased;
   }
   button, input, select { letter-spacing: 0; }
+  ::selection { background: var(--primary-soft); color: var(--foreground); }
 }
 
 @utility organic-card {
   background: var(--card);
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-card);
-  transition: transform 220ms cubic-bezier(.2,.8,.2,1), border-color 180ms ease, background-color 180ms ease;
-  &:hover {
-    transform: translateY(-2px);
-    border-color: var(--input);
-  }
+  transition: background-color 180ms ease;
 }
 
 @utility metric-numbers {
@@ -158,29 +216,24 @@ html { scroll-padding-top: 64px; }
 }
 
 @utility subtle-lift {
-  transition: transform 220ms cubic-bezier(.2,.8,.2,1), border-color 180ms ease, background-color 180ms ease;
-  &:hover { transform: translateY(-2px); border-color: var(--input); }
+  transition: transform 220ms cubic-bezier(.2,.8,.2,1), background-color 180ms ease;
+  &:hover { transform: translateY(-1px); }
   &:active { transform: scale(.985); }
 }
 
-@utility reveal-up {
-  animation: reveal-up 360ms cubic-bezier(.2,.8,.2,1) both;
-}
-
+@utility reveal-up { animation: reveal-up 360ms cubic-bezier(.2,.8,.2,1) both; }
 @utility reveal-delay-1 { animation-delay: 40ms; }
 @utility reveal-delay-2 { animation-delay: 80ms; }
 @utility reveal-delay-3 { animation-delay: 120ms; }
 @utility reveal-delay-4 { animation-delay: 160ms; }
 
 @utility interactive-surface {
-  transition: transform 200ms cubic-bezier(.2,.8,.2,1), background-color 180ms ease, border-color 180ms ease;
-  &:hover { transform: translateY(-1px); border-color: var(--input); }
+  transition: transform 200ms cubic-bezier(.2,.8,.2,1), background-color 180ms ease;
+  &:hover { transform: translateY(-1px); }
   &:active { transform: scale(.985); }
 }
 
-@utility inline-contain {
-  contain: inline-size;
-}
+@utility inline-contain { contain: inline-size; }
 
 @utility progress-reveal {
   transform-origin: left;
@@ -203,7 +256,6 @@ html { scroll-padding-top: 64px; }
 @keyframes reveal-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes progress-reveal { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
-/* Session "Reduce motion" switch (Settings > Appearance) — same effect as the OS setting. */
 [data-reduce-motion="true"] *, [data-reduce-motion="true"] *::before, [data-reduce-motion="true"] *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 [data-reduce-motion="true"] .topo-pulse { animation: none; opacity: .2; }
 @keyframes topo-pulse { 0% { transform: scale(1); opacity: .45 } 100% { transform: scale(2.6); opacity: 0 } }
@@ -213,11 +265,9 @@ html { scroll-padding-top: 64px; }
   :where(a, button, input, textarea, select, [role="button"], [tabindex]):focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 }
 
-/* Shared table density: the session density setting (Settings > Appearance) drives every data table via data-density on the shell root. */
-.density-table :where(th, td) { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-[data-density="compact"] .density-table :where(th, td) { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+.density-table :where(th, td) { padding-top: 0.875rem; padding-bottom: 0.875rem; }
+[data-density="compact"] .density-table :where(th, td) { padding-top: 0.5rem; padding-bottom: 0.5rem; }
 
-/* Touch ergonomics without altering desktop density or the palette. */
 @media (max-width: 1023px) {
   main :where(button, a, [role="button"], [role="tab"], [role="combobox"]),
   aside nav a, [role="dialog"] :where(button, [role="combobox"]),
@@ -225,6 +275,6 @@ html { scroll-padding-top: 64px; }
   main :where(button, [role="button"]), [role="dialog"] button { min-width: 40px; }
   main table :is(th, td):first-child { position: sticky; left: 0; z-index: 2; background: var(--card); }
   main table thead :is(th, td):first-child { z-index: 3; }
-  main table tbody tr:hover td:first-child { background: var(--background); }
+  main table tbody tr:hover td:first-child { background: var(--card); }
   [role="dialog"] { max-width: calc(100vw - 24px); }
 }

@@ -27,7 +27,7 @@ const Pill = ({ tone, children }: { tone: "success" | "warning" | "destructive" 
   return <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${c}`}>{children}</span>;
 };
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
-const card = "organic-card p-6";
+const card = "organic-card p-7";
 const chartColors = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)"];
 
 /* ---------- Filter bar ---------- */
@@ -201,7 +201,7 @@ export function CostDistribution() {
       <div className="mt-6 h-80" aria-live="polite">
         {asTable && <DataTableView caption={`Cost distribution ${view}`} columns={table.columns} rows={table.rows} />}
         {!asTable && view === "service" && (
-          <div key="service" className="animate-in fade-in zoom-in-95 grid h-full gap-6 duration-300 md:grid-cols-[1fr_220px]">
+          <div key="service" className="animate-in fade-in zoom-in-95 grid h-full gap-7 duration-300 md:grid-cols-[1fr_220px]">
             <ResponsiveContainer><PieChart><Pie data={services} dataKey="value" nameKey="name" innerRadius="62%" outerRadius="90%" paddingAngle={2} stroke="none">{services.map((_, i) => <Cell key={i} fill={chartColors[i] ?? "var(--chart-4)"} />)}</Pie><Tooltip contentStyle={tip} formatter={(v) => [`${fmtMoney(Number(v))} · ${pct(Number(v))}`, "Cost"]} /></PieChart></ResponsiveContainer>
             <ul className="hidden flex-col justify-center gap-3 md:flex">{services.map((s, i) => <li key={s.name} className="flex items-center gap-2 text-sm"><span className="size-2 rounded-full" style={{ background: chartColors[i] }} /><span className="flex-1 text-muted-foreground">{s.name}</span><span className="metric-numbers">{pct(s.value)}</span></li>)}</ul>
           </div>
@@ -225,10 +225,9 @@ export function CostDistribution() {
         )}
         {!asTable && view === "daily" && (
           <div key="daily" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><AreaChart data={daily}>
-            <defs><linearGradient id="dg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="var(--chart-1)" stopOpacity={0.35} /><stop offset="1" stopColor="var(--chart-1)" stopOpacity={0} /></linearGradient></defs>
             <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="day" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} interval={4} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} formatter={(v) => [fmtMoney(Number(v)), "Spend"]} />
-            <Area dataKey="spend" stroke="var(--chart-1)" strokeWidth={2} fill="url(#dg)" />
+            <Area dataKey="spend" stroke="var(--chart-1)" strokeWidth={2} fill="var(--chart-1)" fillOpacity={0.08} />
           </AreaChart></ResponsiveContainer></div>
         )}
       </div>
@@ -264,7 +263,7 @@ export function SavingsFeed() {
         <div className="text-right"><Label>Realized</Label><p className="metric-numbers mt-1 text-xl text-success">{fmtMoney(realized)}</p></div>
       </div>
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="progress-reveal h-full rounded-full bg-success transition-all duration-700" style={{ width: `${Math.min(100, (realized / Math.max(1, realized + pending)) * 100)}%` }} /></div>
-      {recommendations.length === 0 && <div className="mt-6 space-y-3 rounded-xl bg-secondary p-6 text-center"><p className="text-sm text-muted-foreground">No resources match the savings rules for the selected team and filters.</p><Button variant="secondary" onClick={reset}>Reset filters</Button></div>}
+      {recommendations.length === 0 && <div className="mt-6 space-y-3 rounded-xl bg-secondary p-7 text-center"><p className="text-sm text-muted-foreground">No resources match the savings rules for the selected team and filters.</p><Button variant="secondary" onClick={reset}>Reset filters</Button></div>}
       <ul className="mt-5 divide-y divide-border">
         {recommendations.map((r) => {
           const st = state[r.id] ?? "open";

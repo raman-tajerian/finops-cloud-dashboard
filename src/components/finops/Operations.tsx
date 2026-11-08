@@ -8,7 +8,7 @@ import { budgetTone, simulate } from "@/lib/scenario";
 import { useGlobalFilters } from "@/lib/filters";
 import { MetricInfo } from "./Help";
 import type { K8sClusterDto, K8sPodDto } from "@/types/finops";
-import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, StatusBadge, TableToggle } from "./States";
+import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, PageHero, StatusBadge, TableToggle } from "./States";
 import { CountUp } from "./Insights";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,8 +50,9 @@ function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string })
     </th>
   );
   return (
-    <div className="space-y-6">
-      <section className="organic-card grid gap-4 p-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+    <div className="space-y-8">
+      {tab === "clusters" && <PageHero label={`${c.name} · monthly cost`} value={fmtMoney(c.monthlyCost)} change={`${c.podsHealthy}/${c.podsTotal} pods healthy`} description={`${c.provider} ${c.service} in ${c.region}, with ${c.nodes} nodes and resource-derived cluster health.`} />}
+      <section className="organic-card grid gap-4 p-7 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <Title sub={`${c.provider} ${c.service} · ${c.region} · ${c.environment}`}>Cluster</Title>
         <Select value={c.id} onValueChange={setId}>
           <SelectTrigger className="h-10 w-full rounded-xl sm:w-72" aria-label="Cluster"><SelectValue /></SelectTrigger>
@@ -61,13 +62,13 @@ function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string })
       {tab === "clusters" && (
       <section aria-label="Cluster metrics" className="grid gap-4 sm:grid-cols-3">
         {[["Monthly cost", fmtMoney(c.monthlyCost), "Last 30 days"], ["Nodes", String(c.nodes), `max(3, cost / ${fmtMoney(350)})`], ["Pod health", `${c.podsHealthy}/${c.podsTotal}`, `${c.podsFailed} failed or pending`]].map(([l, v, n]) => (
-          <div key={l} className="organic-card p-5"><p className="text-[13px] text-muted-foreground">{l}</p><p className="mt-2 metric-numbers text-[32px] leading-none">{v}</p><p className="mt-3 text-xs text-muted-foreground">{n}</p></div>
+          <div key={l} className="organic-card p-7"><p className="text-[13px] text-muted-foreground">{l}</p><p className="mt-2 metric-numbers text-[32px] leading-none">{v}</p><p className="mt-3 text-xs text-muted-foreground">{n}</p></div>
         ))}
       </section>
       )}
       {tab === "namespaces" && (
-      <div className="grid gap-6 xl:grid-cols-2">
-        <article className="organic-card min-w-0 p-6">
+      <div className="grid gap-7 xl:grid-cols-2">
+        <article className="organic-card min-w-0 p-7">
           <div className="flex items-start justify-between gap-3"><Title sub="Fixed namespace weights; sums to the cluster cost">Cost per namespace</Title><TableToggle on={asTable} onChange={setAsTable} /></div>
           <div className="mt-5 h-64">
             {asTable ? <DataTableView caption="Cost per namespace" columns={["Namespace", "Weight", "Cost"]} rows={c.namespaces.map((n) => [n.name, `${Math.round(n.weight * 100)}%`, fmtMoney(n.cost)])} /> : (
@@ -83,7 +84,7 @@ function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string })
             )}
           </div>
         </article>
-        <article className="organic-card min-w-0 p-6">
+        <article className="organic-card min-w-0 p-7">
           <Title sub={`Efficiency = avg(CPU ${c.cpuAvg}%, memory ${c.memAvg}%) × namespace factor; under 30% is over-provisioned`}>Namespaces</Title>
           <div className="mt-4 overflow-x-auto">
             <table className="density-table w-full min-w-[420px] text-left text-sm">
@@ -95,7 +96,7 @@ function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string })
       </div>
       )}
       {tab === "pods" && (
-      <article className="organic-card p-6">
+      <article className="organic-card p-7">
         <div className="flex flex-wrap items-start justify-between gap-3"><Title sub="Each square is one pod. Hover for details, click to open.">Pod status</Title>
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground"><TableToggle on={podTable} onChange={setPodTable} />{(["Running", "Pending", "Failed"] as const).map((s) => <span key={s} className="inline-flex items-center gap-1.5"><span className="size-2.5 rounded-[3px]" style={{ background: podColor[s] }} />{s}</span>)}</div></div>
         {podTable ? <div className="mt-5 h-72"><DataTableView caption="Pods" columns={["Pod", "Namespace", "Status", "Restarts"]} rows={c.pods.map((p) => [p.name, p.namespace, p.status, p.restarts])} /></div> : <div className="mt-5 flex flex-wrap gap-1" role="list" aria-label="Pods">
@@ -125,7 +126,7 @@ function BudgetCard({ d }: { d: NonNullable<ReturnType<typeof useBudget>["data"]
   const pct = budget > 0 ? (d.forecastEom / budget) * 100 : 0;
   const tone = budgetTone(pct);
   return (
-    <article className="organic-card flex h-full flex-col p-6 md:p-8">
+    <article className="organic-card flex h-full flex-col p-7 md:p-8">
       <div className="flex items-start justify-between gap-3"><Title sub={`${d.period} · day ${d.dayOfMonth} of ${d.monthDays}`}>Budget & forecast</Title><StatusBadge tone={tone}>{budget > 0 ? `${pct.toFixed(1)}%` : "—"} of budget</StatusBadge></div>
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <div><p className="text-[13px] text-muted-foreground">Spend to date</p><p className="mt-1 metric-numbers text-[30px] leading-none"><CountUp value={d.spendToDate} format={(n) => fmtMoney(n)} /></p></div>
@@ -166,7 +167,7 @@ function Simulator({ d }: { d: NonNullable<ReturnType<typeof useScenario>["data"
   ];
   const chart = [{ name: "Baseline", v: d.baseline }, { name: "Projected", v: r.projected }];
   return (
-    <article className="organic-card h-full min-w-0 p-6">
+    <article className="organic-card h-full min-w-0 p-7">
       <div className="flex items-start justify-between gap-3"><Title sub={`Baseline = Total spend for the selected ${d.days} days`}>What-if scenario simulator</Title><Calculator className="size-4 shrink-0 text-muted-foreground" /></div>
       <div className="mt-5 space-y-5">
         {levers.map((x) => (

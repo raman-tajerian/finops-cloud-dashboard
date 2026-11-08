@@ -7,7 +7,7 @@ import { AnomalyStrip, CostDistribution, DetailDrawer, K8sHealth, SavingsFeed, t
 import { GlobalFilters } from "@/components/finops/GlobalFilters";
 import { DataGate, useDashboard } from "@/lib/queries";
 import { CardBoundary } from "@/components/finops/States";
-import { CostTrendCard, OverviewKpis, TopMovers } from "@/components/finops/Overview";
+import { CostTrendCard, OverviewHero, OverviewKpis, TopMovers } from "@/components/finops/Overview";
 import { AnomalyForecast, GreenOps, Tilt, Topology3D } from "@/components/finops/Insights";
 import { AnomalyAnalyst } from "@/components/finops/AnomalyAnalyst";
 import { OnboardingChecklist } from "@/components/finops/Onboarding";
@@ -45,7 +45,8 @@ function Index() {
       <Reveal delay={0.16}><PageTabs tabs={TABS} value={tab} onChange={setTab} ariaLabel="Overview sections" /></Reveal>
       <TabContent tab={tab}>
         {tab === "summary" && (
-          <section className="grid gap-6 xl:grid-cols-12">
+          <section className="grid gap-8 xl:grid-cols-12">
+            <div className="min-w-0 xl:col-span-12"><DataGate h="h-20"><OverviewHero /></DataGate></div>
             <div className="min-w-0 xl:col-span-12"><DataGate h="h-16"><OverviewKpis group="summary" /></DataGate></div>
             <div className="min-w-0 xl:col-span-8"><DataGate h="h-72"><CostTrendCard /></DataGate></div>
             <div className="min-w-0 xl:col-span-4"><DataGate h="h-72"><TopMovers /></DataGate></div>

@@ -1,7 +1,7 @@
-// Fjord Labs brand mark — the only file allowed to hold the exact brand hex values.
-const BURGUNDY = "#7A1F3D";
-const MUSTARD = "#D9A441";
-const SAND = "#E8D8C0";
+// Fjord Labs brand mark — palette values come from the shared theme tokens.
+const BURGUNDY = "var(--brand-burgundy)";
+const MUSTARD = "var(--brand-mustard)";
+const SAND = "var(--brand-sand)";
 
 export type BrandSize = 16 | 24 | 32 | 48;
 
@@ -20,7 +20,7 @@ export function FjordMark({ size = 24, mono = false, className = "", decorative 
 /** Mark inside a rounded tile — favicon-style workspace avatar. */
 export function FjordAvatar({ size = 32 }: { size?: BrandSize }) {
   return (
-    <span role="img" aria-label="Fjord Labs" className="grid shrink-0 place-items-center rounded-[10px] border border-[#E7E1D8] bg-[#FFFFFF]" style={{ width: size, height: size }}>
+    <span role="img" aria-label="Fjord Labs" className="grid shrink-0 place-items-center rounded-[10px] border border-border bg-card" style={{ width: size, height: size }}>
       <FjordMark size={size >= 32 ? 24 : 16} decorative />
     </span>
   );

@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { EmptyState, SectionHeading } from "./States";
+import { EmptyState, PageHero, SectionHeading } from "./States";
 
 export const Demo = () => <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground">Demo</span>;
 const RANGES = [["7d", "Last 7 days"], ["mtd", "Month to date"], ["q3", "Quarter"]] as const;
@@ -66,7 +66,9 @@ export function ReportsWorkspace({ tab = "generate", onTab }: { tab?: string; on
   return (
     <div className="space-y-8">
       {tab === "generate" && (
-        <section className="organic-card max-w-2xl space-y-4 p-6" aria-label="Generate report">
+        <div className="space-y-8">
+        <PageHero label="Reports generated this session" value={reports.length} change={`${REPORT_TEMPLATES.length} templates available`} description="Build a shareable cost, savings or compliance report from the same filtered figures as the dashboard." />
+        <section className="organic-card max-w-2xl space-y-4 p-7" aria-label="Generate report">
           <SectionHeading title="Generate a report" description="Built from the same numbers as Overview, Cost Explorer, Recommendations and Security, using the active provider, environment and team filters." />
           <div className="grid gap-1.5"><Label>Template</Label><Select value={gen ?? ""} onValueChange={(v) => { setGen(v as ReportTemplateId); setErr(null); }}><SelectTrigger aria-label="Template"><SelectValue placeholder="Choose a template" /></SelectTrigger><SelectContent>{REPORT_TEMPLATES.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent></Select></div>
           <div className="grid gap-1.5"><Label>Date range</Label><Select value={range} onValueChange={setRange}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{RANGES.map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}</SelectContent></Select></div>
@@ -74,6 +76,7 @@ export function ReportsWorkspace({ tab = "generate", onTab }: { tab?: string; on
           {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
           <div><Button disabled={busy || !gen} onClick={generate}>{busy ? <><Loader2 className="size-4 animate-spin" />Building report…</> : "Generate"}</Button></div>
         </section>
+        </div>
       )}
 
       {tab === "templates" && (
@@ -81,7 +84,7 @@ export function ReportsWorkspace({ tab = "generate", onTab }: { tab?: string; on
         <SectionHeading title="Templates" description="Built from the same numbers as Overview, Cost Explorer, Recommendations and Security, using the active filters." />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {REPORT_TEMPLATES.map((t) => (
-            <article key={t.id} className="organic-card flex flex-col gap-3 p-5">
+            <article key={t.id} className="organic-card flex flex-col gap-3 p-7">
               <FileText className="size-5 text-primary" aria-hidden />
               <div><h3 className="font-semibold">{t.name}</h3><p className="text-sm text-muted-foreground">{t.description}</p></div>
               <ul className="list-disc space-y-0.5 pl-4 text-xs text-muted-foreground">{t.sections.map((s) => <li key={s}>{s}</li>)}</ul>

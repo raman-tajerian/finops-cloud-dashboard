@@ -1,5 +1,10 @@
 # Roadmap
 
+- [x] Visual design v2: quieter tinted cards and 32px rhythm, centered 1280px workspace, consistent icons and AA secondary text.
+- [x] Add a data-driven hero strip to every page's first tab; simplify charts, tables, controls, badges and loading/empty states.
+- [x] Add session-only Appearance > Theme (Light default / warm graphite Dark) and replace remaining hard-coded component colors with tokens.
+- [x] 189 tests passed; 88 page/theme/size combinations checked at 375/768/1024/1440px with no overflow, clipped labels or console errors; measured text/status contrast passes AA and automatic build is OK.
+
 - [x] Navigation/findability: aggregate badges, session pins/recent/collapsible groups, grouped fuzzy palette/actions, drill-down return, glossary/metric help, compact filters and empty-state guidance; 189 tests passed, all eleven pages checked at 375/768/1024/1440, keyboard/focus/CSV/resource drill-down verified, automatic build OK. Existing Explorer conditional-hook error fixed during end-to-end checks; no data or route changes.
 
 - [x] Sub-tab restructure (2026-11-06): shared PageTabs (?tab= URL, pill indicator, keyboard nav), tabs on all 11 pages, progressive disclosure (Show all), deep links page›tab, palette tab entries, tests + responsive checks. No data/API/theme changes.

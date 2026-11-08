@@ -8,10 +8,31 @@ import { useGlobalFilters } from "@/lib/filters";
 
 export function PageHeader({ title, description, actions }: { title: string; description: string; actions?: ReactNode }) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
-      <div className="min-w-0"><h1 className="font-display text-[36px] font-normal leading-[1.15] tracking-normal">{title}</h1><p className="mt-1 text-[13px] text-muted-foreground">{description}</p></div>
+    <div className="grid grid-cols-1 items-end gap-4 py-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="min-w-0"><h1 className="font-display text-[38px] font-normal leading-[1.15] tracking-normal">{title}</h1><p className="mt-2 text-sm text-muted-foreground">{description}</p></div>
       {actions}
     </div>
+  );
+}
+
+/** A quiet, data-led opening for each page's first tab. Numbers stay in Geist. */
+export function PageHero({ label, value, change, description }: { label: string; value: ReactNode; change?: ReactNode; description: string }) {
+  return (
+    <section aria-label={label} className="relative isolate overflow-hidden rounded-3xl bg-hero px-7 py-8 md:px-8">
+      <svg aria-hidden viewBox="0 0 176 104" className="pointer-events-none absolute -right-1 -top-1 hidden h-full w-44 opacity-60 sm:block">
+        <path d="M0 104V16a88 88 0 0 1 88 88Z" className="fill-brand-burgundy" />
+        <circle cx="116" cy="30" r="24" className="fill-brand-mustard" />
+        <rect x="116" y="58" width="52" height="42" rx="16" className="fill-brand-sand" />
+      </svg>
+      <div className="relative max-w-3xl">
+        <p className="text-sm font-medium text-muted-foreground">{label}</p>
+        <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+          <p className="metric-numbers text-[48px] leading-none tracking-[-0.035em]">{value}</p>
+          {change && <div className="text-sm font-medium text-foreground">{change}</div>}
+        </div>
+        <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">{description}</p>
+      </div>
+    </section>
   );
 }
 
@@ -31,11 +52,15 @@ export function StatusBadge({ tone, children }: { tone: Tone; children: ReactNod
   return <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${c}`}><I className="size-3" aria-hidden />{children}</span>;
 }
 
-export function EmptyState({ icon: I, title, action, onAction }: { icon: LucideIcon; title: string; action: string; onAction: () => void }) {
+export function EmptyState({ title, action, onAction }: { icon: LucideIcon; title: string; action: string; onAction: () => void }) {
   return (
-    <div className="organic-card grid place-items-center gap-3 p-10 text-center">
-      <span className="grid size-11 place-items-center rounded-full bg-secondary"><I className="size-5 text-muted-foreground" /></span>
-      <p className="max-w-sm text-sm text-muted-foreground">{title}</p>
+    <div className="organic-card grid place-items-center gap-5 p-7 text-center">
+      <svg aria-hidden viewBox="0 0 112 72" className="h-[72px] w-28">
+        <path d="M4 68V20a48 48 0 0 1 48 48Z" className="fill-brand-burgundy" />
+        <circle cx="70" cy="24" r="17" className="fill-brand-mustard" />
+        <rect x="59" y="43" width="47" height="25" rx="10" className="fill-brand-sand" />
+      </svg>
+      <p className="max-w-sm text-sm leading-6 text-muted-foreground">{title}</p>
       <Button onClick={onAction}>{action}</Button>
     </div>
   );
@@ -48,7 +73,7 @@ export function FilterEmptyState() {
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div role="alert" className="organic-card flex items-center gap-3 p-5">
+    <div role="alert" className="organic-card flex items-center gap-3 p-7">
       <AlertCircle className="size-5 shrink-0 text-destructive" />
       <p className="min-w-0 flex-1 text-sm">{message}</p>
       <Button variant="secondary" onClick={onRetry}>Retry</Button>
@@ -57,7 +82,7 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry: () 
 }
 
 export function CardSkeleton({ h = "h-40" }: { h?: string }) {
-  return <div className="organic-card space-y-3 p-6"><Skeleton className="h-3 w-24" /><Skeleton className="h-7 w-32" /><Skeleton className={`w-full ${h}`} /></div>;
+  return <div className="organic-card space-y-5 p-7"><Skeleton className="h-3 w-24 rounded-full" /><Skeleton className="h-9 w-36 rounded-xl" /><Skeleton className={`w-full rounded-2xl ${h}`} /></div>;
 }
 
 /** Toggle between a chart and an accessible table of the same data. */

@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BellOff, Check, Copy, EyeOff, Lightbulb, PlayCircle, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
@@ -12,7 +12,7 @@ import { fmtDemoDate, snoozeUntil, SNOOZE_OPTIONS } from "@/data/resources";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { recStatus, setSession, useSession, type RecStatus } from "@/lib/session-store";
 import type { Level, SavingCategory, SavingItemDto, SavingsDto } from "@/types/finops";
-import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, TableToggle } from "./States";
+import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, PageHero, TableToggle } from "./States";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -34,7 +34,7 @@ const tabStatuses: Record<string, RecStatus[]> = { open: ["Open"], "in-progress"
 
 export function RecommendationsWorkspace({ search, setSearch, tab }: { search: RecSearch; setSearch: (p: Partial<RecSearch>) => void; tab: string }) {
   const q = useSavings();
-  if (q.isPending) return <div className="grid gap-6"><CardSkeleton h="h-20" /><CardSkeleton h="h-64" /></div>;
+  if (q.isPending) return <div className="grid gap-7"><CardSkeleton h="h-20" /><CardSkeleton h="h-64" /></div>;
   if (q.isError || !q.data) return <ErrorState message="We couldn't load recommendations. Check your connection and try again." onRetry={() => q.refetch()} />;
   return <CardBoundary onReset={() => q.refetch()}><Workspace d={q.data} search={search} setSearch={setSearch} tab={tab} /></CardBoundary>;
 }
@@ -58,8 +58,8 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
   const filtersOn = search.cat !== "All" || search.effort !== "All" || search.risk !== "All" || search.status !== "All";
 
   const summary = (
-      <section className="organic-card p-6 md:p-8" aria-label="Savings summary">
-        <div className="grid gap-6 sm:grid-cols-3">
+      <section className="organic-card p-7 md:p-8" aria-label="Savings summary">
+        <div className="grid gap-7 sm:grid-cols-3">
           <div><p className="text-[13px] text-muted-foreground">Open savings</p><p className="mt-1 metric-numbers text-[30px] leading-none">{fmtMoney(open)}<span className="text-base text-muted-foreground">/mo</span></p></div>
           <div><p className="flex items-center gap-2 text-[13px] text-muted-foreground">Done this session <Demo /></p><p className="mt-1 metric-numbers text-[30px] leading-none text-success">{fmtMoney(done)}</p></div>
           <div><p className="text-[13px] text-muted-foreground">Monthly target</p><p className="mt-1 metric-numbers text-[30px] leading-none">{fmtMoney(d.target)}</p></div>
@@ -75,7 +75,7 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
   );
 
   const listSection = (
-        <section className="organic-card min-w-0 p-6" aria-label="Recommendations">
+        <section className="organic-card min-w-0 p-7" aria-label="Recommendations">
           <div className="flex flex-wrap items-center gap-2">
             <FilterSelect label="Category" value={search.cat} options={categories} onChange={(v) => setSearch({ cat: v })} />
             <FilterSelect label="Effort" value={search.effort} options={levels} onChange={(v) => setSearch({ effort: v })} />
@@ -125,10 +125,11 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
   );
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-8">
+      {tab === "open" && <PageHero label="Open savings opportunity" value={<>{fmtMoney(open)}<span className="text-xl text-muted-foreground">/mo</span></>} change={`${d.items.filter((i) => st(i.id) === "Open" || st(i.id) === "In progress").length} actions to review`} description="Prioritized actions with clear effort, risk and estimated monthly impact." />}
       {summary}
       {tab === "tracker" ? (
-        <div className="grid gap-6 xl:grid-cols-2">
+        <div className="grid gap-7 xl:grid-cols-2">
           <Tracker d={d} open={open} />
           <Rules d={d} />
         </div>
@@ -156,12 +157,13 @@ function Tracker({ d, open }: { d: SavingsDto; open: number }) {
   const [table, setTable] = useState(false);
   const data = d.tracker.map((m, i) => (i === d.tracker.length - 1 ? { ...m, potential: open } : m));
   return (
-    <section className="organic-card p-6" aria-label="Savings tracker">
+    <section className="organic-card p-7" aria-label="Savings tracker">
       <div className="flex items-start justify-between gap-3">
         <div><p className="flex items-center gap-2 text-[15px] font-medium">Savings tracker <Demo /></p><p className="mt-1 text-[13px] text-muted-foreground">Realized (seeded demo) vs potential, last 6 months</p></div>
         <TableToggle on={table} onChange={setTable} />
       </div>
-      <div className="mt-4 h-60">
+      <div className="mt-4 flex gap-5 text-xs text-muted-foreground"><span className="inline-flex items-center gap-2"><span className="size-2 rounded-full bg-chart-2" />Potential</span><span className="inline-flex items-center gap-2"><span className="size-2 rounded-full bg-chart-1" />Realized (demo)</span></div>
+      <div className="mt-3 h-60">
         {table ? <DataTableView caption="Savings per month" columns={["Month", "Realized (demo)", "Potential"]} rows={data.map((m) => [m.month, fmtMoney(m.realized), fmtMoney(m.potential)])} /> : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ left: 0, right: 8, top: 4 }}>
@@ -169,8 +171,7 @@ function Tracker({ d, open }: { d: SavingsDto; open: number }) {
               <XAxis dataKey="month" tickFormatter={(v: string) => v.slice(0, 3)} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
               <YAxis width={48} tickFormatter={(v: number) => fmtMoneyCompact(Number(v))} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={tip} formatter={(v) => fmtMoney(Number(v))} cursor={{ fill: "var(--secondary)" }} />
-              <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="potential" name="Potential" fill="var(--chart-2)" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="potential" name="Potential" fill="var(--chart-2)" fillOpacity={0.78} radius={[6, 6, 0, 0]} />
               <Bar dataKey="realized" name="Realized (demo)" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -182,7 +183,7 @@ function Tracker({ d, open }: { d: SavingsDto; open: number }) {
 
 function Rules({ d }: { d: SavingsDto }) {
   return (
-    <details className="organic-card p-6">
+    <details className="organic-card p-7">
       <summary className="cursor-pointer text-[15px] font-medium">How savings are calculated</summary>
       <ul className="mt-4 space-y-3 text-[13px] text-muted-foreground">
         {d.rules.map((r) => <li key={r.category}><span className="font-medium text-foreground">{r.category}</span> — {r.rule} Effort {r.effort}, risk {r.risk}, confidence {r.confidence}%.</li>)}

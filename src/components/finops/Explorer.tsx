@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useExplore } from "@/lib/queries";
 import { useGlobalFilters, type Filters } from "@/lib/filters";
-import { CardSkeleton, DataTableView, ErrorState, ShowAllButton, TableToggle, useLimited } from "./States";
+import { CardSkeleton, DataTableView, ErrorState, PageHero, ShowAllButton, TableToggle, useLimited } from "./States";
 import { Spark } from "./Platform";
 import type { ExploreDto, ExploreRow, GroupBy } from "@/types/finops";
 import { Button } from "@/components/ui/button";
@@ -57,8 +57,10 @@ export function ExplorerMain({ state, setState }: { state: ExplorerState; setSta
     else download(`${stamp}.json`, JSON.stringify({ filters, groupBy: state.group, total: d.total, previousTotal: d.previousTotal, rows: d.rows.map(({ spark: _s, ...r }) => r) }, null, 2), "application/json");
     toast.success(`Exported ${kind.toUpperCase()}`);
   };
+  const change = d.previousTotal ? ((d.total - d.previousTotal) / d.previousTotal) * 100 : 0;
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      <PageHero label="Spend in selected period" value={fmtMoney(d.total)} change={<span className={change > 0 ? "text-warning" : "text-success"}>{change > 0 ? "+" : ""}{change.toFixed(1)}% vs previous period</span>} description={`Explore the total by ${groupLabels[state.group].toLowerCase()} and move between visual and tabular views.`} />
       <div className="flex flex-wrap items-center gap-3">
         <Seg label="Group by" value={state.group} onChange={(group) => setState({ group })} options={(Object.keys(groupLabels) as GroupBy[]).map((g) => [g, groupLabels[g]])} />
         <Seg label="Chart type" value={state.chart} onChange={(chart) => setState({ chart })} options={[["area", "Area"], ["bar", "Stacked bar"], ["line", "Line"]]} />
@@ -100,9 +102,9 @@ export function UnitEconCards() {
   const d = useExploreData("service");
   if (!d || "type" in d) return d;
   return (
-    <section aria-label="Unit economics" className="grid gap-6 sm:grid-cols-2">
+    <section aria-label="Unit economics" className="grid gap-7 sm:grid-cols-2">
       {[{ label: "Cost per active user", value: d.unitEconomics.perUser, previous: d.unitEconomics.previousPerUser, decimals: 4 }, { label: "Cost per API request", value: d.unitEconomics.perRequest, previous: d.unitEconomics.previousPerRequest, decimals: 6 }].map((u) => (
-        <article key={u.label} className="organic-card p-6"><div className="flex items-center"><Label>{u.label}</Label><MetricInfo label={u.label} /></div><p className="metric-numbers mt-2 text-[32px]">{fmtMoney(u.value, { decimals: u.decimals })}</p><p className="mt-2 text-xs text-muted-foreground">{u.previous > 0 ? `${((u.value / u.previous - 1) * 100).toFixed(1)}%` : "—"} vs prev</p></article>
+        <article key={u.label} className="organic-card p-7"><div className="flex items-center"><Label>{u.label}</Label><MetricInfo label={u.label} /></div><p className="metric-numbers mt-2 text-[32px]">{fmtMoney(u.value, { decimals: u.decimals })}</p><p className="mt-2 text-xs text-muted-foreground">{u.previous > 0 ? `${((u.value / u.previous - 1) * 100).toFixed(1)}%` : "—"} vs prev</p></article>
       ))}
     </section>
   );
@@ -119,8 +121,8 @@ export function SavedViewsPanel({ state, views, setViews, setState }: { state: E
     setName("");
   };
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <section className="organic-card p-6" aria-label="Save current view">
+    <div className="grid gap-7 lg:grid-cols-2">
+      <section className="organic-card p-7" aria-label="Save current view">
         <Label>Save the current view</Label>
         <p className="mt-1 text-[13px] text-muted-foreground">Captures the grouping, chart type and the active global filters.</p>
         <form className="mt-4 flex gap-2" onSubmit={(e) => { e.preventDefault(); save(); }}>
@@ -129,9 +131,9 @@ export function SavedViewsPanel({ state, views, setViews, setState }: { state: E
         </form>
         <p className="mt-3 text-[11px] text-muted-foreground">Saved in this page URL so it survives reload and can be shared.</p>
       </section>
-      <section className="organic-card p-6" aria-label="Saved views">
+      <section className="organic-card p-7" aria-label="Saved views">
         <Label>Saved views{views.length > 0 ? ` · ${views.length}` : ""}</Label>
-        {views.length === 0 ? <div className="mt-4 space-y-3 rounded-xl bg-secondary p-6 text-center"><p className="text-sm text-muted-foreground">No views have been saved in this link yet.</p><Button variant="secondary" onClick={() => document.querySelector<HTMLInputElement>('[aria-label="View name"]')?.focus()}>Name current view</Button></div> : (
+        {views.length === 0 ? <div className="mt-4 space-y-3 rounded-xl bg-secondary p-7 text-center"><p className="text-sm text-muted-foreground">No views have been saved in this link yet.</p><Button variant="secondary" onClick={() => document.querySelector<HTMLInputElement>('[aria-label="View name"]')?.focus()}>Name current view</Button></div> : (
           <ul className="mt-4 divide-y divide-border">
             {views.map((v) => (
               <li key={v.name} className="flex items-center gap-3 py-3">
@@ -160,7 +162,7 @@ function ExplorerChart({ d, state }: { d: ExploreDto; state: ExplorerState }) {
   ];
   const overlay = state.compare ? <Line key="prev" dataKey="previous" name="Previous period (total)" stroke="var(--foreground)" strokeOpacity={0.55} strokeDasharray="5 4" dot={false} strokeWidth={1.5} /> : null;
   return (
-    <article className="organic-card p-6">
+    <article className="organic-card p-7">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><p className="font-mono text-[10px] text-muted-foreground">Spend by {groupLabels[state.group].toLowerCase()}</p>
           <p className="metric-numbers mt-1 text-3xl">{fmtMoney(d.total)}</p>
@@ -175,7 +177,7 @@ function ExplorerChart({ d, state }: { d: ExploreDto; state: ExplorerState }) {
           ) : state.chart === "line" ? (
             <LineChart data={d.series}>{children}{d.keys.map((k, i) => <Line key={k} dataKey={k} stroke={col(i)} dot={false} strokeWidth={1.6} />)}{overlay}</LineChart>
           ) : (
-            <AreaChart data={d.series}>{children}{d.keys.map((k, i) => <Area key={k} dataKey={k} stackId="s" stroke={col(i)} fill={col(i)} fillOpacity={0.1} />)}{overlay}</AreaChart>
+            <AreaChart data={d.series}>{children}{d.keys.map((k, i) => <Area key={k} dataKey={k} stackId="s" stroke={col(i)} fill={col(i)} fillOpacity={0.08} />)}{overlay}</AreaChart>
           )}
         </ResponsiveContainer>}
       </div>
