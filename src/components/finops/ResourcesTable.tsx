@@ -101,7 +101,7 @@ export function ResourcesWorkspace({ search, setSearch, presetStatus }: { search
   return (
     <div className="space-y-8">
       <PageHero label="Resources in view" value={d.count.toLocaleString("en-US")} change={`${fmtMoney(d.monthlyTotal)} monthly cost`} description="Search, sort and inspect every matching resource without losing the current cloud filters." />
-      <div className="grid gap-6 sm:grid-cols-3">
+      <div className="grid gap-7 sm:grid-cols-3">
         <Stat label="Resources" value={d.count.toLocaleString("en-US")} />
         <Stat label="Monthly cost (last 30 days)" value={fmtMoney(d.monthlyTotal)} />
         <Stat label="Spend in selected period" value={fmtMoney(d.periodTotal)} />
@@ -226,7 +226,7 @@ export function ResourcesWorkspace({ search, setSearch, presetStatus }: { search
 }
 
 const Stat = ({ label, value }: { label: string; value: string }) => (
-  <div className="organic-card p-5"><Label>{label}</Label><p className="metric-numbers mt-2 text-2xl" aria-live="polite">{value}</p></div>
+  <div className="organic-card p-7"><Label>{label}</Label><p className="metric-numbers mt-2 text-2xl" aria-live="polite">{value}</p></div>
 );
 
 function Cell({ k, r, py, num }: { k: SortKey; r: ResourceRow; py: string; num?: boolean | undefined }) {

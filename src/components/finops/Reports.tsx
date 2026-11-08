@@ -84,7 +84,7 @@ export function ReportsWorkspace({ tab = "generate", onTab }: { tab?: string; on
         <SectionHeading title="Templates" description="Built from the same numbers as Overview, Cost Explorer, Recommendations and Security, using the active filters." />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {REPORT_TEMPLATES.map((t) => (
-            <article key={t.id} className="organic-card flex flex-col gap-3 p-5">
+            <article key={t.id} className="organic-card flex flex-col gap-3 p-7">
               <FileText className="size-5 text-primary" aria-hidden />
               <div><h3 className="font-semibold">{t.name}</h3><p className="text-sm text-muted-foreground">{t.description}</p></div>
               <ul className="list-disc space-y-0.5 pl-4 text-xs text-muted-foreground">{t.sections.map((s) => <li key={s}>{s}</li>)}</ul>

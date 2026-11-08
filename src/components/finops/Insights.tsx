@@ -80,7 +80,7 @@ export function Topology3D() {
   const pts = Object.fromEntries(Object.entries(raw).map(([id, p]) => [id, { ...p, x: 300 + (p.x - cx) * fit, y: 190 + (p.y - cy) * fit, s: p.s * fit }]));
   const sorted = [...topoNodes].sort((a, b) => pts[b.id]!.z - pts[a.id]!.z);
   return (
-    <article className="organic-card flex h-full flex-col p-6">
+    <article className="organic-card flex h-full flex-col p-7">
       <div className="flex items-start justify-between gap-3">
         <div><Label>Cloud topology</Label><p className="mt-1 text-[13px] text-muted-foreground">Regions, VPCs and clusters · simplified 2D map</p></div>
         <div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><Move3d className="size-4 text-muted-foreground" /></div>
@@ -130,9 +130,9 @@ export function GreenOps() {
   const avg = tons ? carbonRegions.reduce((a, b) => a + b.intensity * b.tons, 0) / tons : 0;
   const max = Math.max(1, ...carbonRegions.map((r) => r.intensity));
   return (
-    <article className="organic-card h-full p-6">
+    <article className="organic-card h-full p-7">
       <div className="flex items-start justify-between"><Label>Carbon footprint · GreenOps</Label><div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><Leaf className="size-4 text-success" /></div></div>
-      <div className="mt-3 flex items-end gap-6">
+      <div className="mt-3 flex items-end gap-7">
         <div><p className="metric-numbers text-3xl"><CountUp value={tons} format={(n) => n.toFixed(1)} /> t</p><p className="text-[11px] text-muted-foreground">CO₂e in period (est.)</p></div>
         <div><p className="metric-numbers text-xl">{Math.round(avg)}</p><p className="text-[11px] text-muted-foreground">avg gCO₂/kWh</p></div>
       </div>
@@ -160,7 +160,7 @@ export function AnomalyForecast() {
   const top = kpis.anomalies[0];
   const spike = data.find((_, i) => trend[i]?.anomaly === top?.title);
   return (
-    <article className="organic-card h-full p-6">
+    <article className="organic-card h-full p-7">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><Label>Anomaly detection · spend forecast</Label><p className="mt-1 text-[13px] text-muted-foreground">Daily spend vs. 90% confidence band</p></div>
         <motion.span initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="inline-flex items-center gap-1.5 rounded-full bg-destructive-soft px-2.5 py-1 text-[11px] font-medium text-destructive">

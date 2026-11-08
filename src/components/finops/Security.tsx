@@ -79,7 +79,7 @@ function ScoreCard({ trend }: { trend: SecurityDto["scoreTrend"] }) {
         <div><p className="flex items-center font-mono text-[10px] text-muted-foreground">Security score<MetricInfo label="Security score" /></p><p className="mt-1 text-[13px] text-muted-foreground">100 − weighted open findings (Critical 8 · High 4 · Medium 1.5 · Low 0.5), clamped at 0.</p></div>
         <TableToggle on={asTable} onChange={setAsTable} />
       </div>
-      <div className="mt-4 flex items-center gap-6">
+      <div className="mt-4 flex items-center gap-7">
         <svg viewBox="0 0 120 120" className="size-28 shrink-0" role="img" aria-label={`Security score ${fmtScore(score)} of 100`}>
           <circle cx="60" cy="60" r={R} fill="none" strokeWidth="10" className="stroke-secondary" />
           <circle cx="60" cy="60" r={R} fill="none" strokeWidth="10" strokeLinecap="round" className="stroke-primary transition-[stroke-dashoffset] duration-700" strokeDasharray={C} strokeDashoffset={C * (1 - score / 100)} transform="rotate(-90 60 60)" />
@@ -114,7 +114,7 @@ function ComplianceCards({ findings, frameworks }: { findings: SecurityFindingDt
   const results = frameworks.map((fw) => ({ fw, r: complianceResult(fw, findings) }));
   const active = results.find((x) => x.fw.id === open);
   return (
-    <article className="organic-card h-full p-6">
+    <article className="organic-card h-full p-7">
       <div className="flex items-start gap-1"><SectionHeading title="Compliance posture · Illustrative" description="Illustrative: these controls are simplified examples, not an audit. A control fails when an open finding of a mapped rule exists. Click a card to inspect its controls." /><MetricInfo label="Compliance control" /></div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {results.map(({ fw, r }) => (
@@ -186,7 +186,7 @@ function FindingsTable({ findings, search, setSearch }: { findings: SecurityFind
   );
 
   return (
-    <article className="organic-card p-6">
+    <article className="organic-card p-7">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <SectionHeading title="Findings" description={`${findings.length} findings for the active filters · ${[...counts].map(([s, n]) => `${n} ${s}`).join(" · ") || "none open"}`} />
         <div className="relative w-full sm:w-56">

@@ -43,7 +43,7 @@ export function OverviewKpis({ group = "summary" }: { group?: "summary" | "unit"
   ];
   const items = all.filter((i) => i.g === group);
   return (
-    <section aria-label="Key metrics" className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <section aria-label="Key metrics" className="grid items-stretch gap-7 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((it) => {
         const d = pctDelta(it.k), up = d > 0, good = it.goodWhenUp ? up : !up;
         return (
@@ -72,7 +72,7 @@ export function CostTrendCard() {
   const markers = trend.filter((t) => t.anomaly);
   const colors = { AWS: "var(--aws)", Azure: "var(--azure)", GCP: "var(--gcp)" } as const;
   return (
-    <article className="organic-card h-full p-6">
+    <article className="organic-card h-full p-7">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><Label>Cost trend by provider</Label><p className="mt-1 text-[13px] text-muted-foreground">Daily spend, dashed forecast with 95% band · {markers.length} anomaly marker{markers.length === 1 ? "" : "s"}</p></div>
         <div className="flex items-center gap-1"><TableToggle on={asTable} onChange={setAsTable} /><DrillLink to="/cost-explorer" tab="explore">Explore</DrillLink></div>
@@ -116,7 +116,7 @@ export function TopMovers() {
     </div>
   );
   return (
-    <article className="organic-card h-full p-6">
+    <article className="organic-card h-full p-7">
       <div className="flex items-start justify-between gap-3"><div><Label>Top movers</Label><p className="mt-1 text-[13px] text-muted-foreground">Largest changes vs previous period</p></div><DrillLink to="/resources" tab="list">Resources</DrillLink></div>
       <div className="mt-4 grid gap-5"><List title="Increases" items={up} inc /><List title="Decreases" items={down} inc={false} /></div>
     </article>

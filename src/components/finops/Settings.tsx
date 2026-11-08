@@ -85,7 +85,7 @@ function FormCard({ fields, value, validate, onSave }: { fields: [string, string
   const [v, setV] = useState(value);
   const [errors, setErrors] = useState<Record<string, string>>({});
   return (
-    <form className="organic-card grid max-w-xl gap-4 p-6" onSubmit={(e) => { e.preventDefault(); const er = validate(v); setErrors(er ?? {}); if (!er) onSave(v); }}>
+    <form className="organic-card grid max-w-xl gap-4 p-7" onSubmit={(e) => { e.preventDefault(); const er = validate(v); setErrors(er ?? {}); if (!er) onSave(v); }}>
       {fields.map(([k, l]) => <div key={k} className="grid gap-1.5"><Label htmlFor={`f-${k}`}>{l}</Label><Input id={`f-${k}`} value={v[k] ?? ""} aria-invalid={!!errors[k]} onChange={(e) => setV({ ...v, [k]: e.target.value })} />{errors[k] && <p className="text-xs text-destructive">{errors[k]}</p>}</div>)}
       <Button type="submit" className="justify-self-start">Save</Button>
     </form>

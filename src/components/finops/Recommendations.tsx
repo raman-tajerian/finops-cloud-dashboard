@@ -34,7 +34,7 @@ const tabStatuses: Record<string, RecStatus[]> = { open: ["Open"], "in-progress"
 
 export function RecommendationsWorkspace({ search, setSearch, tab }: { search: RecSearch; setSearch: (p: Partial<RecSearch>) => void; tab: string }) {
   const q = useSavings();
-  if (q.isPending) return <div className="grid gap-6"><CardSkeleton h="h-20" /><CardSkeleton h="h-64" /></div>;
+  if (q.isPending) return <div className="grid gap-7"><CardSkeleton h="h-20" /><CardSkeleton h="h-64" /></div>;
   if (q.isError || !q.data) return <ErrorState message="We couldn't load recommendations. Check your connection and try again." onRetry={() => q.refetch()} />;
   return <CardBoundary onReset={() => q.refetch()}><Workspace d={q.data} search={search} setSearch={setSearch} tab={tab} /></CardBoundary>;
 }
@@ -58,8 +58,8 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
   const filtersOn = search.cat !== "All" || search.effort !== "All" || search.risk !== "All" || search.status !== "All";
 
   const summary = (
-      <section className="organic-card p-6 md:p-8" aria-label="Savings summary">
-        <div className="grid gap-6 sm:grid-cols-3">
+      <section className="organic-card p-7 md:p-8" aria-label="Savings summary">
+        <div className="grid gap-7 sm:grid-cols-3">
           <div><p className="text-[13px] text-muted-foreground">Open savings</p><p className="mt-1 metric-numbers text-[30px] leading-none">{fmtMoney(open)}<span className="text-base text-muted-foreground">/mo</span></p></div>
           <div><p className="flex items-center gap-2 text-[13px] text-muted-foreground">Done this session <Demo /></p><p className="mt-1 metric-numbers text-[30px] leading-none text-success">{fmtMoney(done)}</p></div>
           <div><p className="text-[13px] text-muted-foreground">Monthly target</p><p className="mt-1 metric-numbers text-[30px] leading-none">{fmtMoney(d.target)}</p></div>
@@ -75,7 +75,7 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
   );
 
   const listSection = (
-        <section className="organic-card min-w-0 p-6" aria-label="Recommendations">
+        <section className="organic-card min-w-0 p-7" aria-label="Recommendations">
           <div className="flex flex-wrap items-center gap-2">
             <FilterSelect label="Category" value={search.cat} options={categories} onChange={(v) => setSearch({ cat: v })} />
             <FilterSelect label="Effort" value={search.effort} options={levels} onChange={(v) => setSearch({ effort: v })} />
@@ -129,7 +129,7 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
       {tab === "open" && <PageHero label="Open savings opportunity" value={<>{fmtMoney(open)}<span className="text-xl text-muted-foreground">/mo</span></>} change={`${d.items.filter((i) => st(i.id) === "Open" || st(i.id) === "In progress").length} actions to review`} description="Prioritized actions with clear effort, risk and estimated monthly impact." />}
       {summary}
       {tab === "tracker" ? (
-        <div className="grid gap-6 xl:grid-cols-2">
+        <div className="grid gap-7 xl:grid-cols-2">
           <Tracker d={d} open={open} />
           <Rules d={d} />
         </div>
@@ -157,7 +157,7 @@ function Tracker({ d, open }: { d: SavingsDto; open: number }) {
   const [table, setTable] = useState(false);
   const data = d.tracker.map((m, i) => (i === d.tracker.length - 1 ? { ...m, potential: open } : m));
   return (
-    <section className="organic-card p-6" aria-label="Savings tracker">
+    <section className="organic-card p-7" aria-label="Savings tracker">
       <div className="flex items-start justify-between gap-3">
         <div><p className="flex items-center gap-2 text-[15px] font-medium">Savings tracker <Demo /></p><p className="mt-1 text-[13px] text-muted-foreground">Realized (seeded demo) vs potential, last 6 months</p></div>
         <TableToggle on={table} onChange={setTable} />
@@ -183,7 +183,7 @@ function Tracker({ d, open }: { d: SavingsDto; open: number }) {
 
 function Rules({ d }: { d: SavingsDto }) {
   return (
-    <details className="organic-card p-6">
+    <details className="organic-card p-7">
       <summary className="cursor-pointer text-[15px] font-medium">How savings are calculated</summary>
       <ul className="mt-4 space-y-3 text-[13px] text-muted-foreground">
         {d.rules.map((r) => <li key={r.category}><span className="font-medium text-foreground">{r.category}</span> — {r.rule} Effort {r.effort}, risk {r.risk}, confidence {r.confidence}%.</li>)}

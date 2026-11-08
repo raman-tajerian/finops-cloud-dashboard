@@ -38,14 +38,14 @@ const seeded = [
 
 export function BudgetsAlertsWorkspace({ tab }: { tab: string }) {
   const q = useAlerts();
-  if (q.isPending) return <div className="grid gap-6"><CardSkeleton h="h-32" /><CardSkeleton h="h-48" /></div>;
+  if (q.isPending) return <div className="grid gap-7"><CardSkeleton h="h-32" /><CardSkeleton h="h-48" /></div>;
   if (q.isError || !q.data) return <ErrorState message="We couldn't load budgets and alerts. Check your connection and try again." onRetry={() => q.refetch()} />;
   return <CardBoundary onReset={() => q.refetch()}><Workspace d={q.data} tab={tab} /></CardBoundary>;
 }
 
 function Workspace({ d, tab }: { d: AlertsDto; tab: string }) {
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-7">
       {tab === "budgets" && <BudgetCards d={d} />}
       {tab === "anomalies" && <Anomalies rows={d.anomalies} />}
       {tab === "alerts" && <AlertRules />}
@@ -74,7 +74,7 @@ function BudgetCards({ d }: { d: AlertsDto }) {
           {cards.map((c) => {
             const pct = c.amount > 0 ? (c.s.forecast / c.amount) * 100 : 0, tone = budgetTone(pct);
             return (
-              <article key={c.id} className="rounded-2xl border border-border bg-card p-5">
+              <article key={c.id} className="rounded-2xl border border-border bg-card p-7">
                 <div className="flex items-start justify-between gap-2"><div className="min-w-0"><p className="truncate text-sm font-medium">{c.name}</p><p className="text-xs text-muted-foreground">{scopeLabel(c.s.scope)} · {c.period}</p></div><div className="flex shrink-0 items-center gap-1.5">{c.demo && <Demo />}<StatusBadge tone={tone}>{c.amount > 0 ? `${pct.toFixed(0)}%` : "—"}</StatusBadge></div></div>
                 <dl className="mt-4 grid grid-cols-3 gap-2 text-xs"><div><dt className="text-muted-foreground">Budget / mo</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtMoney(c.amount)}</dd></div><div><dt className="text-muted-foreground">Spent</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtMoney(c.s.spent)}</dd></div><div><dt className="text-muted-foreground">Forecast</dt><dd className="metric-numbers mt-0.5 text-sm">{fmtMoney(c.s.forecast)}</dd></div></dl>
                 <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label={`${c.name} forecast vs budget`} aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
@@ -137,7 +137,7 @@ function AlertRules() {
   const [del, setDel] = useState<AlertRule | null>(null);
   const update = (r: AlertRule) => setSession((s) => ({ ...s, rules: s.rules.map((x) => (x.id === r.id ? r : x)) }));
   return (
-    <section className="organic-card min-w-0 p-6" aria-label="Alert rules">
+    <section className="organic-card min-w-0 p-7" aria-label="Alert rules">
       <Title sub="Demo — changes last for this session only.">Alert rules</Title>
       {rules.length === 0 ? <div className="mt-5"><EmptyState icon={BellRing} title="All alert rules have been removed from this session." action="Restore defaults" onAction={() => window.location.reload()} /></div> : (
         <div className="mt-4 overflow-x-auto">
@@ -191,7 +191,7 @@ function Anomalies({ rows }: { rows: AnomalyRowDto[] }) {
   const status = useSession((s) => s.anomalies);
   const [open, setOpen] = useState<AnomalyRowDto | null>(null);
   return (
-    <section className="organic-card min-w-0 p-6" aria-label="Anomalies">
+    <section className="organic-card min-w-0 p-7" aria-label="Anomalies">
       <Title sub="Same anomalies as Overview: last 3 days vs the prior 14-day baseline. Status is demo-only.">Anomalies · {rows.length}</Title>
       {rows.length === 0 ? <div className="mt-5"><EmptyState icon={BellRing} title="No cost increases meet the anomaly rule for the selected filters." action="Reset filters" onAction={reset} /></div> : (
         <div className="mt-4 overflow-x-auto">
