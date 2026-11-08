@@ -12,8 +12,23 @@ export interface FindingState { status: FindingSessionStatus; reason?: string }
 export interface PastReport { id: string; template: string; title: string; format: string; range: string; created: string; content: string }
 export interface ScheduleRow { id: string; template: string; cadence: "weekly" | "monthly"; recipients: string[]; format: string; enabled: boolean }
 export interface DemoSettings { profile?: { name: string; email: string; title: string }; workspace?: { name: string; currency: string; timezone: string }; members?: import("@/types/finops").MemberDto[]; mappings?: import("@/types/finops").TagMappingDto[]; keys?: import("@/types/finops").ApiKeyDto[]; notify: Record<string, boolean>; density: "compact" | "comfortable"; reduceMotion: boolean }
-interface State { reports: PastReport[]; schedules: ScheduleRow[]; integrations: Record<string, "Connected" | "Not connected">; settings: DemoSettings; recs: Record<string, RecState>; budgets: SessionBudget[]; rules: AlertRule[]; anomalies: Record<string, AnomalyStatus>; findings: Record<string, FindingState> }
+export interface NavTarget { to: string; tab?: string; label: string }
+export interface NavigationSession { pinned: NavTarget[]; recent: NavTarget[]; searches: string[]; collapsed: Record<string, boolean> }
+export const emptyNavigation = (): NavigationSession => ({ pinned: [], recent: [], searches: [], collapsed: {} });
+export const targetKey = (t: NavTarget) => `${t.to}:${t.tab ?? ""}`;
+export function togglePin(n: NavigationSession, target: NavTarget): NavigationSession {
+  return { ...n, pinned: n.pinned.some((p) => targetKey(p) === targetKey(target)) ? n.pinned.filter((p) => targetKey(p) !== targetKey(target)) : [...n.pinned, target] };
+}
+export function recordVisit(n: NavigationSession, target: NavTarget): NavigationSession {
+  return { ...n, recent: [target, ...n.recent.filter((p) => p.to !== target.to)].slice(0, 4) };
+}
+export function recordSearch(n: NavigationSession, search: string): NavigationSession {
+  const text = search.trim();
+  return text ? { ...n, searches: [text, ...n.searches.filter((s) => s !== text)].slice(0, 5) } : n;
+}
+interface State { navigation: NavigationSession; reports: PastReport[]; schedules: ScheduleRow[]; integrations: Record<string, "Connected" | "Not connected">; settings: DemoSettings; recs: Record<string, RecState>; budgets: SessionBudget[]; rules: AlertRule[]; anomalies: Record<string, AnomalyStatus>; findings: Record<string, FindingState> }
 let state: State = {
+  navigation: emptyNavigation(),
   reports: [], schedules: [], integrations: {}, settings: { notify: {}, density: "comfortable", reduceMotion: false },
   findings: {},
   recs: {},
