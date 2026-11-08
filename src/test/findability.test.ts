@@ -29,6 +29,7 @@ describe("palette matching", () => {
   it("finds pages with fuzzy matching", () => {
     expect(targets.filter((t) => t.group === "Pages" && fuzzyMatch(t.label, "cst explr")).map((t) => t.to)).toContain("/cost-explorer");
     expect(fuzzyMatch("Resources", "resouces")).toBeGreaterThan(0);
+    expect(fuzzyMatch("payments-bq-prod-1 BigQuery GCP europe-west1", "reduce motion")).toBe(0);
   });
   it("finds tabs independently", () => {
     expect(targets.filter((t) => t.group === "Tabs" && fuzzyMatch(t.label, "unit economics")).some((t) => t.tab === "unit-economics")).toBe(true);

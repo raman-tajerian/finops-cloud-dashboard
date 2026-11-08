@@ -19,9 +19,13 @@ export function fuzzyMatch(value: string, query: string): number {
   let score = 1;
   for (const word of words) {
     if (hay.includes(word)) continue;
-    let i = 0;
-    for (const c of hay) if (c === word[i]) i++;
-    if (i === word.length) { score *= 0.6; continue; }
+    const subsequence = hay.split(/\s+/).some((token) => {
+      if (token.length > word.length * 3) return false;
+      let i = 0;
+      for (const c of token) if (c === word[i]) i++;
+      return i === word.length;
+    });
+    if (subsequence) { score *= 0.6; continue; }
     const typo = hay.split(/[^a-z0-9-]+/).some((token) => {
       if (Math.abs(token.length - word.length) > 1 || word.length < 3) return false;
       const dp = Array.from({ length: word.length + 1 }, (_, j) => j);
