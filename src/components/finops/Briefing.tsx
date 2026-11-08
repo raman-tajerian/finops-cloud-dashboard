@@ -28,7 +28,7 @@ export function FernScoreCard() {
     <h2 className="text-base font-semibold">Fern score</h2>
     <Sheet open={open} onOpenChange={setOpen}>
       <div className="mt-5 flex flex-col items-center gap-4">
-        {d.score === null ? <p className="text-5xl" aria-label="Fern score unavailable">—</p> : <SheetTrigger asChild><Button variant="ghost" aria-label="What affects your score" className="h-auto rounded-full p-2"><ProgressRing value={d.score} size={132} stroke={7} suffix="" label="Fern score" /></Button></SheetTrigger>}
+        {d.score === null ? <p className="text-5xl" aria-label="Fern score unavailable">—</p> : <SheetTrigger asChild><Button variant="ghost" aria-label="What affects your score" className="h-auto rounded-full p-2 [&_svg]:size-full!"><ProgressRing value={d.score} size={132} stroke={7} suffix="" label="Fern score" /></Button></SheetTrigger>}
         <p className="text-center text-sm text-muted-foreground">{d.score === null ? "No matching resources to assess." : "Waste, security, budget and anomalies."}</p>
       </div>
       <SheetContent className="w-full sm:max-w-lg">
