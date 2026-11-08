@@ -85,7 +85,7 @@
   --ring: #7A1F3D;
   --success: #4F6F5A;
   --success-soft: rgb(79 111 90 / 11%);
-  --warning: #8F6A1C;
+  --warning: #8A651A; /* 4.72:1 on warning-soft */
   --warning-soft: rgb(201 154 62 / 13%);
   --sidebar-bg: #F0EBE3;
   --overlay: rgb(31 36 33 / 35%);
