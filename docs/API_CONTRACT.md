@@ -1,6 +1,6 @@
 # Fern API contract
 
-Set `VITE_API_BASE_URL` to switch the 14 read functions in [`src/lib/api.ts`](../src/lib/api.ts) from demo builders to `GET {base}/api/v1/...`. One trailing slash is removed from the base. JSON must match [`src/types/finops.ts`](../src/types/finops.ts); it is cast, not runtime-validated. The read client has no authentication headers or write methods. Non-2xx responses throw `Request failed (<status>)`. Demo requests wait a simulated 300–800 ms before returning builder results.
+Set `VITE_API_BASE_URL` to switch the 16 read functions in [`src/lib/api.ts`](../src/lib/api.ts) from demo builders to `GET {base}/api/v1/...`. One trailing slash is removed from the base. JSON must match [`src/types/finops.ts`](../src/types/finops.ts); it is cast, not runtime-validated. The read client has no authentication headers or write methods. Non-2xx responses throw `Request failed (<status>)`. Demo requests wait a simulated 300–800 ms before returning builder results.
 
 ## Complete function inventory
 
@@ -22,6 +22,8 @@ Set `VITE_API_BASE_URL` to switch the 14 read functions in [`src/lib/api.ts`](..
 | getIntegrations() | GET | /api/v1/integrations | None | IntegrationsDto |
 | getSettings() | GET | /api/v1/settings | None | SettingsDto |
 | getSecurity(f) | GET | /api/v1/security | F | SecurityDto |
+| getFernScore(f) | GET | /api/v1/fern-score | F | FernScoreDto |
+| getInsights(f) | GET | /api/v1/insights | F | InsightsDto |
 
 App normalization (`src/lib/filters.ts`) accepts range `7d|mtd|q3|custom` (default mtd), providers AWS/Azure/GCP (default all), env All/Production/Staging/Development (default All), team All/Platform/Data/FinOps/Media (default All). Custom means last 30 days, not an arbitrary interval; `30d` is not a separate normalized URL value. The API client itself does not apply defaults to its supplied Filters.
 
@@ -159,3 +161,14 @@ Changes in this refresh:
 - Documented exact versus rounded report values, current/previous executive unit-cost rows and which templates expose those rows.
 - Corrected the Sustainability endpoint field names (`intensity`, `rating`) and added its region `cost` field to the endpoint summary.
 - Retained provider serialization, filter defaults, demo date, all nested contracts and separate AI route limitations. The read base URL requires a compatible external HTTP backend; no production implementation or successful live AI generation was verified.
+
+
+## GET /api/v1/fern-score
+Query: global filters F. Returns `FernScoreDto`: `score:number|null`, `subScores:{waste,security,budget,anomaly}` (each number|null), `inputs:{spend,idleWaste,securityScore,budgetForecast,budgetAmount,activeAnomalies}` (numbers). Derived from the unchanged Dashboard, Security and Budget aggregates. Budget utilization uses end-of-month forecast / default company monthly budget, matching the Budgets company card. No resources or nonpositive spend returns null score/sub-scores (UI `—`); a missing/zero budget with spend gives budget score zero. See [DEMO_DATA.md](DEMO_DATA.md) for the complete formula and mixed-period caveat.
+
+## GET /api/v1/insights
+Query: global filters F. Returns `InsightsDto`: `{insights:DailyInsightDto[]}`. Each insight has `id`, `type` (`cost-mover|saving|budget|security|greener-region`), `sentence` (plain-language template with one `{figure}` token), `figure:{value:number,unit:USD|count|tCO2e}`, and `link:{to,tab}`. The UI replaces the token using the shared currency or unit formatter. Numeric monetary figures remain USD. Links point to existing pages/tabs and retain global URL filters.
+
+Rules run in fixed order and return at most five entries, one per applicable rule. No matching resources returns an empty array; unavailable rules are skipped, so narrow filters can produce fewer than three entries. Empty output displays “Nothing needs attention”. Figures reconcile to existing aggregates; no generated/AI text or invented figures. Session-only demo status/budget edits are not inputs: these endpoints describe the aggregate default state, as do the existing read endpoints.
+
+Both new endpoints follow the existing read-client pattern: local pure builders in demo mode, actual GET requests to the configured C# API in live mode. This project does not host `/api/v1` HTTP handlers; the replacement backend must implement these paths. Both queries have separate loading/error/retry states keyed by all global filters.

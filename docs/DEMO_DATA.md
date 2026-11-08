@@ -290,3 +290,24 @@ The suite is an implementation regression check, not proof of real-world correct
 ## Verification scope
 
 Documentation was checked against current source on **4 November 2026**. This documentation-only rerun (`bun run test`) passed **172 tests across 13 files**. The automatic build log reports `build OK` at **09:36:28 UTC**. Manual builds and separate typechecks were not run under the workspace rules; the automatic build is not claimed as a standalone typecheck. No application source, data, styling, routes or tests were modified for this documentation refresh. A compatible production HTTP backend, successful Gateway generation, blanket secret-rejection guarantees and real cloud/report delivery were not verified; cloud/report delivery and production authentication are not built.
+
+## Fern score and daily briefing
+
+Read-only deterministic builders in `src/data/insights.ts`, exposed by the typed API, reuse existing aggregates without changing totals.
+
+- **Waste:** clamp(100 − idleWaste / selectedSpend × 500, 0, 100). At 20% waste the score is zero. Idle waste retains the existing monthly aggregate; spend retains the selected window. This intentionally follows existing aggregates rather than silently normalizing either value.
+- **Security:** the existing filtered weighted security score, clamped to 0–100.
+- **Budget:** forecast utilization = shared end-of-month forecast / default company monthly budget. Score is 100 through 90% utilization, linear between 90% and 130%, and zero at/above 130%: clamp((1.30 − utilization) × 250, 0, 100). The amount is the existing rounded Q3/3 × 105% default. A zero amount with spend gives zero score.
+- **Anomalies:** clamp(100 − 25 × existing active anomaly count, 0, 100).
+- **Fern:** round(0.35 × waste + 0.25 × security + 0.20 × budget + 0.20 × anomaly). No resources or nonpositive spend returns null for all scores, displayed as `—`. No NaN/Infinity is serialized.
+
+The “What affects your score” drawer documents all four rules, weights and existing destination tabs. No source aggregate or demo-session action is mutated. Like the existing read APIs, this assessment uses the default aggregate state, not session-only budget/status overlays.
+
+Briefing rules, in stable order (one entry per rule, skipped when unavailable):
+1. Biggest absolute cost delta among Overview movers (increase or decrease); figure is abs(delta), with the previous-period comparison and the workload name. Ties use resource ID. Link: Cost Explorer → Compare periods.
+2. Largest saving group from `buildSavings().items[0]`; figure is its monthly saving. Link: Recommendations → Open.
+3. Largest forecast excess among existing built-in budget scopes (All, AWS, Azure, Platform, Production), with positive default amount and forecast > amount. Figure is forecast − defaultAmount, not selected-period spend. Ties use scope key. Link: Budgets → Budgets.
+4. Count of Critical Open/In progress security findings. Link: Security → Findings.
+5. Greatest estimated reduction among the existing greener-region suggestions; figure is the unchanged reductionTons for the selected window. Ties use resource ID. Link: Sustainability → Greener regions.
+
+Sentence templates contain one `{figure}` token and no separately generated numeric claims; the UI substitutes the shared money/count/emissions formatter and shows the same formatted figure beside the sentence. All API money stays USD; currency changes affect only presentation. Narrow selections may yield fewer than three insights rather than inventing missing data. No resources returns no insights; if no rule applies the card says “Nothing needs attention”. The briefing is a deterministic demo assessment, not live monitoring or AI generation. Regression coverage: `src/test/insights.test.ts` checks formulas, boundaries, empty fallbacks, reconciliation, sentence figures and repeatability.
