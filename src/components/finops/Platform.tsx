@@ -6,7 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { rangeLabels, type CloudId, type Env, type PlatformRange } from "@/lib/finops-platform-data";
 import { useBudget, useDashboard, useDashboardData } from "@/lib/queries";
-import { allProviders, teams, type Filters, type Team } from "@/lib/filters";
+import { allProviders, teams, useGlobalFilters, type Filters, type Team } from "@/lib/filters";
 import { DataTableView, TableToggle } from "./States";
 import type { RecommendationDto } from "@/types/finops";
 import { Button } from "@/components/ui/button";
@@ -249,6 +249,7 @@ function TreeCell(p: { x?: number; y?: number; width?: number; height?: number; 
 /* ---------- Savings feed ---------- */
 type RecState = "open" | "remediating" | "done" | "assigned" | "ignored";
 export function SavingsFeed() {
+  const { reset } = useGlobalFilters();
   const recommendations = useDashboardData().recommendations;
   const [state, setState] = useState<Record<string, RecState>>({});
   const active = recommendations.filter((r) => (state[r.id] ?? "open") !== "ignored" && state[r.id] !== "done");
@@ -263,7 +264,7 @@ export function SavingsFeed() {
         <div className="text-right"><Label>Realized</Label><p className="metric-numbers mt-1 text-xl text-success">{fmtMoney(realized)}</p></div>
       </div>
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="progress-reveal h-full rounded-full bg-success transition-all duration-700" style={{ width: `${Math.min(100, (realized / Math.max(1, realized + pending)) * 100)}%` }} /></div>
-      {recommendations.length === 0 && <p className="mt-6 rounded-xl bg-secondary p-6 text-center text-sm text-muted-foreground">No recommendations for this team. Try "All teams" in the filters.</p>}
+      {recommendations.length === 0 && <div className="mt-6 space-y-3 rounded-xl bg-secondary p-6 text-center"><p className="text-sm text-muted-foreground">No resources match the savings rules for the selected team and filters.</p><Button variant="secondary" onClick={reset}>Reset filters</Button></div>}
       <ul className="mt-5 divide-y divide-border">
         {recommendations.map((r) => {
           const st = state[r.id] ?? "open";
