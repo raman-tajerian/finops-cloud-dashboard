@@ -344,7 +344,7 @@ export function K8sHealth({ onOpen }: { onOpen: (d: Detail) => void }) {
       <div className="mt-6 border-t border-border pt-4">
         <div className="flex items-center gap-2"><Bot className="size-3.5 text-muted-foreground" /><Label>Live automation</Label></div>
         <ul className="mt-3 space-y-2.5">
-          {ticker.map((x, i) => <motion.li layout="position" key={`${x.t}-${i}-${x.ago}`} initial={i === 0 ? { opacity: 0, y: -4 } : false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.24 }} className="flex justify-between gap-3 text-xs"><span className={i === 0 ? "text-foreground" : "text-muted-foreground"}>{x.t}</span><span className="metric-numbers shrink-0 text-muted-foreground">{x.ago === 0 ? "now" : `${x.ago}m ago`}</span></li>)}
+          {ticker.map((x, i) => <motion.li layout="position" key={`${x.t}-${i}-${x.ago}`} initial={i === 0 ? { opacity: 0, y: -4 } : false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.24 }} className="flex justify-between gap-3 text-xs"><span className={i === 0 ? "text-foreground" : "text-muted-foreground"}>{x.t}</span><span className="metric-numbers shrink-0 text-muted-foreground">{x.ago === 0 ? "now" : `${x.ago}m ago`}</span></motion.li>)}
         </ul>
       </div>
     </article>
