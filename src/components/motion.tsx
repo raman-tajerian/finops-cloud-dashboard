@@ -47,12 +47,14 @@ export function AnimatedNumber({ value, format }: { value: number; format: (n: n
   const [current, setCurrent] = useState(value);
   const [rolling, setRolling] = useState<RollingText>(null);
   const currentRef = useRef(value);
+  const formatRef = useRef(format);
+  formatRef.current = format;
   const idRef = useRef(0);
 
   useEffect(() => {
     if (currentRef.current === value) return;
-    const from = format(currentRef.current);
-    const to = format(value);
+    const from = formatRef.current(currentRef.current);
+    const to = formatRef.current(value);
     if (reduce || from === to) {
       currentRef.current = value;
       setCurrent(value);
