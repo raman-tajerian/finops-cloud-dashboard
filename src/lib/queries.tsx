@@ -20,6 +20,19 @@ export function useInsights() {
   return useQuery({ queryKey: ["insights", filters], queryFn: () => api.getInsights(filters), staleTime: 60_000 });
 }
 
+export function useCommitments() {
+  const { filters } = useGlobalFilters();
+  return useQuery({ queryKey: ["commitments", filters], queryFn: () => api.getCommitments(filters), staleTime: 60_000 });
+}
+export function useTeams() {
+  const { filters } = useGlobalFilters();
+  return useQuery({ queryKey: ["teams", filters], queryFn: () => api.getTeams(filters), staleTime: 60_000 });
+}
+export function useNotifications() {
+  const { filters } = useGlobalFilters();
+  return useQuery({ queryKey: ["notifications", filters], queryFn: () => api.getNotifications(filters), staleTime: 60_000 });
+}
+
 /** Only call inside <DataGate>, which guarantees data is loaded. */
 export function useDashboardData(): DashboardDto {
   return useDashboard().data as DashboardDto;
