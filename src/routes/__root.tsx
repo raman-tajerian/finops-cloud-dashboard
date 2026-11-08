@@ -135,7 +135,8 @@ function RootComponent() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
     document.documentElement.style.colorScheme = theme;
-  }, [theme]);
+    document.documentElement.dataset["reduceMotion"] = String(reduceMotion);
+  }, [theme, reduceMotion]);
 
   return (
     <QueryClientProvider client={queryClient}>

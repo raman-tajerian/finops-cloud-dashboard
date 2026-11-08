@@ -5,7 +5,7 @@ import { ArrowDownRight, ArrowUpRight, ChevronRight, Minus } from "lucide-react"
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useDashboardData } from "@/lib/queries";
 import { DataTableView, PageHero, TableToggle } from "./States";
-import { CountUp } from "./Insights";
+import { AnimatedNumber, ChartReveal } from "@/components/motion";
 import { Spark } from "./Platform";
 import type { KpiValue } from "@/types/finops";
 import { MetricInfo } from "./Help";
@@ -24,7 +24,7 @@ const pctDelta = (k: KpiValue) => (k.previous ? ((k.value - k.previous) / k.prev
 export function OverviewHero() {
   const { totalSpend } = useDashboardData().overview;
   const change = pctDelta(totalSpend);
-  return <PageHero label="Total cloud spend" value={fmtMoney(totalSpend.value)} change={<span className={change > 0 ? "text-warning" : "text-success"}>{change > 0 ? "+" : ""}{change.toFixed(1)}% vs previous period</span>} description="Your selected cloud spend in one view, with the trends and actions that need attention below." />;
+  return <PageHero scrollMotion label="Total cloud spend" value={<AnimatedNumber value={totalSpend.value} format={fmtMoney} />} change={<span className={change > 0 ? "text-warning" : "text-success"}>{change > 0 ? "+" : ""}{change.toFixed(1)}% vs previous period</span>} description="Your selected cloud spend in one view, with the trends and actions that need attention below." />;
 }
 
 /** KPI cards, split into the "summary" and "unit" groups used by the Overview sub-tabs. */
@@ -51,7 +51,7 @@ export function OverviewKpis({ group = "summary" }: { group?: "summary" | "unit"
             <Link aria-label={it.label} to={it.to} state={{ drilldown: true } as never} search={(prev: Record<string, unknown>) => ({ ...prev, tab: it.tab })} className="absolute inset-0 z-0 rounded-[inherit]" />
             <div className="pointer-events-none relative flex items-center justify-between gap-1"><p className="min-w-0 flex-1 text-[13px] text-muted-foreground">{it.label}</p><span className="pointer-events-auto relative z-10"><MetricInfo label={it.label} /></span><ChevronRight className="size-3.5 shrink-0 text-muted-foreground" /></div>
             <div className="mt-2 flex items-end justify-between gap-2">
-              <p className="metric-numbers whitespace-nowrap text-[32px] leading-none" aria-live="polite"><CountUp value={it.k.value} format={it.f} />{it.suffix && <span className="text-base font-normal text-muted-foreground">{it.suffix}</span>}</p>
+              <p className="metric-numbers whitespace-nowrap text-[32px] leading-none" aria-live="polite"><AnimatedNumber value={it.k.value} format={it.f} />{it.suffix && <span className="text-base font-normal text-muted-foreground">{it.suffix}</span>}</p>
               <Spark data={it.k.spark} color={it.color} className="h-8 w-20" />
             </div>
             <p title={`Previous period: ${it.f(it.k.previous)}`} className={`mt-auto flex items-center gap-1 whitespace-nowrap pt-3 text-xs tabular-nums ${Math.abs(d) < 0.05 ? "text-muted-foreground" : good ? "text-success" : "text-warning"}`}>
@@ -67,6 +67,7 @@ export function OverviewKpis({ group = "summary" }: { group?: "summary" | "unit"
 export function CostTrendCard() {
   const { trend, providers, kpis } = useDashboardData();
   const [asTable, setAsTable] = useState(false);
+  const [hovered, setHovered] = useState<string | null>(null);
   const navigate = useNavigate();
   const data = trend.map((t) => (t.total === 0 && t.forecast !== null ? { ...t, AWS: null, Azure: null, GCP: null } : t));
   const markers = trend.filter((t) => t.anomaly);
@@ -79,22 +80,22 @@ export function CostTrendCard() {
       </div>
       <div className="mt-4 h-72">
         {asTable ? <DataTableView caption="Daily cost by provider with forecast" columns={["Day", ...providers, "Forecast", "Band", "Anomaly"]} rows={trend.map((t) => [t.day, ...providers.map((p) => (t.total ? fmtMoney(t[p]) : "—")), t.forecast === null ? "—" : fmtMoney(t.forecast), t.band ? `${fmtMoney(t.band[0])} – ${fmtMoney(t.band[1])}` : "—", t.anomaly ?? ""])} /> :
-        <ResponsiveContainer>
+        <ChartReveal className="h-full" motionKey={providers.join("-")}><ResponsiveContainer>
           <ComposedChart data={data} margin={{ left: -6, right: 8, top: 8 }}>
             <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} />
             <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} minTickGap={24} />
             <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} formatter={(v, n) => [Array.isArray(v) ? `${fmtMoney(Number(v[0]))} – ${fmtMoney(Number(v[1]))}` : fmtMoney(Number(v)), String(n)]} />
-            {providers.map((p) => <Area key={p} dataKey={p} stackId="p" stroke={colors[p]} fill={colors[p]} fillOpacity={0.08} strokeWidth={1.5} animationDuration={700} />)}
-            <Area dataKey="band" name="95% band" stroke="none" fill="var(--muted-foreground)" fillOpacity={0.12} />
-            <Line dataKey="forecast" name="Forecast" stroke="var(--muted-foreground)" strokeDasharray="5 4" dot={false} strokeWidth={1.5} connectNulls />
+            {providers.map((p) => <Area key={p} dataKey={p} stackId="p" stroke={colors[p]} fill={colors[p]} fillOpacity={hovered && hovered !== p ? 0.015 : 0.08} strokeOpacity={hovered && hovered !== p ? 0.25 : 1} strokeWidth={1.5} isAnimationActive={false} onMouseEnter={() => setHovered(p)} onMouseLeave={() => setHovered(null)} />)}
+            <Area dataKey="band" name="95% band" stroke="none" fill="var(--muted-foreground)" fillOpacity={0.12} isAnimationActive={false} />
+            <Line dataKey="forecast" name="Forecast" stroke="var(--muted-foreground)" strokeDasharray="5 4" dot={false} strokeWidth={1.5} connectNulls isAnimationActive={false} />
             {markers.map((m) => (
               <ReferenceDot key={m.day} x={m.day} y={m.total} r={6} fill="var(--destructive)" stroke="var(--card)" strokeWidth={2} className="cursor-pointer"
                 onClick={() => navigate({ to: "/cost-explorer", search: (prev: Record<string, unknown>) => ({ ...prev, group: "service" }) } as never)}
                 label={{ value: "!", fill: "var(--card)", fontSize: 9, position: "center" }} />
             ))}
           </ComposedChart>
-        </ResponsiveContainer>}
+        </ResponsiveContainer></ChartReveal>}
       </div>
       {kpis.anomalies[0] && <p className="mt-3 text-xs text-muted-foreground">Click a red marker to investigate · top: <span className="text-foreground">{kpis.anomalies[0].title}</span> +{kpis.anomalies[0].change}%</p>}
     </article>

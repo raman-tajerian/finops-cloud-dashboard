@@ -20,7 +20,7 @@ export function FjordMark({ size = 24, mono = false, className = "", decorative 
 /** Mark inside a rounded tile — favicon-style workspace avatar. */
 export function FjordAvatar({ size = 32 }: { size?: BrandSize }) {
   return (
-    <span role="img" aria-label="Fjord Labs" className="grid shrink-0 place-items-center rounded-[10px] border border-border bg-card" style={{ width: size, height: size }}>
+    <span role="img" aria-label="Fjord Labs" data-brand-avatar className="grid shrink-0 place-items-center rounded-[10px] border border-border bg-card" style={{ width: size, height: size }}>
       <FjordMark size={size >= 32 ? 24 : 16} decorative />
     </span>
   );

@@ -9,7 +9,7 @@ import { useGlobalFilters } from "@/lib/filters";
 import { MetricInfo } from "./Help";
 import type { K8sClusterDto, K8sPodDto } from "@/types/finops";
 import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, PageHero, StatusBadge, TableToggle } from "./States";
-import { CountUp } from "./Insights";
+import { AnimatedNumber, MotionBar, ProgressRing } from "@/components/motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -51,7 +51,7 @@ function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string })
   );
   return (
     <div className="space-y-8">
-      {tab === "clusters" && <PageHero label={`${c.name} · monthly cost`} value={fmtMoney(c.monthlyCost)} change={`${c.podsHealthy}/${c.podsTotal} pods healthy`} description={`${c.provider} ${c.service} in ${c.region}, with ${c.nodes} nodes and resource-derived cluster health.`} />}
+      {tab === "clusters" && <PageHero label={`${c.name} · monthly cost`} value={<AnimatedNumber value={c.monthlyCost} format={fmtMoney} />} change={`${c.podsHealthy}/${c.podsTotal} pods healthy`} description={`${c.provider} ${c.service} in ${c.region}, with ${c.nodes} nodes and resource-derived cluster health.`} />}
       <section className="organic-card grid gap-4 p-7 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <Title sub={`${c.provider} ${c.service} · ${c.region} · ${c.environment}`}>Cluster</Title>
         <Select value={c.id} onValueChange={setId}>
@@ -78,7 +78,7 @@ function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string })
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={16} />
                   <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={52} tickFormatter={(v: number) => fmtMoneyCompact(Number(v))} />
                   <Tooltip contentStyle={tip} cursor={{ fill: "var(--muted)" }} formatter={(v) => fmtMoney(Number(v))} />
-                  <Bar dataKey="cost" radius={[6, 6, 0, 0]}>{c.namespaces.map((n) => <Cell key={n.name} fill={n.overProvisioned ? "var(--chart-3)" : "var(--chart-1)"} />)}</Bar>
+                  <Bar dataKey="cost" isAnimationActive={false} shape={<MotionBar />} radius={[6, 6, 0, 0]}>{c.namespaces.map((n) => <Cell key={n.name} fill={n.overProvisioned ? "var(--chart-3)" : "var(--chart-1)"} />)}</Bar>
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -129,16 +129,12 @@ function BudgetCard({ d }: { d: NonNullable<ReturnType<typeof useBudget>["data"]
     <article className="organic-card flex h-full flex-col p-7 md:p-8">
       <div className="flex items-start justify-between gap-3"><Title sub={`${d.period} · day ${d.dayOfMonth} of ${d.monthDays}`}>Budget & forecast</Title><StatusBadge tone={tone}>{budget > 0 ? `${pct.toFixed(1)}%` : "—"} of budget</StatusBadge></div>
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <div><p className="text-[13px] text-muted-foreground">Spend to date</p><p className="mt-1 metric-numbers text-[30px] leading-none"><CountUp value={d.spendToDate} format={(n) => fmtMoney(n)} /></p></div>
-        <div><p className="flex items-center text-[13px] text-muted-foreground">Projected end of month<MetricInfo label="Forecast end of month" /></p><p className="mt-1 metric-numbers text-[30px] leading-none"><CountUp value={d.forecastEom} format={(n) => fmtMoney(n)} /></p></div>
+        <div><p className="text-[13px] text-muted-foreground">Spend to date</p><p className="mt-1 metric-numbers text-[30px] leading-none"><AnimatedNumber value={d.spendToDate} format={(n) => fmtMoney(n)} /></p></div>
+        <div><p className="flex items-center text-[13px] text-muted-foreground">Projected end of month<MetricInfo label="Forecast end of month" /></p><p className="mt-1 metric-numbers text-[30px] leading-none"><AnimatedNumber value={d.forecastEom} format={(n) => fmtMoney(n)} /></p></div>
       </div>
-      <div className="mt-6">
-        <div className="mb-2 flex justify-between text-xs text-muted-foreground"><span>Projected % of budget</span><span className="tabular-nums">{budget > 0 ? `${pct.toFixed(1)}%` : "—"}</span></div>
-        <div className="relative h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
-          <div className="h-full origin-left rounded-full transition-transform duration-500" style={{ transform: `scaleX(${Math.min(100, pct) / 100})`, background: toneColor[tone] }} />
-          <span className="absolute inset-y-0 left-[80%] w-px bg-foreground/30" aria-hidden />
-        </div>
-        <div className="mt-1 flex justify-between text-[11px] text-muted-foreground"><span>0%</span><span className="ml-[70%]">80%</span><span>100%</span></div>
+      <div className="mt-6 flex items-center gap-5" role="progressbar" aria-label="Projected percentage of budget" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
+        <ProgressRing value={pct} label="Projected percentage of budget" size={92} stroke={7} color={toneColor[tone]} decimals={1} />
+        <div className="text-xs text-muted-foreground"><p>Projected % of budget</p><p className="mt-2">0–100% ring scale</p><p className="mt-1">80% alert threshold</p></div>
       </div>
       <div className="mt-auto space-y-3 pt-6">
         <label className="flex items-center justify-between gap-3 text-sm"><span className="text-muted-foreground">Monthly budget</span>
@@ -179,7 +175,7 @@ function Simulator({ d }: { d: NonNullable<ReturnType<typeof useScenario>["data"
       </div>
       <div className="mt-6 grid gap-3 border-t border-border pt-5 text-sm sm:grid-cols-3">
         <div><p className="text-[13px] text-muted-foreground">Baseline</p><p className="mt-1 metric-numbers text-2xl">{fmtMoney(d.baseline)}</p></div>
-        <div><p className="text-[13px] text-muted-foreground">Projected</p><p className="mt-1 metric-numbers text-2xl"><CountUp value={r.projected} format={(n) => fmtMoney(n)} /></p></div>
+        <div><p className="text-[13px] text-muted-foreground">Projected</p><p className="mt-1 metric-numbers text-2xl"><AnimatedNumber value={r.projected} format={(n) => fmtMoney(n)} /></p></div>
         <div><p className="text-[13px] text-muted-foreground">Savings</p><p className={`mt-1 metric-numbers text-2xl ${r.savings >= 0 ? "text-success" : "text-warning"}`}>{fmtMoney(r.savings)}</p><p className="text-xs text-muted-foreground tabular-nums">{r.pct.toFixed(1)}%</p></div>
       </div>
       <div className="mt-4 flex justify-end"><TableToggle on={asTable} onChange={setAsTable} /></div>
@@ -190,7 +186,7 @@ function Simulator({ d }: { d: NonNullable<ReturnType<typeof useScenario>["data"
               <XAxis type="number" hide domain={[0, "dataMax"]} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} width={72} />
               <Tooltip contentStyle={tip} cursor={{ fill: "var(--muted)" }} formatter={(v) => fmtMoney(Number(v))} />
-              <Bar dataKey="v" radius={[0, 6, 6, 0]} barSize={22}>{chart.map((c, i) => <Cell key={c.name} fill={i ? "var(--chart-1)" : "var(--chart-6)"} />)}</Bar>
+              <Bar dataKey="v" isAnimationActive={false} shape={<MotionBar />} radius={[0, 6, 6, 0]} barSize={22}>{chart.map((c, i) => <Cell key={c.name} fill={i ? "var(--chart-1)" : "var(--chart-6)"} />)}</Bar>
             </BarChart>
           </ResponsiveContainer>
         )}

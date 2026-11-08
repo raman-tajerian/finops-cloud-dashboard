@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { AccentBand, FjordAvatar, FjordLogo } from "@/components/brand";
+import { AccentBand, BrandIntro, FjordAvatar, FjordLogo } from "@/components/brand";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ArrowLeft, Pin, ChevronDown, HelpCircle, Bell, ChevronsLeft, ChevronsUpDown, LogOut, Menu, Radar, Search, User, X } from "lucide-react";
 import { toast } from "sonner";
@@ -99,6 +99,7 @@ export function Shell({ children }: { children: ReactNode }) {
   return (
     <div data-density={density} data-reduce-motion={reduceMotion} className={`min-h-screen bg-background lg:grid ${collapsed ? "lg:grid-cols-[72px_minmax(0,1fr)]" : "lg:grid-cols-[248px_minmax(0,1fr)]"}`}>
       <CurrencySync />
+      <BrandIntro />
       <aside className={`fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col bg-sidebar-bg px-3 py-4 transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${collapsed ? "lg:w-[72px]" : ""} ${open ? "translate-x-0" : "-translate-x-full"}`}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -169,7 +170,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 ))}</ul>
               </PopoverContent>
             </Popover>
-            <Button onClick={scan} disabled={scanning} className="h-10 rounded-xl"><Radar className={scanning ? "animate-spin" : ""} /><span className="hidden sm:inline">{scanning ? "Scanning…" : "Run scan"}</span></Button>
+            <Button onClick={scan} disabled={scanning} className="h-10 rounded-xl"><Radar className="" /><span className="hidden sm:inline">{scanning ? "Scanning…" : "Run scan"}</span></Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild><button className="grid size-10 place-items-center rounded-full border border-border bg-card text-xs font-medium" aria-label="User menu">RT</button></DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
@@ -186,7 +187,7 @@ export function Shell({ children }: { children: ReactNode }) {
             </DropdownMenu>
           </div>
         </header>
-        <main key={currency} className="mx-auto w-full max-w-[1280px] min-w-0 space-y-8 p-4 pb-24 md:p-8 md:pb-24">{filteredPage && (dashboard.isPending || dashboard.isPlaceholderData) ? <CardSkeleton h="h-64" /> : filteredPage && dashboard.isSuccess && resources.length === 0 ? <FilterEmptyState /> : <>{backTarget && <Button variant="ghost" className="min-h-10 max-w-full justify-start whitespace-normal text-left" onClick={() => { navigate({ href: backTarget.href }); setBackTarget(null); }}><ArrowLeft />Back to previous page · {backTarget.label}</Button>}<div className="flex flex-wrap gap-2"><Button variant="ghost" size="sm" className="h-10 text-xs text-muted-foreground" aria-pressed={navigation.pinned.some((t) => targetKey(t) === targetKey(pageTarget))} onClick={() => pin(pageTarget)}><Pin />Pin page</Button>{activeTab && <Button variant="ghost" size="sm" className="h-10 text-xs text-muted-foreground" aria-pressed={navigation.pinned.some((t) => targetKey(t) === targetKey(tabTarget))} onClick={() => pin(tabTarget)}><Pin />Pin tab · {activeTab.label}</Button>}</div>{children}<CalculationNotes /></>}</main>
+        <main className="mx-auto w-full max-w-[1280px] min-w-0 space-y-8 p-4 pb-24 md:p-8 md:pb-24">{filteredPage && (dashboard.isPending || dashboard.isPlaceholderData) ? <CardSkeleton h="h-64" /> : filteredPage && dashboard.isSuccess && resources.length === 0 ? <FilterEmptyState /> : <>{backTarget && <Button variant="ghost" className="min-h-10 max-w-full justify-start whitespace-normal text-left" onClick={() => { navigate({ href: backTarget.href }); setBackTarget(null); }}><ArrowLeft />Back to previous page · {backTarget.label}</Button>}<div className="flex flex-wrap gap-2"><Button variant="ghost" size="sm" className="h-10 text-xs text-muted-foreground" aria-pressed={navigation.pinned.some((t) => targetKey(t) === targetKey(pageTarget))} onClick={() => pin(pageTarget)}><Pin />Pin page</Button>{activeTab && <Button variant="ghost" size="sm" className="h-10 text-xs text-muted-foreground" aria-pressed={navigation.pinned.some((t) => targetKey(t) === targetKey(tabTarget))} onClick={() => pin(tabTarget)}><Pin />Pin tab · {activeTab.label}</Button>}</div>{children}<CalculationNotes /></>}</main>
         <div className="mx-auto max-w-[1280px] px-4 md:px-8"><AccentBand className="h-1 rounded-full overflow-hidden" /></div>
         <footer className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-3 px-4 pb-8 pt-4 text-xs text-muted-foreground md:px-8"><FjordLogo size={16} /><span>·</span><span>Fern v0.4.0</span><span>·</span><span>{dataSource === "live" ? "Live data" : "Demo data — all figures are simulated"}</span><span>·</span><span>Demo data as of 12 Oct 2026</span></footer>
       </div>

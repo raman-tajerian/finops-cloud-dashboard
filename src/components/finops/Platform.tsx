@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis } from "recharts";
 import { SlidersHorizontal, AlertTriangle, BellPlus, Bot, ChevronRight, Download, EyeOff, FileJson, FileSpreadsheet, FileText, UserPlus, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
@@ -17,7 +17,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
-import { CountUp, Tilt } from "./Insights";
+import { Tilt } from "./Insights";
+import { AnimatedNumber, ChartReveal, MotionBar, MotionDonut } from "@/components/motion";
+import { motion } from "framer-motion";
 
 export type { Filters };
 
@@ -124,7 +126,7 @@ export function DetailDrawer({ detail, onClose }: { detail: Detail; onClose: () 
     <Sheet open={!!detail} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="w-full sm:max-w-md">
         {detail && <>
-          <SheetHeader><SheetTitle>{detail.title}</SheetTitle><SheetDescription>{detail.description}</SheetDescription></SheetHeader>
+          <motion.div layoutId={`detail-${detail.title}`}><SheetHeader><SheetTitle>{detail.title}</SheetTitle><SheetDescription>{detail.description}</SheetDescription></SheetHeader></motion.div>
           <dl className="mt-2 divide-y divide-border px-4">
             {detail.rows.map(([k, v]) => <div key={k} className="flex justify-between gap-4 py-3 text-sm"><dt className="text-muted-foreground">{k}</dt><dd className="metric-numbers text-right">{v}</dd></div>)}
           </dl>
@@ -136,7 +138,7 @@ export function DetailDrawer({ detail, onClose }: { detail: Detail; onClose: () 
 
 export function Spark({ data: raw, color, className = "h-10 w-24" }: { data: number[]; color: string; className?: string }) {
   const data = useMemo(() => raw.map((v, i) => ({ i, v })), [raw]);
-  return <div className={className} aria-hidden><ResponsiveContainer><LineChart data={data}><Line dataKey="v" stroke={color} strokeWidth={1.5} dot={false} animationDuration={700} animationEasing="ease-out" /></LineChart></ResponsiveContainer></div>;
+  return <div className={className} aria-hidden><ResponsiveContainer><LineChart data={data}><Line dataKey="v" stroke={color} strokeWidth={1.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer></div>;
 }
 
 /* ---------- KPI cards ---------- */
@@ -164,8 +166,8 @@ export function DenseKpis({ onOpen }: { onOpen: (d: Detail) => void }) {
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {items.map((it) => (
         <Tilt key={it.label}><button onClick={() => onOpen(it.detail as Detail)} className={`${card} subtle-lift group h-full w-full text-left`}>
-          <div className="flex items-center justify-between"><Label>{it.label}</Label><ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></div>
-          <div className="mt-3 flex items-end justify-between gap-2"><p className="metric-numbers whitespace-nowrap text-2xl 2xl:text-3xl"><CountUp value={it.n} format={it.f} /></p><Spark data={it.spark} color={it.color} /></div>
+          <div className="flex items-center justify-between"><motion.span layoutId={`detail-${it.detail.title}`}><Label>{it.label}</Label></motion.span><ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></div>
+          <div className="mt-3 flex items-end justify-between gap-2"><p className="metric-numbers whitespace-nowrap text-2xl 2xl:text-3xl"><AnimatedNumber value={it.n} format={it.f} /></p><Spark data={it.spark} color={it.color} /></div>
           <div className="mt-2">{it.pill}</div>
           <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4">
             {it.subs.map(([a, b]) => <div key={a}><dt className="text-[11px] text-muted-foreground">{a}</dt><dd className="metric-numbers mt-0.5 text-sm">{b}</dd></div>)}
@@ -198,39 +200,39 @@ export function CostDistribution() {
           ))}
         </div></div>
       </div>
-      <div className="mt-6 h-80" aria-live="polite">
+      <ChartReveal className="mt-6 h-80" motionKey={`${view}-${asTable}`}><div aria-live="polite" className="h-full">
         {asTable && <DataTableView caption={`Cost distribution ${view}`} columns={table.columns} rows={table.rows} />}
         {!asTable && view === "service" && (
-          <div key="service" className="animate-in fade-in zoom-in-95 grid h-full gap-7 duration-300 md:grid-cols-[1fr_220px]">
-            <ResponsiveContainer><PieChart><Pie data={services} dataKey="value" nameKey="name" innerRadius="62%" outerRadius="90%" paddingAngle={2} stroke="none">{services.map((_, i) => <Cell key={i} fill={chartColors[i] ?? "var(--chart-4)"} />)}</Pie><Tooltip contentStyle={tip} formatter={(v) => [`${fmtMoney(Number(v))} · ${pct(Number(v))}`, "Cost"]} /></PieChart></ResponsiveContainer>
+          <div key="service" className="grid h-full gap-7 md:grid-cols-[1fr_220px]">
+            <MotionDonut className="h-full w-full" data={services.map((s, i) => ({ name: s.name, value: s.value, color: chartColors[i] ?? "var(--chart-4)" }))} formatValue={(v) => `${fmtMoney(v)} · ${pct(v)}`} />
             <ul className="hidden flex-col justify-center gap-3 md:flex">{services.map((s, i) => <li key={s.name} className="flex items-center gap-2 text-sm"><span className="size-2 rounded-full" style={{ background: chartColors[i] }} /><span className="flex-1 text-muted-foreground">{s.name}</span><span className="metric-numbers">{pct(s.value)}</span></li>)}</ul>
           </div>
         )}
         {!asTable && view === "region" && (
-          <div key="region" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><BarChart data={d.regions}>
+          <div key="region" className="h-full"><ResponsiveContainer><BarChart data={d.regions}>
             <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="region" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} cursor={{ fill: "var(--secondary)" }} formatter={(v, n) => [fmtMoney(Number(v)), String(n)]} />
-            {providers.includes("AWS") && <Bar dataKey="AWS" stackId="a" fill="var(--aws)" />}
-            {providers.includes("Azure") && <Bar dataKey="Azure" stackId="a" fill="var(--azure)" />}
-            {providers.includes("GCP") && <Bar dataKey="GCP" stackId="a" fill="var(--gcp)" radius={[6, 6, 0, 0]} />}
+            {providers.includes("AWS") && <Bar dataKey="AWS" stackId="a" fill="var(--aws)" isAnimationActive={false} shape={<MotionBar />} />}
+            {providers.includes("Azure") && <Bar dataKey="Azure" stackId="a" fill="var(--azure)" isAnimationActive={false} shape={<MotionBar />} />}
+            {providers.includes("GCP") && <Bar dataKey="GCP" stackId="a" fill="var(--gcp)" isAnimationActive={false} shape={<MotionBar />} radius={[6, 6, 0, 0]} />}
           </BarChart></ResponsiveContainer></div>
         )}
         {!asTable && view === "team" && (
-          <div key="team" className="animate-in fade-in h-full duration-300"><ResponsiveContainer>
-            <Treemap data={d.teams.map((t, i) => ({ ...t, fill: chartColors[i % chartColors.length] }))} dataKey="value" nameKey="name" stroke="var(--card)" isAnimationActive animationDuration={500}
+          <div key="team" className="h-full"><ResponsiveContainer>
+            <Treemap data={d.teams.map((t, i) => ({ ...t, fill: chartColors[i % chartColors.length] }))} dataKey="value" nameKey="name" stroke="var(--card)" isAnimationActive={false}
               content={<TreeCell total={total} />}>
               <Tooltip contentStyle={tip} formatter={(v) => [`${fmtMoney(Number(v))} · ${pct(Number(v))}`, "Cost"]} />
             </Treemap>
           </ResponsiveContainer></div>
         )}
         {!asTable && view === "daily" && (
-          <div key="daily" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><AreaChart data={daily}>
+          <div key="daily" className="h-full"><ResponsiveContainer><AreaChart data={daily}>
             <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="day" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} interval={4} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} formatter={(v) => [fmtMoney(Number(v)), "Spend"]} />
-            <Area dataKey="spend" stroke="var(--chart-1)" strokeWidth={2} fill="var(--chart-1)" fillOpacity={0.08} />
+            <Area dataKey="spend" stroke="var(--chart-1)" strokeWidth={2} fill="var(--chart-1)" fillOpacity={0.08} isAnimationActive={false} />
           </AreaChart></ResponsiveContainer></div>
         )}
-      </div>
+      </div></ChartReveal>
     </article>
   );
 }
@@ -262,7 +264,7 @@ export function SavingsFeed() {
         <div><Label>Optimization recommendations</Label><p className="mt-1 text-[13px] text-muted-foreground">Executing all open actions saves <span className="metric-numbers text-foreground">{fmtMoney(pending)}/month</span></p></div>
         <div className="text-right"><Label>Realized</Label><p className="metric-numbers mt-1 text-xl text-success">{fmtMoney(realized)}</p></div>
       </div>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="progress-reveal h-full rounded-full bg-success transition-all duration-700" style={{ width: `${Math.min(100, (realized / Math.max(1, realized + pending)) * 100)}%` }} /></div>
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><motion.div className="h-full origin-left rounded-full bg-success" initial={{ scaleX: 0 }} animate={{ scaleX: Math.min(100, (realized / Math.max(1, realized + pending)) * 100) / 100 }} transition={{ type: "spring", stiffness: 120, damping: 20 }} /></div>
       {recommendations.length === 0 && <div className="mt-6 space-y-3 rounded-xl bg-secondary p-7 text-center"><p className="text-sm text-muted-foreground">No resources match the savings rules for the selected team and filters.</p><Button variant="secondary" onClick={reset}>Reset filters</Button></div>}
       <ul className="mt-5 divide-y divide-border">
         {recommendations.map((r) => {
@@ -330,19 +332,19 @@ export function K8sHealth({ onOpen }: { onOpen: (d: Detail) => void }) {
   return (
     <article className={`${card} flex h-full flex-col`}>
       <button className="flex w-full items-start justify-between text-left" onClick={() => onOpen({ title: cluster.name, description: "Kubernetes cluster details", rows: [["Region", cluster.region], ["Version", cluster.version], ["Nodes", `${cluster.nodes}`], ["CPU allocation", `${cpu}%`], ["Memory utilization", `${mem}%`], ["Pods healthy", `${cluster.podsHealthy}/${cluster.podsTotal}`], ["Pods pending", "2 (ImagePullBackOff)"]] })}>
-        <div><Label>Kubernetes cluster</Label><p className="mt-1 font-medium">{cluster.name}</p><p className="metric-numbers text-xs text-muted-foreground">{cluster.region} · {cluster.version} · {cluster.nodes} nodes</p></div>
-        <div className="flex shrink-0 items-center gap-2"><span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">Demo telemetry</span><Pill tone="success"><span className="pulse-dot mr-1.5 size-1.5 rounded-full bg-success text-success" />Healthy</Pill></div>
+        <div><motion.span layoutId={`detail-${cluster.name}`}><Label>Kubernetes cluster</Label></motion.span><p className="mt-1 font-medium">{cluster.name}</p><p className="metric-numbers text-xs text-muted-foreground">{cluster.region} · {cluster.version} · {cluster.nodes} nodes</p></div>
+        <div className="flex shrink-0 items-center gap-2"><span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">Demo telemetry</span><Pill tone="success"><span className="mr-1.5 size-1.5 rounded-full bg-success text-success" />Healthy</Pill></div>
       </button>
       <div className="mt-6 space-y-4">
         {bars.map(([l, v, c, t]) => (
           <div key={l}><div className="flex justify-between text-xs"><span className="text-muted-foreground">{l}</span><span className="metric-numbers">{t}</span></div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div className="progress-reveal h-full rounded-full transition-all duration-700" style={{ width: `${v}%`, background: c }} /></div></div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><motion.div className="h-full origin-left rounded-full" initial={{ scaleX: 0 }} animate={{ scaleX: v / 100 }} style={{ background: c }} transition={{ type: "spring", stiffness: 120, damping: 20 }} /></div></div>
         ))}
       </div>
       <div className="mt-6 border-t border-border pt-4">
         <div className="flex items-center gap-2"><Bot className="size-3.5 text-muted-foreground" /><Label>Live automation</Label></div>
         <ul className="mt-3 space-y-2.5">
-          {ticker.map((x, i) => <li key={`${x.t}-${i}-${x.ago}`} className={`flex justify-between gap-3 text-xs ${i === 0 ? "animate-in fade-in slide-in-from-top-1 duration-300" : ""}`}><span className={i === 0 ? "text-foreground" : "text-muted-foreground"}>{x.t}</span><span className="metric-numbers shrink-0 text-muted-foreground">{x.ago === 0 ? "now" : `${x.ago}m ago`}</span></li>)}
+          {ticker.map((x, i) => <motion.li layout="position" key={`${x.t}-${i}-${x.ago}`} initial={i === 0 ? { opacity: 0, y: -4 } : false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.24 }} className="flex justify-between gap-3 text-xs"><span className={i === 0 ? "text-foreground" : "text-muted-foreground"}>{x.t}</span><span className="metric-numbers shrink-0 text-muted-foreground">{x.ago === 0 ? "now" : `${x.ago}m ago`}</span></motion.li>)}
         </ul>
       </div>
     </article>
@@ -355,7 +357,7 @@ export function AnomalyStrip({ onOpen }: { onOpen: (d: Detail) => void }) {
   return (
     <button onClick={() => onOpen({ title: a.title, description: "Last 3 days vs the prior 14-day baseline.", rows: [["Change", `+${a.change}%`], ["Est. monthly impact", fmtMoney(a.impact)], ["Detected", a.since], ["Suggested action", "Enable CDN caching for media container"]] })} className="group flex w-full items-center gap-3 rounded-2xl bg-destructive-soft px-4 py-1.5 text-left text-[13px] transition-[transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-destructive-soft/80 active:scale-[0.99]">
       <AlertTriangle className="size-4 shrink-0 text-destructive" />
-      <span className="flex-1"><span className="font-medium text-destructive">Anomaly:</span> <span className="text-foreground">Unexpected +{a.change}% spike in {a.title}</span></span>
+      <motion.span layoutId={`detail-${a.title}`} className="flex-1"><span className="font-medium text-destructive">Anomaly:</span> <span className="text-foreground">Unexpected +{a.change}% spike in {a.title}</span></motion.span>
       <ChevronRight className="size-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1" />
     </button>
   );

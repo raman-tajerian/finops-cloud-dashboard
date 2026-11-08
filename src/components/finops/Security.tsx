@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { MetricInfo } from "./Help";
+import { AnimatedNumber, MotionBar, ProgressRing } from "@/components/motion";
 
 export interface SecSearch { sev: string; fstatus: string; prov: string; rule: string; q: string; sort: string; finding: string }
 
@@ -70,21 +71,16 @@ function ScoreCard({ trend }: { trend: SecurityDto["scoreTrend"] }) {
   const [asTable, setAsTable] = useState(false);
   const previous = trend.at(-2)?.score ?? score;
   const delta = score - previous;
-  const R = 52, C = 2 * Math.PI * R;
   return (
     <div className="space-y-8">
-    <PageHero label="Security score" value={<>{fmtScore(score)}<span className="text-xl text-muted-foreground"> / 100</span></>} change={`${delta >= 0 ? "+" : ""}${delta.toFixed(1)} vs previous month`} description="A simulated posture score based on weighted open findings for the current cloud filters." />
+    <PageHero label="Security score" value={<><AnimatedNumber value={score} format={fmtScore} /><span className="text-xl text-muted-foreground"> / 100</span></>} change={`${delta >= 0 ? "+" : ""}${delta.toFixed(1)} vs previous month`} description="A simulated posture score based on weighted open findings for the current cloud filters." />
     <article className="organic-card h-full p-7">
       <div className="flex items-start justify-between gap-3">
         <div><p className="flex items-center font-mono text-[10px] text-muted-foreground">Security score<MetricInfo label="Security score" /></p><p className="mt-1 text-[13px] text-muted-foreground">100 − weighted open findings (Critical 8 · High 4 · Medium 1.5 · Low 0.5), clamped at 0.</p></div>
         <TableToggle on={asTable} onChange={setAsTable} />
       </div>
       <div className="mt-4 flex items-center gap-7">
-        <svg viewBox="0 0 120 120" className="size-28 shrink-0" role="img" aria-label={`Security score ${fmtScore(score)} of 100`}>
-          <circle cx="60" cy="60" r={R} fill="none" strokeWidth="10" className="stroke-secondary" />
-          <circle cx="60" cy="60" r={R} fill="none" strokeWidth="10" strokeLinecap="round" className="stroke-primary transition-[stroke-dashoffset] duration-700" strokeDasharray={C} strokeDashoffset={C * (1 - score / 100)} transform="rotate(-90 60 60)" />
-          <text x="60" y="66" textAnchor="middle" className="fill-foreground metric-numbers text-2xl">{fmtScore(score)}</text>
-        </svg>
+        <ProgressRing value={score} label="Security score" size={112} stroke={8} decimals={1} suffix="" />
         <div className="min-w-0 flex-1">
           {asTable ? (
             <DataTableView caption="Security score trend, last 6 months" columns={["Month", "Score"]} rows={trend.map((t) => [t.month, fmtScore(t.score)])} />
@@ -95,7 +91,7 @@ function ScoreCard({ trend }: { trend: SecurityDto["scoreTrend"] }) {
                   <XAxis dataKey="month" tickLine={false} axisLine={false} fontSize={11} stroke="var(--muted-foreground)" />
                   <YAxis hide domain={[0, 100]} />
                   <Tooltip formatter={(v) => [fmtScore(Number(v)), "Score"]} cursor={{ fill: "var(--secondary)" }} contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", background: "var(--card)", fontSize: 12 }} />
-                  <Bar dataKey="score" radius={[6, 6, 0, 0]}>{trend.map((t, i) => <Cell key={t.month} fill={i === trend.length - 1 ? "var(--primary)" : "var(--chart-2)"} />)}</Bar>
+                  <Bar dataKey="score" isAnimationActive={false} shape={<MotionBar />} radius={[6, 6, 0, 0]}>{trend.map((t, i) => <Cell key={t.month} fill={i === trend.length - 1 ? "var(--primary)" : "var(--chart-2)"} />)}</Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>

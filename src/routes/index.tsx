@@ -47,10 +47,10 @@ function Index() {
         {tab === "summary" && (
           <section className="grid gap-8 xl:grid-cols-12">
             <div className="min-w-0 xl:col-span-12"><DataGate h="h-20"><OverviewHero /></DataGate></div>
-            <div className="min-w-0 xl:col-span-12"><DataGate h="h-16"><OverviewKpis group="summary" /></DataGate></div>
-            <div className="min-w-0 xl:col-span-8"><DataGate h="h-72"><CostTrendCard /></DataGate></div>
-            <div className="min-w-0 xl:col-span-4"><DataGate h="h-72"><TopMovers /></DataGate></div>
-            <div className="min-w-0 xl:col-span-12"><CardBoundary label="Top resources"><TopResourcesCard /></CardBoundary></div>
+            <Reveal className="min-w-0 xl:col-span-12"><DataGate h="h-16"><OverviewKpis group="summary" /></DataGate></Reveal>
+            <Reveal className="min-w-0 xl:col-span-8"><DataGate h="h-72"><CostTrendCard /></DataGate></Reveal>
+            <Reveal className="min-w-0 xl:col-span-4"><DataGate h="h-72"><TopMovers /></DataGate></Reveal>
+            <Reveal className="min-w-0 xl:col-span-12"><CardBoundary label="Top resources"><TopResourcesCard /></CardBoundary></Reveal>
           </section>
         )}
         {tab === "unit-economics" && (

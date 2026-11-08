@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Activity, ArrowDownRight, ArrowUpRight, Check, ChevronRight, CircleAlert, Cpu, Database, MemoryStick, Search, Server, Sparkles } from "lucide-react";
 import { allocation, fmtMoney, fmtMoneyCompact, type CostPoint, type ResourceStatus } from "@/lib/finops-data";
 import { useDashboardData, useResources } from "@/lib/queries";
@@ -8,24 +8,10 @@ import { CardSkeleton, ErrorState, FilterEmptyState } from "@/components/finops/
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
+import { MotionDonut, ProgressRing } from "@/components/motion";
 
 const Label = ({ children }: { children: React.ReactNode }) => <p className="text-[15px] font-medium leading-snug text-foreground">{children}</p>;
 const tooltipStyle = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 14, fontSize: 12, color: "var(--foreground)" };
-
-function Ring({ value, tone = "success", size = 96 }: { value: number; tone?: "success" | "warning"; size?: number }) {
-  const r = 34;
-  const circumference = 2 * Math.PI * r;
-  const color = tone === "success" ? "var(--success)" : "var(--warning)";
-  return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <svg viewBox="0 0 84 84" className="size-full -rotate-90" aria-label={`${value} percent`}>
-        <circle cx="42" cy="42" r={r} fill="none" stroke="var(--muted)" strokeWidth="4" />
-        <circle className="transition-[stroke-dashoffset] duration-700 ease-out" cx="42" cy="42" r={r} fill="none" stroke={color} strokeWidth="4" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - value / 100)} />
-      </svg>
-      <span className="metric-numbers absolute inset-0 grid place-items-center text-sm font-medium">{value}%</span>
-    </div>
-  );
-}
 
 export function CostTrend({ data }: { data: CostPoint[] }) {
   return (
@@ -41,8 +27,8 @@ export function CostTrend({ data }: { data: CostPoint[] }) {
             <XAxis dataKey="label" tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} minTickGap={28} />
             <YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tooltipStyle} formatter={(v) => fmtMoney(Number(v))} />
-            <Area type="monotone" dataKey="aws" name="AWS" stroke="var(--aws)" strokeWidth={2} fill="var(--aws)" fillOpacity={0.08} animationDuration={900} animationEasing="ease-out" />
-            <Area type="monotone" dataKey="azure" name="Azure" stroke="var(--azure)" strokeWidth={2} fill="transparent" animationDuration={1050} animationEasing="ease-out" />
+            <Area type="monotone" dataKey="aws" name="AWS" stroke="var(--aws)" strokeWidth={2} fill="var(--aws)" fillOpacity={0.08} isAnimationActive={false} />
+            <Area type="monotone" dataKey="azure" name="Azure" stroke="var(--azure)" strokeWidth={2} fill="transparent" isAnimationActive={false} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -66,10 +52,10 @@ export function InfrastructureStatus() {
   }, []);
   return (
     <article id="infrastructure" className="organic-card p-7 md:p-8">
-      <div className="flex flex-wrap items-start justify-between gap-4"><div><Label>Live infrastructure</Label><h2 className="mt-2 text-xl font-medium">Kubernetes health</h2></div><span className="inline-flex items-center gap-2 rounded-full bg-success-soft px-3 py-1.5 text-xs text-success"><span className="pulse-dot size-1.5 rounded-full bg-success" />Live · {tick + 1}s</span></div>
+      <div className="flex flex-wrap items-start justify-between gap-4"><div><Label>Live infrastructure</Label><h2 className="mt-2 text-xl font-medium">Kubernetes health</h2></div><span className="inline-flex items-center gap-2 rounded-full bg-success-soft px-3 py-1.5 text-xs text-success"><span className="size-1.5 rounded-full bg-success" />Live · {tick + 1}s</span></div>
       <div className="mt-7 grid gap-7 md:grid-cols-2">
-        <div className="interactive-surface flex items-center gap-4 rounded-2xl border border-transparent bg-secondary p-4"><Ring value={cpu} size={78} /><div><Cpu className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">CPU utilization</p><p className="text-xs text-muted-foreground">Across 42 nodes</p></div></div>
-        <div className="interactive-surface flex items-center gap-4 rounded-2xl border border-transparent bg-secondary p-4"><Ring value={memory} tone="warning" size={78} /><div><MemoryStick className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">Memory</p><p className="text-xs text-muted-foreground">9.8 TB allocated</p></div></div>
+        <div className="interactive-surface flex items-center gap-4 rounded-2xl border border-transparent bg-secondary p-4"><ProgressRing value={cpu} label="CPU utilization" size={78} stroke={5} color="var(--success)" /><div><Cpu className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">CPU utilization</p><p className="text-xs text-muted-foreground">Across 42 nodes</p></div></div>
+        <div className="interactive-surface flex items-center gap-4 rounded-2xl border border-transparent bg-secondary p-4"><ProgressRing value={memory} label="Memory utilization" size={78} stroke={5} color="var(--warning)" /><div><MemoryStick className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">Memory</p><p className="text-xs text-muted-foreground">9.8 TB allocated</p></div></div>
         <div className="interactive-surface rounded-2xl border border-transparent bg-secondary p-4 md:col-span-2"><div className="flex items-center justify-between"><span className="text-xs font-medium">Cluster status</span><span className="text-xs text-success">286 / 288 pods</span></div><div className="mt-4 grid grid-cols-3 gap-2 text-center"><div><p className="metric-numbers text-lg font-medium">3</p><p className="text-[10px] text-muted-foreground">Clusters</p></div><div><p className="metric-numbers text-lg font-medium">42</p><p className="text-[10px] text-muted-foreground">Nodes</p></div><div><p className="metric-numbers text-lg font-medium text-warning">2</p><p className="text-[10px] text-muted-foreground">Pending</p></div></div></div>
       </div>
       <div className="mt-6 border-t border-border pt-5"><div className="mb-3 flex items-center justify-between"><span className="text-xs font-medium">Deployment activity</span><Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={() => toast("Deployment log opened")}>View all <ChevronRight /></Button></div><div className="space-y-3">{initialLogs.map((log) => <div key={log.time} className="grid grid-cols-[66px_1fr_auto] items-center gap-2 text-xs"><span className="metric-numbers font-mono text-muted-foreground">{log.time}</span><span className="truncate">{log.event}</span><span className="text-success">{log.state}</span></div>)}</div></div>
@@ -89,7 +75,7 @@ export function SavingsWorkflow() {
   return (
     <article id="savings" className="organic-card h-full p-7 md:p-8">
       <div className="flex items-start justify-between"><div><Label>Savings workflow</Label><h2 className="mt-2 text-xl font-medium">{fmtMoney(pending.reduce((sum, item) => sum + item.amount, 0))} ready</h2></div><Sparkles className="size-5 text-primary" /></div>
-       <div className="mt-6 space-y-3">{savingItems.map((item) => { const complete = done.includes(item.id); return <div key={item.id} className={`interactive-surface rounded-2xl border p-4 ${complete ? "border-success/20 bg-success-soft" : "border-border bg-secondary"}`}><div className="flex gap-3"><div className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full transition-transform duration-300 ${complete ? "scale-110 bg-success text-primary-foreground" : "bg-card text-muted-foreground"}`}>{complete ? <Check className="size-3.5 animate-in zoom-in" /> : <CircleAlert className="size-3.5" />}</div><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-3"><p className={`text-sm font-medium transition-colors ${complete ? "text-muted-foreground line-through" : ""}`}>{item.title}</p><span className="metric-numbers text-sm font-medium text-primary">{fmtMoney(item.amount)}</span></div><p className="mt-1 text-xs text-muted-foreground">{item.detail}</p>{!complete && <Button variant="ghost" size="sm" className="mt-2 h-7 px-0 text-xs text-foreground hover:bg-transparent" onClick={() => { setDone((current) => [...current, item.id]); toast.success(`${item.title} marked complete`); }}>Mark complete <ArrowDownRight /></Button>}</div></div></div>; })}</div>
+       <div className="mt-6 space-y-3">{savingItems.map((item) => { const complete = done.includes(item.id); return <div key={item.id} className={`interactive-surface rounded-2xl border p-4 ${complete ? "border-success/20 bg-success-soft" : "border-border bg-secondary"}`}><div className="flex gap-3"><div className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full transition-transform duration-300 ${complete ? "scale-110 bg-success text-primary-foreground" : "bg-card text-muted-foreground"}`}>{complete ? <Check className="size-3.5" /> : <CircleAlert className="size-3.5" />}</div><div className="min-w-0 flex-1"><div className="flex items-start justify-between gap-3"><p className={`text-sm font-medium transition-colors ${complete ? "text-muted-foreground line-through" : ""}`}>{item.title}</p><span className="metric-numbers text-sm font-medium text-primary">{fmtMoney(item.amount)}</span></div><p className="mt-1 text-xs text-muted-foreground">{item.detail}</p>{!complete && <Button variant="ghost" size="sm" className="mt-2 h-7 px-0 text-xs text-foreground hover:bg-transparent" onClick={() => { setDone((current) => [...current, item.id]); toast.success(`${item.title} marked complete`); }}>Mark complete <ArrowDownRight /></Button>}</div></div></div>; })}</div>
       {done.length > 0 && <Button variant="outline" className="mt-4 w-full rounded-xl" onClick={() => setDone([])}>Reset workflow</Button>}
     </article>
   );
@@ -98,7 +84,7 @@ export function SavingsWorkflow() {
 export function Allocation() {
   const total = allocation.reduce((sum, item) => sum + item.value, 0);
   return (
-    <article className="organic-card h-full p-7 md:p-8"><Label>Cost allocation</Label><h2 className="mt-2 text-xl font-medium">By service</h2><div className="relative mt-4 h-48"><ResponsiveContainer><PieChart><Pie data={allocation} dataKey="value" innerRadius={58} outerRadius={78} paddingAngle={4} stroke="none">{allocation.map((item) => <Cell key={item.name} fill={item.color} />)}</Pie><Tooltip contentStyle={tooltipStyle} formatter={(v) => fmtMoney(Number(v))} /></PieChart></ResponsiveContainer><div className="pointer-events-none absolute inset-0 grid place-items-center text-center"><div><p className="metric-numbers text-base font-medium">{fmtMoney(total)}</p><p className="text-[10px] text-muted-foreground">this month</p></div></div></div><ul className="space-y-3">{allocation.map((item) => <li key={item.name} className="flex items-center gap-3 text-xs"><i className="size-2 rounded-full" style={{ background: item.color }} /><span className="text-muted-foreground">{item.name}</span><span className="metric-numbers ml-auto">{Math.round(item.value / total * 100)}%</span></li>)}</ul></article>
+    <article className="organic-card h-full p-7 md:p-8"><Label>Cost allocation</Label><h2 className="mt-2 text-xl font-medium">By service</h2><div className="relative mt-4 h-48"><MotionDonut className="h-full w-full" data={allocation.map((item) => ({ name: item.name, value: item.value, color: item.color }))} formatValue={fmtMoney} /><div className="pointer-events-none absolute inset-0 grid place-items-center text-center"><div><p className="metric-numbers text-base font-medium">{fmtMoney(total)}</p><p className="text-[10px] text-muted-foreground">this month</p></div></div></div><ul className="space-y-3">{allocation.map((item) => <li key={item.name} className="flex items-center gap-3 text-xs"><i className="size-2 rounded-full" style={{ background: item.color }} /><span className="text-muted-foreground">{item.name}</span><span className="metric-numbers ml-auto">{Math.round(item.value / total * 100)}%</span></li>)}</ul></article>
   );
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDown, ArrowUp, Ban, ChevronLeft, ChevronRight, Columns3, Download, Lightbulb, Rows3, Search, Server, Tag, Users } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +16,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { motion } from "framer-motion";
+import { AnimatedNumber, ChartReveal } from "@/components/motion";
 
 export type SortKey = "name" | "provider" | "service" | "region" | "environment" | "team" | "monthlyCost" | "cpuAvg" | "memAvg" | "status";
 export interface TableSearch { q: string; sort: string; dir: string; page: number; size: number; id: string; status: string; service: string; ids?: string }
@@ -100,7 +102,7 @@ export function ResourcesWorkspace({ search, setSearch, presetStatus }: { search
 
   return (
     <div className="space-y-8">
-      <PageHero label="Resources in view" value={d.count.toLocaleString("en-US")} change={`${fmtMoney(d.monthlyTotal)} monthly cost`} description="Search, sort and inspect every matching resource without losing the current cloud filters." />
+      <PageHero label="Resources in view" value={<AnimatedNumber value={d.count} format={(n) => n.toLocaleString("en-US")} />} change={`${fmtMoney(d.monthlyTotal)} monthly cost`} description="Search, sort and inspect every matching resource without losing the current cloud filters." />
       <div className="grid gap-7 sm:grid-cols-3">
         <Stat label="Resources" value={d.count.toLocaleString("en-US")} />
         <Stat label="Monthly cost (last 30 days)" value={fmtMoney(d.monthlyTotal)} />
@@ -173,13 +175,13 @@ export function ResourcesWorkspace({ search, setSearch, presetStatus }: { search
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id} className="group cursor-pointer border-t border-border hover:bg-secondary" onClick={() => setSearch({ id: r.id })}>
+                {rows.map((r, index) => (
+                  <motion.tr layout={index < 25 ? "position" : false} key={r.id} data-resource-row={r.id} tabIndex={0} className="group cursor-pointer border-t border-border hover:bg-secondary focus-visible:outline-2 focus-visible:outline-ring" onKeyDown={(e) => { if (e.currentTarget === e.target && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); e.currentTarget.focus(); setSearch({ id: r.id }); } }} onClick={(e) => { e.currentTarget.focus(); setSearch({ id: r.id }); }}>
                     <td className={`sticky left-0 z-10 bg-card px-3 ${py} group-hover:bg-secondary`} onClick={(e) => e.stopPropagation()}>
                       <Checkbox aria-label={`Select ${r.name}`} className="size-5" checked={selected.has(r.id)} onCheckedChange={(on) => setSelected((cur) => { const n = new Set(cur); if (on) n.add(r.id); else n.delete(r.id); return n; })} />
                     </td>
                     {visible.map((c) => <Cell key={c.k} k={c.k} r={r} py={py} num={c.num} />)}
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>
@@ -231,28 +233,36 @@ const Stat = ({ label, value }: { label: string; value: string }) => (
 
 function Cell({ k, r, py, num }: { k: SortKey; r: ResourceRow; py: string; num?: boolean | undefined }) {
   const cls = `px-3 ${py} ${num ? "metric-numbers text-right" : ""}`;
-  if (k === "name") return <td className={`sticky left-12 z-10 max-w-[220px] bg-card px-3 ${py} group-hover:bg-secondary`}><p className="truncate font-medium">{r.name}</p><p className="truncate text-[11px] text-muted-foreground">{r.sku}</p></td>;
+  if (k === "name") return <td className={`sticky left-12 z-10 max-w-[220px] bg-card px-3 ${py} group-hover:bg-secondary`}><motion.p layoutId={`resource-title-${r.id}`} className="truncate font-medium">{r.name}</motion.p><p className="truncate text-[11px] text-muted-foreground">{r.sku}</p></td>;
   if (k === "monthlyCost") return <td className={cls}>{fmtMoney(r.monthlyCost)}</td>;
   if (k === "cpuAvg" || k === "memAvg") return <td className={`${cls} ${k === "cpuAvg" && r.cpuAvg < 25 ? "text-warning" : ""}`}>{r[k]}%</td>;
   if (k === "status") return <td className={cls}><StatusBadge tone={tone[r.status]}>{r.status}</StatusBadge></td>;
   return <td className={`${cls} whitespace-nowrap text-muted-foreground`}>{r[k]}</td>;
 }
 
+export function focusResourceRow(id: string): boolean {
+  const row = Array.from(document.querySelectorAll<HTMLElement>("[data-resource-row]")).find((el) => el.dataset["resourceRow"] === id);
+  row?.focus();
+  return Boolean(row);
+}
+
 function ResourceDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const q = useResource(id || undefined);
   const [costTable, setCostTable] = useState(false);
   const [utilTable, setUtilTable] = useState(false);
+  const sourceId = useRef(id);
+  useEffect(() => { if (id) sourceId.current = id; }, [id]);
   const d = q.data;
   const axis = { tick: { fontSize: 10, fill: "var(--muted-foreground)" }, tickLine: false, axisLine: false } as const;
   return (
     <Sheet open={!!id} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
+      <SheetContent className="w-full overflow-y-auto sm:max-w-xl" onCloseAutoFocus={(e) => { if (focusResourceRow(sourceId.current)) e.preventDefault(); }}>
         {q.isPending && <div className="p-4"><CardSkeleton h="h-64" /></div>}
         {q.isError && <div className="p-4"><ErrorState message="We couldn't load this resource." onRetry={() => q.refetch()} /></div>}
         {q.isSuccess && !d && <><SheetHeader><SheetTitle>Resource not found</SheetTitle><SheetDescription>The link points to a resource that no longer exists.</SheetDescription></SheetHeader></>}
         {d && <>
           <SheetHeader>
-            <SheetTitle className="break-all">{d.resource.name}</SheetTitle>
+            <motion.div layoutId={`resource-title-${d.resource.id}`}><SheetTitle className="break-all">{d.resource.name}</SheetTitle></motion.div>
             <SheetDescription>{d.resource.provider} {d.resource.service} · {d.resource.sku} · {d.resource.region}</SheetDescription>
           </SheetHeader>
           <div className="space-y-4 px-4 pb-6">
@@ -278,22 +288,22 @@ function ResourceDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 <div className="flex items-center justify-between"><Label>Daily cost · last 90 days</Label><TableToggle on={costTable} onChange={setCostTable} /></div>
                 <div className="mt-3 h-64">
                   {costTable ? <DataTableView caption="Daily cost" columns={["Day", "Cost"]} rows={d.cost.map((c) => [c.day, fmtMoney(c.cost, { decimals: 2 })])} /> :
-                  <ResponsiveContainer><AreaChart data={d.cost} margin={{ left: -6, right: 8 }}>
+                  <ChartReveal className="h-full" motionKey={`${id}-cost`}><ResponsiveContainer><AreaChart data={d.cost} margin={{ left: -6, right: 8 }}>
                     <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} /><XAxis dataKey="day" {...axis} minTickGap={28} /><YAxis {...axis} width={48} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
                     <Tooltip contentStyle={tip} formatter={(v) => [fmtMoney(Number(v), { decimals: 2 }), "Cost"]} />
-                    <Area dataKey="cost" stroke="var(--chart-1)" fill="var(--chart-1)" fillOpacity={0.1} strokeWidth={1.5} />
-                  </AreaChart></ResponsiveContainer>}
+                    <Area dataKey="cost" stroke="var(--chart-1)" fill="var(--chart-1)" fillOpacity={0.1} strokeWidth={1.5} isAnimationActive={false} />
+                  </AreaChart></ResponsiveContainer></ChartReveal>}
                 </div>
               </TabsContent>
               <TabsContent value="utilization">
                 <div className="flex items-center justify-between"><Label>CPU and memory · last 90 days</Label><TableToggle on={utilTable} onChange={setUtilTable} /></div>
                 <div className="mt-3 h-64">
                   {utilTable ? <DataTableView caption="Utilization" columns={["Day", "CPU %", "Memory %"]} rows={d.util.map((u) => [u.day, u.cpu.toFixed(0), u.mem.toFixed(0)])} /> :
-                  <ResponsiveContainer><LineChart data={d.util} margin={{ left: -6, right: 8 }}>
+                  <ChartReveal className="h-full" motionKey={`${id}-util`}><ResponsiveContainer><LineChart data={d.util} margin={{ left: -6, right: 8 }}>
                     <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} /><XAxis dataKey="day" {...axis} minTickGap={28} /><YAxis {...axis} width={40} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                     <Tooltip contentStyle={tip} formatter={(v, n) => [`${Number(v).toFixed(0)}%`, String(n)]} />
-                    <Line dataKey="cpu" name="CPU" stroke="var(--chart-2)" dot={false} strokeWidth={1.5} /><Line dataKey="mem" name="Memory" stroke="var(--chart-3)" dot={false} strokeWidth={1.5} />
-                  </LineChart></ResponsiveContainer>}
+                    <Line dataKey="cpu" name="CPU" stroke="var(--chart-2)" dot={false} strokeWidth={1.5} isAnimationActive={false} /><Line dataKey="mem" name="Memory" stroke="var(--chart-3)" dot={false} strokeWidth={1.5} isAnimationActive={false} />
+                  </LineChart></ResponsiveContainer></ChartReveal>}
                 </div>
               </TabsContent>
               <TabsContent value="tags">

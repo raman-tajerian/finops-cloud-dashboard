@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MetricInfo } from "./Help";
+import { AnimatedNumber, ChartReveal, MotionBar } from "@/components/motion";
 
 export type ChartType = "area" | "bar" | "line";
 export interface ExplorerState { group: GroupBy; chart: ChartType; compare: boolean }
@@ -60,7 +61,7 @@ export function ExplorerMain({ state, setState }: { state: ExplorerState; setSta
   const change = d.previousTotal ? ((d.total - d.previousTotal) / d.previousTotal) * 100 : 0;
   return (
     <div className="space-y-8">
-      <PageHero label="Spend in selected period" value={fmtMoney(d.total)} change={<span className={change > 0 ? "text-warning" : "text-success"}>{change > 0 ? "+" : ""}{change.toFixed(1)}% vs previous period</span>} description={`Explore the total by ${groupLabels[state.group].toLowerCase()} and move between visual and tabular views.`} />
+      <PageHero label="Spend in selected period" value={<AnimatedNumber value={d.total} format={fmtMoney} />} change={<span className={change > 0 ? "text-warning" : "text-success"}>{change > 0 ? "+" : ""}{change.toFixed(1)}% vs previous period</span>} description={`Explore the total by ${groupLabels[state.group].toLowerCase()} and move between visual and tabular views.`} />
       <div className="flex flex-wrap items-center gap-3">
         <Seg label="Group by" value={state.group} onChange={(group) => setState({ group })} options={(Object.keys(groupLabels) as GroupBy[]).map((g) => [g, groupLabels[g]])} />
         <Seg label="Chart type" value={state.chart} onChange={(chart) => setState({ chart })} options={[["area", "Area"], ["bar", "Stacked bar"], ["line", "Line"]]} />
@@ -160,7 +161,7 @@ function ExplorerChart({ d, state }: { d: ExploreDto; state: ExplorerState }) {
     <YAxis key="y" {...axis} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />,
     <Tooltip key="t" contentStyle={tip} formatter={(v, n) => [fmtMoney(Number(v)), String(n)]} />,
   ];
-  const overlay = state.compare ? <Line key="prev" dataKey="previous" name="Previous period (total)" stroke="var(--foreground)" strokeOpacity={0.55} strokeDasharray="5 4" dot={false} strokeWidth={1.5} /> : null;
+  const overlay = state.compare ? <Line key="prev" dataKey="previous" name="Previous period (total)" stroke="var(--foreground)" strokeOpacity={0.55} strokeDasharray="5 4" dot={false} strokeWidth={1.5} isAnimationActive={false} /> : null;
   return (
     <article className="organic-card p-7">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -171,15 +172,15 @@ function ExplorerChart({ d, state }: { d: ExploreDto; state: ExplorerState }) {
       </div>
       <div className="mt-6 h-[420px]" aria-live="polite">
         {asTable ? <DataTableView caption={`Daily spend by ${state.group}`} columns={["Day", ...d.keys, "Total", ...(state.compare ? ["Previous"] : [])]} rows={d.series.map((s) => [String(s["day"]), ...d.keys.map((k) => fmtMoney(Number(s[k]))), fmtMoney(Number(s["total"])), ...(state.compare ? [fmtMoney(Number(s["previous"]))] : [])])} /> :
-        <ResponsiveContainer key={`${state.chart}-${state.group}`}>
+        <ChartReveal className="h-full" motionKey={`${state.chart}-${state.group}`}><ResponsiveContainer>
           {state.chart === "bar" ? (
-            <BarChart data={d.series}>{children}{d.keys.map((k, i) => <Bar key={k} dataKey={k} stackId="s" fill={col(i)} fillOpacity={0.85} />)}{overlay}</BarChart>
+            <BarChart data={d.series}>{children}{d.keys.map((k, i) => <Bar key={k} dataKey={k} stackId="s" fill={col(i)} fillOpacity={0.85} isAnimationActive={false} shape={<MotionBar />} />)}{overlay}</BarChart>
           ) : state.chart === "line" ? (
-            <LineChart data={d.series}>{children}{d.keys.map((k, i) => <Line key={k} dataKey={k} stroke={col(i)} dot={false} strokeWidth={1.6} />)}{overlay}</LineChart>
+            <LineChart data={d.series}>{children}{d.keys.map((k, i) => <Line key={k} dataKey={k} stroke={col(i)} dot={false} strokeWidth={1.6} isAnimationActive={false} />)}{overlay}</LineChart>
           ) : (
-            <AreaChart data={d.series}>{children}{d.keys.map((k, i) => <Area key={k} dataKey={k} stackId="s" stroke={col(i)} fill={col(i)} fillOpacity={0.08} />)}{overlay}</AreaChart>
+            <AreaChart data={d.series}>{children}{d.keys.map((k, i) => <Area key={k} dataKey={k} stackId="s" stroke={col(i)} fill={col(i)} fillOpacity={0.08} isAnimationActive={false} />)}{overlay}</AreaChart>
           )}
-        </ResponsiveContainer>}
+        </ResponsiveContainer></ChartReveal>}
       </div>
     </article>
   );

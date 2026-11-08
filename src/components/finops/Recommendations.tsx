@@ -14,6 +14,8 @@ import { recStatus, setSession, useSession, type RecStatus } from "@/lib/session
 import type { Level, SavingCategory, SavingItemDto, SavingsDto } from "@/types/finops";
 import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, PageHero, TableToggle } from "./States";
 import { Button } from "@/components/ui/button";
+import { AnimatedNumber, MotionBar } from "@/components/motion";
+import { motion } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -90,12 +92,12 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
             <div className="mt-5"><EmptyState icon={Lightbulb} title={d.items.length ? "No recommendations have the status and filters selected in this tab." : "No savings found for the selected global filters."} action={!d.items.length ? "Reset filters" : filtersOn ? "Clear filters" : "View savings tracker"} onAction={() => { if (!d.items.length) reset(); else if (filtersOn) setSearch({ cat: "All", effort: "All", risk: "All", status: "All" }); else navigate({ to: "/recommendations", search: (p: Record<string, unknown>) => ({ ...p, tab: "tracker" }) } as never); }} /></div>
           ) : (
             <ul className="mt-5 divide-y divide-border">
-              {list.map((i) => {
+              {list.map((i, index) => {
                 const s = st(i.id);
                 return (
-                  <li key={i.id} className={`flex flex-col gap-3 py-4 lg:flex-row lg:items-center ${s === "Ignored" || s === "Snoozed" ? "opacity-60" : ""}`}>
+                  <motion.li layout={index < 25 ? "position" : false} key={i.id} className={`flex flex-col gap-3 py-4 lg:flex-row lg:items-center ${s === "Ignored" || s === "Snoozed" ? "opacity-60" : ""}`}>
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2"><p className="text-sm font-medium">{i.title}</p><Pill c={statusTone[s]}>{s}</Pill>{s === "Snoozed" && recs[i.id]?.snoozedUntil && <Pill c="bg-secondary text-muted-foreground">Snoozed until {fmtDemoDate(recs[i.id]!.snoozedUntil!)} · Demo</Pill>}{recs[i.id]?.team && <Pill c="bg-secondary text-muted-foreground">{recs[i.id]!.team}</Pill>}</div>
+                      <div className="flex flex-wrap items-center gap-2"><motion.p layoutId={`recommendation-${i.id}`} className="text-sm font-medium">{i.title}</motion.p><Pill c={statusTone[s]}>{s}</Pill>{s === "Snoozed" && recs[i.id]?.snoozedUntil && <Pill c="bg-secondary text-muted-foreground">Snoozed until {fmtDemoDate(recs[i.id]!.snoozedUntil!)} · Demo</Pill>}{recs[i.id]?.team && <Pill c="bg-secondary text-muted-foreground">{recs[i.id]!.team}</Pill>}</div>
                       <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         <span>{i.category}</span>
                         <Link to="/resources" search={(prev: Record<string, unknown>) => ({ ...prev, ids: i.resourceIds.join(","), tab: "list" }) as never} className="underline-offset-2 hover:underline">{i.resourceIds.length} resource{i.resourceIds.length > 1 ? "s" : ""}</Link>
@@ -116,7 +118,7 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
                       </>}
                       {(s === "Ignored" || s === "Snoozed" || s === "Done") && <Button size="sm" variant="ghost" className="h-10" onClick={() => setStatus(i.id, "Open")}>Reopen</Button>}
                     </div>
-                  </li>
+                  </motion.li>
                 );
               })}
             </ul>
@@ -126,7 +128,7 @@ function Workspace({ d, search, setSearch, tab }: { d: SavingsDto; search: RecSe
 
   return (
     <div className="grid gap-8">
-      {tab === "open" && <PageHero label="Open savings opportunity" value={<>{fmtMoney(open)}<span className="text-xl text-muted-foreground">/mo</span></>} change={`${d.items.filter((i) => st(i.id) === "Open" || st(i.id) === "In progress").length} actions to review`} description="Prioritized actions with clear effort, risk and estimated monthly impact." />}
+      {tab === "open" && <PageHero label="Open savings opportunity" value={<><AnimatedNumber value={open} format={fmtMoney} /><span className="text-xl text-muted-foreground">/mo</span></>} change={`${d.items.filter((i) => st(i.id) === "Open" || st(i.id) === "In progress").length} actions to review`} description="Prioritized actions with clear effort, risk and estimated monthly impact." />}
       {summary}
       {tab === "tracker" ? (
         <div className="grid gap-7 xl:grid-cols-2">
@@ -171,8 +173,8 @@ function Tracker({ d, open }: { d: SavingsDto; open: number }) {
               <XAxis dataKey="month" tickFormatter={(v: string) => v.slice(0, 3)} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
               <YAxis width={48} tickFormatter={(v: number) => fmtMoneyCompact(Number(v))} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={tip} formatter={(v) => fmtMoney(Number(v))} cursor={{ fill: "var(--secondary)" }} />
-              <Bar dataKey="potential" name="Potential" fill="var(--chart-2)" fillOpacity={0.78} radius={[6, 6, 0, 0]} />
-              <Bar dataKey="realized" name="Realized (demo)" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="potential" name="Potential" fill="var(--chart-2)" fillOpacity={0.78} isAnimationActive={false} shape={<MotionBar />} radius={[6, 6, 0, 0]} />
+              <Bar dataKey="realized" name="Realized (demo)" fill="var(--chart-1)" isAnimationActive={false} shape={<MotionBar />} radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -210,7 +212,7 @@ function ReviewDrawer({ item, onClose }: { item: SavingItemDto | null; onClose: 
     <Sheet open={!!item} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
         {item && (<>
-          <SheetHeader><SheetTitle>{item.title}</SheetTitle><SheetDescription>{item.category} · {item.detail}</SheetDescription></SheetHeader>
+          <motion.div layoutId={`recommendation-${item.id}`}><SheetHeader><SheetTitle>{item.title}</SheetTitle><SheetDescription>{item.category} · {item.detail}</SheetDescription></SheetHeader></motion.div>
           <div className="space-y-5 px-4 pb-6">
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-success-soft p-4"><p className="text-xs text-muted-foreground">Estimated saving</p><p className="metric-numbers mt-1 text-xl text-success">{fmtMoney(item.savings)}/mo</p></div>

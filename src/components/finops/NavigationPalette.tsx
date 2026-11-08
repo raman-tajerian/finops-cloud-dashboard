@@ -11,6 +11,8 @@ import { useGlobalFilters } from "@/lib/filters";
 import { recordSearch, setSession, useSession } from "@/lib/session-store";
 import { api } from "@/lib/api";
 import { reportToCsv } from "@/data/reports";
+import { motion } from "framer-motion";
+import { MOTION } from "@/lib/motion";
 
 export function NavigationPalette({ open, onOpenChange, returnFocus, createBudget, openHelp, scan }: { open: boolean; onOpenChange: (v: boolean) => void; returnFocus: () => void; createBudget: () => void; openHelp: () => void; scan: () => void }) {
   const [query, setQuery] = useState("");
@@ -45,10 +47,10 @@ export function NavigationPalette({ open, onOpenChange, returnFocus, createBudge
     { label: "Export CSV", fn: () => { remember(); void exportCsv(); } },
     { label: "Help and keyboard shortcuts", fn: () => run(openHelp) }, { label: "Run full scan", fn: () => run(scan) },
   ].filter((a) => fuzzyMatch(a.label, query));
-  return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent className="max-w-xl overflow-hidden p-0" onCloseAutoFocus={(e) => { e.preventDefault(); returnFocus(); }}><DialogTitle className="sr-only">Search Fern</DialogTitle><DialogDescription className="sr-only">Find pages, tabs, resources and actions.</DialogDescription><Command shouldFilter={false}><CommandInput aria-label="Search Fern" value={query} onValueChange={setQuery} placeholder="Search pages, resources, terms or actions…" /><CommandList className="max-h-[60dvh]">
+  return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent className="max-w-xl overflow-hidden p-0 data-[state=closed]:animate-none data-[state=open]:animate-none" onCloseAutoFocus={(e) => { e.preventDefault(); returnFocus(); }}><DialogTitle className="sr-only">Search Fern</DialogTitle><DialogDescription className="sr-only">Find pages, tabs, resources and actions.</DialogDescription><motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: MOTION.duration.base, ease: MOTION.easeOut }}><Command shouldFilter={false}><CommandInput aria-label="Search Fern" value={query} onValueChange={setQuery} placeholder="Search pages, resources, terms or actions…" /><CommandList className="max-h-[60dvh]">
     {!query && searches.length > 0 && <CommandGroup heading="Recent searches">{searches.map((s) => <CommandItem key={s} value={`recent:${s}`} onSelect={() => setQuery(s)}>{s}</CommandItem>)}</CommandGroup>}
     {["Pages", "Tabs", "Resources", "Recommendations", "Findings", "Settings"].map((group) => { const rows = targets.filter((t) => t.group === group); return rows.length > 0 && <CommandGroup key={group} heading={group}>{rows.map((t, i) => <CommandItem key={`${group}:${t.to}:${i}`} value={`${group}:${t.to}:${i}`} onSelect={() => go(t)}><span className="min-w-0 flex-1 break-words">{t.label}</span></CommandItem>)}</CommandGroup>; })}
     {actions.length > 0 && <CommandGroup heading="Actions">{actions.map((a) => <CommandItem key={a.label} value={a.label} disabled={busy && a.label === "Export CSV"} onSelect={a.fn}>{a.label}{busy && a.label === "Export CSV" && "…"}</CommandItem>)}</CommandGroup>}
     {!targets.length && !actions.length && <div className="space-y-3 p-6 text-center"><p className="text-sm text-muted-foreground">Nothing matches this search in the selected filters.</p><Button variant="secondary" onClick={() => setQuery("")}>Clear search</Button></div>}
-  </CommandList><div className="flex flex-wrap gap-4 border-t border-border p-3 text-xs text-muted-foreground"><span>↑ ↓ Navigate</span><span>↵ Open</span><span>Esc Close</span></div></Command></DialogContent></Dialog>;
+  </CommandList><div className="flex flex-wrap gap-4 border-t border-border p-3 text-xs text-muted-foreground"><span>↑ ↓ Navigate</span><span>↵ Open</span><span>Esc Close</span></div></Command></motion.div></DialogContent></Dialog>;
 }

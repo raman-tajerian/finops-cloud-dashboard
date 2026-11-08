@@ -168,8 +168,10 @@ svg.lucide { stroke-width: 1.5; }
 .recharts-line-curve, .recharts-area-curve { stroke-width: 2px; stroke-linecap: round; stroke-linejoin: round; }
 .recharts-tooltip-wrapper .recharts-default-tooltip { background: var(--popover) !important; border: 1px solid var(--border) !important; border-radius: 12px !important; box-shadow: var(--shadow-card); padding: 8px 10px !important; }
 .recharts-text { fill: var(--muted-foreground); }
-@keyframes sand-shimmer { from { background-position: -200% 0 } to { background-position: 200% 0 } }
-[data-slot="skeleton"], .animate-pulse.bg-muted { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: sand-shimmer 1.6s linear infinite; }
+[data-slot="skeleton"] { background: var(--skeleton-base); }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 240ms; animation-timing-function: cubic-bezier(.2,.8,.2,1); }
+html[data-reduce-motion="true"]::view-transition-old(root), html[data-reduce-motion="true"]::view-transition-new(root) { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; } }
 table thead { position: sticky; top: 0; z-index: 1; background: color-mix(in srgb, var(--card) 88%, transparent); backdrop-filter: blur(12px); }
 table td, table th { border: 0; }
 main table :is(tbody tr, tfoot tr) { border: 0; }
@@ -221,12 +223,6 @@ html { scroll-padding-top: 64px; }
   &:active { transform: scale(.985); }
 }
 
-@utility reveal-up { animation: reveal-up 360ms cubic-bezier(.2,.8,.2,1) both; }
-@utility reveal-delay-1 { animation-delay: 40ms; }
-@utility reveal-delay-2 { animation-delay: 80ms; }
-@utility reveal-delay-3 { animation-delay: 120ms; }
-@utility reveal-delay-4 { animation-delay: 160ms; }
-
 @utility interactive-surface {
   transition: transform 200ms cubic-bezier(.2,.8,.2,1), background-color 180ms ease;
   &:hover { transform: translateY(-1px); }
@@ -235,32 +231,8 @@ html { scroll-padding-top: 64px; }
 
 @utility inline-contain { contain: inline-size; }
 
-@utility progress-reveal {
-  transform-origin: left;
-  animation: progress-reveal 700ms cubic-bezier(.2,.8,.2,1) both;
-}
-
-@utility pulse-dot {
-  position: relative;
-  &::after {
-    content: "";
-    position: absolute;
-    inset: -3px;
-    border-radius: 9999px;
-    border: 1px solid currentColor;
-    animation: quiet-pulse 2.4s ease-out infinite;
-  }
-}
-
-@keyframes quiet-pulse { 0%, 45% { opacity: .6; transform: scale(.7); } 100% { opacity: 0; transform: scale(1.8); } }
-@keyframes reveal-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes progress-reveal { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 [data-reduce-motion="true"] *, [data-reduce-motion="true"] *::before, [data-reduce-motion="true"] *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
-[data-reduce-motion="true"] .topo-pulse { animation: none; opacity: .2; }
-@keyframes topo-pulse { 0% { transform: scale(1); opacity: .45 } 100% { transform: scale(2.6); opacity: 0 } }
-.topo-pulse { transform-box: fill-box; transform-origin: center; animation: topo-pulse 1.8s ease-out infinite; }
-@media (prefers-reduced-motion: reduce) { .topo-pulse { animation: none; opacity: .2 } }
 @layer base {
   :where(a, button, input, textarea, select, [role="button"], [tabindex]):focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 }

@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Component, useState, type ReactNode } from "react";
+import { Component, useRef, useState, type ReactNode } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useAppReducedMotion } from "@/components/motion";
 import { AlertCircle, CheckCircle2, CircleDashed, OctagonAlert, TriangleAlert, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,9 +18,15 @@ export function PageHeader({ title, description, actions }: { title: string; des
 }
 
 /** A quiet, data-led opening for each page's first tab. Numbers stay in Geist. */
-export function PageHero({ label, value, change, description }: { label: string; value: ReactNode; change?: ReactNode; description: string }) {
+export function PageHero({ label, value, change, description, scrollMotion = false }: { label: string; value: ReactNode; change?: ReactNode; description: string; scrollMotion?: boolean }) {
+  const ref = useRef<HTMLElement>(null);
+  const reduce = useAppReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.92]);
+  const supportOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const active = scrollMotion && !reduce;
   return (
-    <section aria-label={label} className="relative isolate overflow-hidden rounded-3xl bg-hero px-7 py-8 md:px-8">
+    <section ref={ref} aria-label={label} className="relative isolate overflow-hidden rounded-3xl bg-hero px-7 py-8 md:px-8">
       <svg aria-hidden viewBox="0 0 176 104" className="pointer-events-none absolute -right-1 -top-1 hidden h-full w-44 opacity-60 sm:block">
         <path d="M0 104V16a88 88 0 0 1 88 88Z" className="fill-brand-burgundy" />
         <circle cx="116" cy="30" r="24" className="fill-brand-mustard" />
@@ -27,10 +35,10 @@ export function PageHero({ label, value, change, description }: { label: string;
       <div className="relative max-w-3xl">
         <p className="text-sm font-medium text-muted-foreground">{label}</p>
         <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-2">
-          <p className="metric-numbers text-[48px] leading-none tracking-[-0.035em]">{value}</p>
-          {change && <div className="text-sm font-medium text-foreground">{change}</div>}
+          <motion.p style={active ? { scale, transformOrigin: "left bottom" } : {}} className="metric-numbers text-[48px] leading-none tracking-[-0.035em]">{value}</motion.p>
+          {change && <motion.div style={active ? { opacity: supportOpacity } : {}} className="text-sm font-medium text-foreground">{change}</motion.div>}
         </div>
-        <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">{description}</p>
+        <motion.p style={active ? { opacity: supportOpacity } : {}} className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">{description}</motion.p>
       </div>
     </section>
   );

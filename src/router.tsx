@@ -16,6 +16,7 @@ export const getRouter = () => {
     context: { queryClient },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
+    defaultViewTransition: true,
     defaultErrorComponent: PageError,
   });
 
