@@ -126,7 +126,7 @@ export function DetailDrawer({ detail, onClose }: { detail: Detail; onClose: () 
     <Sheet open={!!detail} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="w-full sm:max-w-md">
         {detail && <>
-          <SheetHeader><SheetTitle>{detail.title}</SheetTitle><SheetDescription>{detail.description}</SheetDescription></SheetHeader>
+          <motion.div layoutId={`detail-${detail.title}`}><SheetHeader><SheetTitle>{detail.title}</SheetTitle><SheetDescription>{detail.description}</SheetDescription></SheetHeader></motion.div>
           <dl className="mt-2 divide-y divide-border px-4">
             {detail.rows.map(([k, v]) => <div key={k} className="flex justify-between gap-4 py-3 text-sm"><dt className="text-muted-foreground">{k}</dt><dd className="metric-numbers text-right">{v}</dd></div>)}
           </dl>
@@ -166,7 +166,7 @@ export function DenseKpis({ onOpen }: { onOpen: (d: Detail) => void }) {
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {items.map((it) => (
         <Tilt key={it.label}><button onClick={() => onOpen(it.detail as Detail)} className={`${card} subtle-lift group h-full w-full text-left`}>
-          <div className="flex items-center justify-between"><Label>{it.label}</Label><ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></div>
+          <div className="flex items-center justify-between"><motion.span layoutId={`detail-${it.detail.title}`}><Label>{it.label}</Label></motion.span><ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" /></div>
           <div className="mt-3 flex items-end justify-between gap-2"><p className="metric-numbers whitespace-nowrap text-2xl 2xl:text-3xl"><AnimatedNumber value={it.n} format={it.f} /></p><Spark data={it.spark} color={it.color} /></div>
           <div className="mt-2">{it.pill}</div>
           <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-4">
@@ -332,7 +332,7 @@ export function K8sHealth({ onOpen }: { onOpen: (d: Detail) => void }) {
   return (
     <article className={`${card} flex h-full flex-col`}>
       <button className="flex w-full items-start justify-between text-left" onClick={() => onOpen({ title: cluster.name, description: "Kubernetes cluster details", rows: [["Region", cluster.region], ["Version", cluster.version], ["Nodes", `${cluster.nodes}`], ["CPU allocation", `${cpu}%`], ["Memory utilization", `${mem}%`], ["Pods healthy", `${cluster.podsHealthy}/${cluster.podsTotal}`], ["Pods pending", "2 (ImagePullBackOff)"]] })}>
-        <div><Label>Kubernetes cluster</Label><p className="mt-1 font-medium">{cluster.name}</p><p className="metric-numbers text-xs text-muted-foreground">{cluster.region} · {cluster.version} · {cluster.nodes} nodes</p></div>
+        <div><motion.span layoutId={`detail-${cluster.name}`}><Label>Kubernetes cluster</Label></motion.span><p className="mt-1 font-medium">{cluster.name}</p><p className="metric-numbers text-xs text-muted-foreground">{cluster.region} · {cluster.version} · {cluster.nodes} nodes</p></div>
         <div className="flex shrink-0 items-center gap-2"><span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">Demo telemetry</span><Pill tone="success"><span className="mr-1.5 size-1.5 rounded-full bg-success text-success" />Healthy</Pill></div>
       </button>
       <div className="mt-6 space-y-4">
@@ -357,7 +357,7 @@ export function AnomalyStrip({ onOpen }: { onOpen: (d: Detail) => void }) {
   return (
     <button onClick={() => onOpen({ title: a.title, description: "Last 3 days vs the prior 14-day baseline.", rows: [["Change", `+${a.change}%`], ["Est. monthly impact", fmtMoney(a.impact)], ["Detected", a.since], ["Suggested action", "Enable CDN caching for media container"]] })} className="group flex w-full items-center gap-3 rounded-2xl bg-destructive-soft px-4 py-1.5 text-left text-[13px] transition-[transform,background-color] duration-200 hover:-translate-y-0.5 hover:bg-destructive-soft/80 active:scale-[0.99]">
       <AlertTriangle className="size-4 shrink-0 text-destructive" />
-      <span className="flex-1"><span className="font-medium text-destructive">Anomaly:</span> <span className="text-foreground">Unexpected +{a.change}% spike in {a.title}</span></span>
+      <motion.span layoutId={`detail-${a.title}`} className="flex-1"><span className="font-medium text-destructive">Anomaly:</span> <span className="text-foreground">Unexpected +{a.change}% spike in {a.title}</span></span>
       <ChevronRight className="size-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1" />
     </button>
   );

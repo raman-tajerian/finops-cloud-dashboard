@@ -175,13 +175,13 @@ export function ResourcesWorkspace({ search, setSearch, presetStatus }: { search
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id} data-resource-row={r.id} tabIndex={0} className="group cursor-pointer border-t border-border hover:bg-secondary focus-visible:outline-2 focus-visible:outline-ring" onKeyDown={(e) => { if (e.currentTarget === e.target && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); e.currentTarget.focus(); setSearch({ id: r.id }); } }} onClick={(e) => { e.currentTarget.focus(); setSearch({ id: r.id }); }}>
+                {rows.map((r, index) => (
+                  <motion.tr layout={index < 25 ? "position" : false} key={r.id} data-resource-row={r.id} tabIndex={0} className="group cursor-pointer border-t border-border hover:bg-secondary focus-visible:outline-2 focus-visible:outline-ring" onKeyDown={(e) => { if (e.currentTarget === e.target && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); e.currentTarget.focus(); setSearch({ id: r.id }); } }} onClick={(e) => { e.currentTarget.focus(); setSearch({ id: r.id }); }}>
                     <td className={`sticky left-0 z-10 bg-card px-3 ${py} group-hover:bg-secondary`} onClick={(e) => e.stopPropagation()}>
                       <Checkbox aria-label={`Select ${r.name}`} className="size-5" checked={selected.has(r.id)} onCheckedChange={(on) => setSelected((cur) => { const n = new Set(cur); if (on) n.add(r.id); else n.delete(r.id); return n; })} />
                     </td>
                     {visible.map((c) => <Cell key={c.k} k={c.k} r={r} py={py} num={c.num} />)}
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>
