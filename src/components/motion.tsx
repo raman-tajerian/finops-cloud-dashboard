@@ -93,9 +93,9 @@ export function AnimatedNumber({ value, format }: { value: number; format: (n: n
       <span aria-hidden className="inline-flex">
         {Array.from(shown).map((char, i) => {
           const previous = rolling?.from[i] ?? char;
-          if (!rolling || !/\d/.test(char) || previous === char) return <span key={`${rolling?.id ?? "final"}-${i}`} className="inline-block w-[1ch] text-center">{char === " " ? " " : char}</span>;
+if (!rolling || !/\d/.test(char) || previous === char) return <span key={`${rolling?.id ?? "final"}-${i}`} className="inline-block text-center" style={{ width: `${glyphWidth(char)}em` }}>{char === " " ? " " : char}</span>;
           return (
-            <span key={`${rolling.id}-${i}`} className="inline-block h-[1.2em] w-[1ch] overflow-hidden text-center align-top">
+            <span key={`${rolling.id}-${i}`} className="inline-block h-[1.2em] overflow-hidden text-center align-top" style={{ width: `${glyphWidth(char)}em` }}>
               <motion.span className="flex flex-col" initial={{ y: "0%" }} animate={{ y: "-50%" }} transition={{ duration: MOTION.duration.number, ease: MOTION.easeOut }}>
                 <span className="h-[1.2em] leading-[1.2]">{previous}</span><span className="h-[1.2em] leading-[1.2]">{char}</span>
               </motion.span>
