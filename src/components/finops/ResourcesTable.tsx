@@ -282,22 +282,22 @@ function ResourceDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 <div className="flex items-center justify-between"><Label>Daily cost · last 90 days</Label><TableToggle on={costTable} onChange={setCostTable} /></div>
                 <div className="mt-3 h-64">
                   {costTable ? <DataTableView caption="Daily cost" columns={["Day", "Cost"]} rows={d.cost.map((c) => [c.day, fmtMoney(c.cost, { decimals: 2 })])} /> :
-                  <ResponsiveContainer><AreaChart data={d.cost} margin={{ left: -6, right: 8 }}>
+                  <ChartReveal className="h-full" motionKey={`${id}-cost`}><ResponsiveContainer><AreaChart data={d.cost} margin={{ left: -6, right: 8 }}>
                     <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} /><XAxis dataKey="day" {...axis} minTickGap={28} /><YAxis {...axis} width={48} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
                     <Tooltip contentStyle={tip} formatter={(v) => [fmtMoney(Number(v), { decimals: 2 }), "Cost"]} />
                     <Area dataKey="cost" stroke="var(--chart-1)" fill="var(--chart-1)" fillOpacity={0.1} strokeWidth={1.5} isAnimationActive={false} />
-                  </AreaChart></ResponsiveContainer>}
+                  </AreaChart></ResponsiveContainer></ChartReveal>}
                 </div>
               </TabsContent>
               <TabsContent value="utilization">
                 <div className="flex items-center justify-between"><Label>CPU and memory · last 90 days</Label><TableToggle on={utilTable} onChange={setUtilTable} /></div>
                 <div className="mt-3 h-64">
                   {utilTable ? <DataTableView caption="Utilization" columns={["Day", "CPU %", "Memory %"]} rows={d.util.map((u) => [u.day, u.cpu.toFixed(0), u.mem.toFixed(0)])} /> :
-                  <ResponsiveContainer><LineChart data={d.util} margin={{ left: -6, right: 8 }}>
+                  <ChartReveal className="h-full" motionKey={`${id}-util`}><ResponsiveContainer><LineChart data={d.util} margin={{ left: -6, right: 8 }}>
                     <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} /><XAxis dataKey="day" {...axis} minTickGap={28} /><YAxis {...axis} width={40} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                     <Tooltip contentStyle={tip} formatter={(v, n) => [`${Number(v).toFixed(0)}%`, String(n)]} />
                     <Line dataKey="cpu" name="CPU" stroke="var(--chart-2)" dot={false} strokeWidth={1.5} isAnimationActive={false} /><Line dataKey="mem" name="Memory" stroke="var(--chart-3)" dot={false} strokeWidth={1.5} isAnimationActive={false} />
-                  </LineChart></ResponsiveContainer>}
+                  </LineChart></ResponsiveContainer></ChartReveal>}
                 </div>
               </TabsContent>
               <TabsContent value="tags">

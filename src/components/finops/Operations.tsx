@@ -9,7 +9,7 @@ import { useGlobalFilters } from "@/lib/filters";
 import { MetricInfo } from "./Help";
 import type { K8sClusterDto, K8sPodDto } from "@/types/finops";
 import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, PageHero, StatusBadge, TableToggle } from "./States";
-import { AnimatedNumber, MotionBar } from "@/components/motion";
+import { AnimatedNumber, MotionBar, ProgressRing } from "@/components/motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -132,13 +132,9 @@ function BudgetCard({ d }: { d: NonNullable<ReturnType<typeof useBudget>["data"]
         <div><p className="text-[13px] text-muted-foreground">Spend to date</p><p className="mt-1 metric-numbers text-[30px] leading-none"><AnimatedNumber value={d.spendToDate} format={(n) => fmtMoney(n)} /></p></div>
         <div><p className="flex items-center text-[13px] text-muted-foreground">Projected end of month<MetricInfo label="Forecast end of month" /></p><p className="mt-1 metric-numbers text-[30px] leading-none"><AnimatedNumber value={d.forecastEom} format={(n) => fmtMoney(n)} /></p></div>
       </div>
-      <div className="mt-6">
-        <div className="mb-2 flex justify-between text-xs text-muted-foreground"><span>Projected % of budget</span><span className="tabular-nums">{budget > 0 ? `${pct.toFixed(1)}%` : "—"}</span></div>
-        <div className="relative h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
-          <div className="h-full origin-left rounded-full transition-transform duration-500" style={{ transform: `scaleX(${Math.min(100, pct) / 100})`, background: toneColor[tone] }} />
-          <span className="absolute inset-y-0 left-[80%] w-px bg-foreground/30" aria-hidden />
-        </div>
-        <div className="mt-1 flex justify-between text-[11px] text-muted-foreground"><span>0%</span><span className="ml-[70%]">80%</span><span>100%</span></div>
+      <div className="mt-6 flex items-center gap-5" role="progressbar" aria-label="Projected percentage of budget" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
+        <ProgressRing value={pct} label="Projected percentage of budget" size={92} stroke={7} color={toneColor[tone]} decimals={1} />
+        <div className="text-xs text-muted-foreground"><p>Projected % of budget</p><p className="mt-2">0–100% ring scale</p><p className="mt-1">80% alert threshold</p></div>
       </div>
       <div className="mt-auto space-y-3 pt-6">
         <label className="flex items-center justify-between gap-3 text-sm"><span className="text-muted-foreground">Monthly budget</span>
