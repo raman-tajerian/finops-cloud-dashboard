@@ -233,7 +233,7 @@ function AnomalyDrawer({ row, onClose }: { row: AnomalyRowDto | null; onClose: (
             <div className="flex items-center justify-between"><p className="text-sm font-medium">Expected band vs actual (21 days)</p><TableToggle on={table} onChange={setTable} /></div>
             <div className="h-64">
               {table ? <DataTableView caption="Daily actual vs expected band" columns={["Day", "Actual", "Expected low", "Expected high"]} rows={row.series.map((p) => [p.day, fmtMoney(p.actual), fmtMoney(p.low), fmtMoney(p.high)])} /> : (
-                <ResponsiveContainer width="100%" height="100%">
+                <ChartReveal className="h-full" motionKey={row.id}><ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={row.series.map((p) => ({ ...p, band: [p.low, p.high] }))} margin={{ left: 0, right: 8, top: 4 }}>
                     <CartesianGrid vertical={false} stroke="var(--border)" />
                     <XAxis dataKey="day" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} interval={4} />
@@ -242,7 +242,7 @@ function AnomalyDrawer({ row, onClose }: { row: AnomalyRowDto | null; onClose: (
                     <Area dataKey="band" name="Expected band" stroke="none" fill="var(--chart-2)" fillOpacity={0.25} isAnimationActive={false} />
                     <Line dataKey="actual" name="Actual" stroke="var(--chart-3)" strokeWidth={2} dot={false} isAnimationActive={false} />
                   </ComposedChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer></ChartReveal>
               )}
             </div>
             <dl className="grid grid-cols-2 gap-3 text-sm">
