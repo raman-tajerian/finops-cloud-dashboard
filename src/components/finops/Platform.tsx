@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { Tilt } from "./Insights";
-import { AnimatedNumber, MotionBar, MotionDonut } from "@/components/motion";
+import { AnimatedNumber, ChartReveal, MotionBar, MotionDonut } from "@/components/motion";
 import { motion } from "framer-motion";
 
 export type { Filters };
@@ -200,16 +200,16 @@ export function CostDistribution() {
           ))}
         </div></div>
       </div>
-      <div className="mt-6 h-80" aria-live="polite">
+      <ChartReveal className="mt-6 h-80" motionKey={`${view}-${asTable}`}><div aria-live="polite" className="h-full">
         {asTable && <DataTableView caption={`Cost distribution ${view}`} columns={table.columns} rows={table.rows} />}
         {!asTable && view === "service" && (
-          <div key="service" className="animate-in fade-in zoom-in-95 grid h-full gap-7 duration-300 md:grid-cols-[1fr_220px]">
+          <div key="service" className="grid h-full gap-7 md:grid-cols-[1fr_220px]">
             <MotionDonut className="h-full w-full" data={services.map((s, i) => ({ name: s.name, value: s.value, color: chartColors[i] ?? "var(--chart-4)" }))} formatValue={(v) => `${fmtMoney(v)} · ${pct(v)}`} />
             <ul className="hidden flex-col justify-center gap-3 md:flex">{services.map((s, i) => <li key={s.name} className="flex items-center gap-2 text-sm"><span className="size-2 rounded-full" style={{ background: chartColors[i] }} /><span className="flex-1 text-muted-foreground">{s.name}</span><span className="metric-numbers">{pct(s.value)}</span></li>)}</ul>
           </div>
         )}
         {!asTable && view === "region" && (
-          <div key="region" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><BarChart data={d.regions}>
+          <div key="region" className="h-full"><ResponsiveContainer><BarChart data={d.regions}>
             <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="region" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} cursor={{ fill: "var(--secondary)" }} formatter={(v, n) => [fmtMoney(Number(v)), String(n)]} />
             {providers.includes("AWS") && <Bar dataKey="AWS" stackId="a" fill="var(--aws)" isAnimationActive={false} shape={<MotionBar />} />}
@@ -218,7 +218,7 @@ export function CostDistribution() {
           </BarChart></ResponsiveContainer></div>
         )}
         {!asTable && view === "team" && (
-          <div key="team" className="animate-in fade-in h-full duration-300"><ResponsiveContainer>
+          <div key="team" className="h-full"><ResponsiveContainer>
             <Treemap data={d.teams.map((t, i) => ({ ...t, fill: chartColors[i % chartColors.length] }))} dataKey="value" nameKey="name" stroke="var(--card)" isAnimationActive={false}
               content={<TreeCell total={total} />}>
               <Tooltip contentStyle={tip} formatter={(v) => [`${fmtMoney(Number(v))} · ${pct(Number(v))}`, "Cost"]} />
@@ -226,13 +226,13 @@ export function CostDistribution() {
           </ResponsiveContainer></div>
         )}
         {!asTable && view === "daily" && (
-          <div key="daily" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><AreaChart data={daily}>
+          <div key="daily" className="h-full"><ResponsiveContainer><AreaChart data={daily}>
             <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="day" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} interval={4} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} formatter={(v) => [fmtMoney(Number(v)), "Spend"]} />
             <Area dataKey="spend" stroke="var(--chart-1)" strokeWidth={2} fill="var(--chart-1)" fillOpacity={0.08} isAnimationActive={false} />
           </AreaChart></ResponsiveContainer></div>
         )}
-      </div>
+      </div></ChartReveal>
     </article>
   );
 }

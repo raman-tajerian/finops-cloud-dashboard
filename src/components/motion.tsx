@@ -5,6 +5,7 @@ import { AnimatePresence, animate, motion, useReducedMotion } from "framer-motio
 import { useRouterState } from "@tanstack/react-router";
 import { MOTION, pageEnter, pageExit } from "@/lib/motion";
 import { useSession } from "@/lib/session-store";
+import { useCurrency } from "@/lib/money";
 
 export function useAppReducedMotion() {
   const system = useReducedMotion();
@@ -44,19 +45,22 @@ type RollingText = { id: number; from: string; to: string } | null;
 /** A true digit odometer: two stacked glyph rows roll once, then exact text is restored. */
 export function AnimatedNumber({ value, format }: { value: number; format: (n: number) => string }) {
   const reduce = useAppReducedMotion();
+  const currency = useCurrency();
   const [current, setCurrent] = useState(value);
   const [rolling, setRolling] = useState<RollingText>(null);
   const currentRef = useRef(value);
+  const currentTextRef = useRef(format(value));
   const formatRef = useRef(format);
   formatRef.current = format;
   const idRef = useRef(0);
 
   useEffect(() => {
-    if (currentRef.current === value) return;
-    const from = formatRef.current(currentRef.current);
+    const from = currentTextRef.current;
     const to = formatRef.current(value);
-    if (reduce || from === to) {
+    if (from === to) return;
+    if (reduce) {
       currentRef.current = value;
+      currentTextRef.current = to;
       setCurrent(value);
       setRolling(null);
       return;
@@ -70,12 +74,13 @@ export function AnimatedNumber({ value, format }: { value: number; format: (n: n
       onComplete: () => {
         if (idRef.current !== id) return;
         currentRef.current = value;
+        currentTextRef.current = to;
         setCurrent(value);
         setRolling(null);
       },
     });
     return () => controls.stop();
-  }, [value, reduce]);
+  }, [value, reduce, currency]);
 
   const finalText = format(current);
   const shown = rolling?.to ?? finalText;
