@@ -42,7 +42,7 @@ export function BrandIntro() {
         transition={{ duration: 0.6, ease: MOTION.easeOut }} onAnimationComplete={() => phase === "leave" && finish()}>
         <svg viewBox="-8 -4 48 40" className="size-full" role="img" aria-label="Fjord Labs">
           {paths.map((p, i) => <motion.path key={p.d} d={p.d} fill={p.fill} initial={{ x: p.x, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.3, ease: MOTION.easeOut }} onAnimationComplete={i === paths.length - 1 ? leave : undefined} />)}
+            transition={{ duration: 0.3, ease: MOTION.easeOut }} onAnimationComplete={i === paths.length - 1 ? leave : () => {}} />)}
         </svg>
       </motion.div>
       <button type="button" onClick={finish} className="pointer-events-auto absolute right-5 top-5 min-h-10 rounded-full border border-border bg-card px-4 text-sm text-muted-foreground">Skip intro</button>

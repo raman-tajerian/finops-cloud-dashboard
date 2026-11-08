@@ -35,10 +35,10 @@ export function PageHero({ label, value, change, description, scrollMotion = fal
       <div className="relative max-w-3xl">
         <p className="text-sm font-medium text-muted-foreground">{label}</p>
         <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-2">
-          <motion.p style={active ? { scale, transformOrigin: "left bottom" } : undefined} className="metric-numbers text-[48px] leading-none tracking-[-0.035em]">{value}</motion.p>
-          {change && <motion.div style={active ? { opacity: supportOpacity } : undefined} className="text-sm font-medium text-foreground">{change}</motion.div>}
+          <motion.p style={active ? { scale, transformOrigin: "left bottom" } : {}} className="metric-numbers text-[48px] leading-none tracking-[-0.035em]">{value}</motion.p>
+          {change && <motion.div style={active ? { opacity: supportOpacity } : {}} className="text-sm font-medium text-foreground">{change}</motion.div>}
         </div>
-        <motion.p style={active ? { opacity: supportOpacity } : undefined} className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">{description}</motion.p>
+        <motion.p style={active ? { opacity: supportOpacity } : {}} className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">{description}</motion.p>
       </div>
     </section>
   );

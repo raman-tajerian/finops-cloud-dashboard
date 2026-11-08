@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode, type PointerEvent as RPE } from "react";
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
+import { useRef, useState, type ReactNode, type PointerEvent as RPE } from "react";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { AnimatedNumber, useAppReducedMotion } from "@/components/motion";
 import { Area, ComposedChart, CartesianGrid, Line, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Calculator, Leaf, Move3d, TrendingUp } from "lucide-react";
@@ -18,7 +18,7 @@ const tip = { background: "var(--popover)", border: "1px solid var(--border)", b
 export function CountUp({ value, format }: { value: number; format: (n: number) => string }) {
   const [shown, setShown] = useState(value);
   const prev = useRef(value);
-  const reduce = useReducedMotion();
+  const reduce = useAppReducedMotion();
   useEffect(() => {
     if (reduce) { setShown(value); prev.current = value; return; }
     const c = animate(prev.current, value, { duration: 0.8, ease: [0.22, 1, 0.36, 1], onUpdate: setShown });
@@ -30,7 +30,7 @@ export function CountUp({ value, format }: { value: number; format: (n: number) 
 
 /** Subtle 3D tilt wrapper for bento cards. */
 export function Tilt({ children, className = "" }: { children: ReactNode; className?: string }) {
-  const reduce = useReducedMotion();
+  const reduce = useAppReducedMotion();
   const mx = useMotionValue(0), my = useMotionValue(0);
   const rx = useSpring(useTransform(my, [-0.5, 0.5], [3, -3]), { stiffness: 200, damping: 20 });
   const ry = useSpring(useTransform(mx, [-0.5, 0.5], [-3, 3]), { stiffness: 200, damping: 20 });
@@ -41,7 +41,7 @@ export function Tilt({ children, className = "" }: { children: ReactNode; classN
   };
   return (
     <motion.div style={{ rotateX: rx, rotateY: ry, transformPerspective: 1200 }} onPointerMove={move} onPointerLeave={() => { mx.set(0); my.set(0); }}
-      initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      initial={reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className={`h-full ${className}`}>
       {children}
     </motion.div>
@@ -57,14 +57,7 @@ export function Topology3D() {
   const [pitch, setPitch] = useState(-0.25);
   const [hover, setHover] = useState<TopoNode | null>(null);
   const drag = useRef<{ x: number; y: number } | null>(null);
-  const reduce = useReducedMotion();
-  useEffect(() => {
-    if (reduce) return;
-    let raf = 0;
-    const tick = () => { if (!drag.current) setYaw((y) => y + 0.0025); raf = requestAnimationFrame(tick); };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [reduce]);
+  const reduce = useAppReducedMotion();
   const project = (n: { x: number; y: number; z: number }) => {
     const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
     const x1 = n.x * cy - n.z * sy, z1 = n.x * sy + n.z * cy;
@@ -125,6 +118,7 @@ export function Topology3D() {
 /* ---------- GreenOps ---------- */
 const ratingTone = { A: "bg-success-soft text-success", B: "bg-success-soft text-success", C: "bg-warning-soft text-warning", D: "bg-destructive-soft text-destructive" } as const;
 export function GreenOps() {
+  const reduce = useAppReducedMotion();
   const carbonRegions = useDashboardData().carbon;
   const [asTable, setAsTable] = useState(false);
   const tons = carbonRegions.reduce((a, b) => a + b.tons, 0);
@@ -144,8 +138,8 @@ export function GreenOps() {
             <div className="flex items-center justify-between text-xs"><span><span className="font-mono">{r.region}</span> <span className="text-muted-foreground">· {r.provider}</span></span>
               <span className="flex items-center gap-2"><span className="metric-numbers text-muted-foreground">{r.intensity} g</span><span className={`rounded-full px-1.5 text-[10px] font-semibold ${ratingTone[r.rating]}`}>{r.rating}</span></span></div>
             <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-muted">
-              <motion.div className="h-full rounded-full" style={{ background: r.rating <= "B" ? "var(--success)" : r.rating === "C" ? "var(--warning)" : "var(--destructive)" }}
-                initial={{ width: 0 }} whileInView={{ width: `${(r.intensity / max) * 100}%` }} viewport={{ once: true }} transition={{ duration: 0.8, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }} />
+              <motion.div className="h-full rounded-full" style={{ background: r.rating <= "B" ? "var(--success)" : r.rating === "C" ? "var(--warning)" : "var(--destructive)", transformOrigin: "left" }}
+                initial={reduce ? { scaleX: (r.intensity / max) } : { scaleX: 0 }} whileInView={{ scaleX: (r.intensity / max) }} viewport={{ once: true }} transition={{ duration: reduce ? 0 : 0.6, delay: reduce ? 0 : i * 0.04, ease: [0.22, 1, 0.36, 1] }} />
             </div>
           </li>
         ))}
@@ -177,9 +171,9 @@ export function AnomalyForecast() {
             <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} minTickGap={24} />
             <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} formatter={(v) => Array.isArray(v) ? `${fmtMoney(Number(v[0]))} – ${fmtMoney(Number(v[1]))}` : fmtMoney(Number(v))} />
-            <Area dataKey="band" name="Confidence" stroke="none" fill="var(--chart-1)" fillOpacity={0.1} animationDuration={900} />
-            <Line dataKey="forecast" name="Forecast" stroke="var(--muted-foreground)" strokeDasharray="4 4" dot={false} strokeWidth={1.2} animationDuration={900} />
-            <Line dataKey="actual" name="Actual" stroke="var(--chart-2)" dot={false} strokeWidth={2} connectNulls={false} animationDuration={1100} />
+            <Area dataKey="band" name="Confidence" stroke="none" fill="var(--chart-1)" fillOpacity={0.1} isAnimationActive={false} />
+            <Line dataKey="forecast" name="Forecast" stroke="var(--muted-foreground)" strokeDasharray="4 4" dot={false} strokeWidth={1.2} isAnimationActive={false} />
+            <Line dataKey="actual" name="Actual" stroke="var(--chart-2)" dot={false} strokeWidth={2} connectNulls={false} isAnimationActive={false} />
             {spike && <ReferenceDot x={spike.day} y={spike.actual ?? 0} r={5} fill="var(--destructive)" stroke="var(--card)" strokeWidth={2} />}
           </ComposedChart>
         </ResponsiveContainer>}

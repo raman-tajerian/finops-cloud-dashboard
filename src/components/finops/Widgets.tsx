@@ -8,24 +8,10 @@ import { CardSkeleton, ErrorState, FilterEmptyState } from "@/components/finops/
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
+import { ProgressRing } from "@/components/motion";
 
 const Label = ({ children }: { children: React.ReactNode }) => <p className="text-[15px] font-medium leading-snug text-foreground">{children}</p>;
 const tooltipStyle = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 14, fontSize: 12, color: "var(--foreground)" };
-
-function Ring({ value, tone = "success", size = 96 }: { value: number; tone?: "success" | "warning"; size?: number }) {
-  const r = 34;
-  const circumference = 2 * Math.PI * r;
-  const color = tone === "success" ? "var(--success)" : "var(--warning)";
-  return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <svg viewBox="0 0 84 84" className="size-full -rotate-90" aria-label={`${value} percent`}>
-        <circle cx="42" cy="42" r={r} fill="none" stroke="var(--muted)" strokeWidth="4" />
-        <circle className="transition-[stroke-dashoffset] duration-700 ease-out" cx="42" cy="42" r={r} fill="none" stroke={color} strokeWidth="4" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={circumference * (1 - value / 100)} />
-      </svg>
-      <span className="metric-numbers absolute inset-0 grid place-items-center text-sm font-medium">{value}%</span>
-    </div>
-  );
-}
 
 export function CostTrend({ data }: { data: CostPoint[] }) {
   return (
@@ -41,8 +27,8 @@ export function CostTrend({ data }: { data: CostPoint[] }) {
             <XAxis dataKey="label" tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} minTickGap={28} />
             <YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tooltipStyle} formatter={(v) => fmtMoney(Number(v))} />
-            <Area type="monotone" dataKey="aws" name="AWS" stroke="var(--aws)" strokeWidth={2} fill="var(--aws)" fillOpacity={0.08} animationDuration={900} animationEasing="ease-out" />
-            <Area type="monotone" dataKey="azure" name="Azure" stroke="var(--azure)" strokeWidth={2} fill="transparent" animationDuration={1050} animationEasing="ease-out" />
+            <Area type="monotone" dataKey="aws" name="AWS" stroke="var(--aws)" strokeWidth={2} fill="var(--aws)" fillOpacity={0.08} isAnimationActive={false} />
+            <Area type="monotone" dataKey="azure" name="Azure" stroke="var(--azure)" strokeWidth={2} fill="transparent" isAnimationActive={false} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -68,8 +54,8 @@ export function InfrastructureStatus() {
     <article id="infrastructure" className="organic-card p-7 md:p-8">
       <div className="flex flex-wrap items-start justify-between gap-4"><div><Label>Live infrastructure</Label><h2 className="mt-2 text-xl font-medium">Kubernetes health</h2></div><span className="inline-flex items-center gap-2 rounded-full bg-success-soft px-3 py-1.5 text-xs text-success"><span className="pulse-dot size-1.5 rounded-full bg-success" />Live · {tick + 1}s</span></div>
       <div className="mt-7 grid gap-7 md:grid-cols-2">
-        <div className="interactive-surface flex items-center gap-4 rounded-2xl border border-transparent bg-secondary p-4"><Ring value={cpu} size={78} /><div><Cpu className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">CPU utilization</p><p className="text-xs text-muted-foreground">Across 42 nodes</p></div></div>
-        <div className="interactive-surface flex items-center gap-4 rounded-2xl border border-transparent bg-secondary p-4"><Ring value={memory} tone="warning" size={78} /><div><MemoryStick className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">Memory</p><p className="text-xs text-muted-foreground">9.8 TB allocated</p></div></div>
+        <div className="interactive-surface flex items-center gap-4 rounded-2xl border border-transparent bg-secondary p-4"><ProgressRing value={cpu} label="CPU utilization" size={78} stroke={5} color="var(--success)" /><div><Cpu className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">CPU utilization</p><p className="text-xs text-muted-foreground">Across 42 nodes</p></div></div>
+        <div className="interactive-surface flex items-center gap-4 rounded-2xl border border-transparent bg-secondary p-4"><ProgressRing value={memory} label="Memory utilization" size={78} stroke={5} color="var(--warning)" /><div><MemoryStick className="size-4 text-muted-foreground" /><p className="mt-2 text-sm font-medium">Memory</p><p className="text-xs text-muted-foreground">9.8 TB allocated</p></div></div>
         <div className="interactive-surface rounded-2xl border border-transparent bg-secondary p-4 md:col-span-2"><div className="flex items-center justify-between"><span className="text-xs font-medium">Cluster status</span><span className="text-xs text-success">286 / 288 pods</span></div><div className="mt-4 grid grid-cols-3 gap-2 text-center"><div><p className="metric-numbers text-lg font-medium">3</p><p className="text-[10px] text-muted-foreground">Clusters</p></div><div><p className="metric-numbers text-lg font-medium">42</p><p className="text-[10px] text-muted-foreground">Nodes</p></div><div><p className="metric-numbers text-lg font-medium text-warning">2</p><p className="text-[10px] text-muted-foreground">Pending</p></div></div></div>
       </div>
       <div className="mt-6 border-t border-border pt-5"><div className="mb-3 flex items-center justify-between"><span className="text-xs font-medium">Deployment activity</span><Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={() => toast("Deployment log opened")}>View all <ChevronRight /></Button></div><div className="space-y-3">{initialLogs.map((log) => <div key={log.time} className="grid grid-cols-[66px_1fr_auto] items-center gap-2 text-xs"><span className="metric-numbers font-mono text-muted-foreground">{log.time}</span><span className="truncate">{log.event}</span><span className="text-success">{log.state}</span></div>)}</div></div>

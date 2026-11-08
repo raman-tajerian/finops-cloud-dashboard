@@ -29,7 +29,7 @@ const MotionSlot = motion.create(Slot);
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ className, variant, size, asChild = false, ...props }, ref) => {
   const reduce = useAppReducedMotion();
-  const Comp = asChild ? MotionSlot : motion.button;
+  const Comp = (asChild ? MotionSlot : motion.button) as React.ElementType;
   return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref}
     whileTap={reduce ? undefined : { scale: 0.98 }} transition={{ type: "spring", ...MOTION.spring }} {...props} />;
 });
