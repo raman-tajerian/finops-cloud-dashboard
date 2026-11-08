@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Navigation/findability: aggregate badges, session pins/recent/collapsible groups, grouped fuzzy palette/actions, drill-down return, glossary/metric help, compact filters and empty-state guidance; full tests and keyboard/responsive checks.
+- [x] Navigation/findability: aggregate badges, session pins/recent/collapsible groups, grouped fuzzy palette/actions, drill-down return, glossary/metric help, compact filters and empty-state guidance; 189 tests passed, all eleven pages checked at 375/768/1024/1440, keyboard/focus/CSV/resource drill-down verified, automatic build OK. Existing Explorer conditional-hook error fixed during end-to-end checks; no data or route changes.
 
 - [x] Sub-tab restructure (2026-11-06): shared PageTabs (?tab= URL, pill indicator, keyboard nav), tabs on all 11 pages, progressive disclosure (Show all), deep links page›tab, palette tab entries, tests + responsive checks. No data/API/theme changes.
 
