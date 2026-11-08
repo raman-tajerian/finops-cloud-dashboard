@@ -84,9 +84,11 @@ export function AnimatedNumber({ value, format }: { value: number; format: (n: n
 
   const finalText = format(current);
   const shown = rolling?.to ?? finalText;
-  const width = Math.max(rolling?.from.length ?? 0, shown.length);
+  const glyphWidth = (char: string) => /\d/.test(char) ? 0.62 : /\s/.test(char) ? 0.32 : /[.,]/.test(char) ? 0.34 : /[−–—]/.test(char) ? 0.45 : 0.64;
+  const textWidth = (text: string) => Array.from(text).reduce((sum, char) => sum + glyphWidth(char), 0);
+  const width = Math.max(textWidth(rolling?.from ?? ""), textWidth(shown));
   return (
-    <span className="relative inline-flex whitespace-pre tabular-nums" style={{ width: `${width}ch` }} aria-label={format(value)}>
+    <span className="relative inline-flex whitespace-pre tabular-nums" style={{ width: `${width}em` }}>
       <span className="sr-only">{format(value)}</span>
       <span aria-hidden className="inline-flex">
         {Array.from(shown).map((char, i) => {
