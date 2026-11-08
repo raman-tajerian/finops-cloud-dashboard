@@ -11,10 +11,11 @@ export const FERN_WEIGHTS = { waste: 0.35, security: 0.25, budget: 0.20, anomaly
 
 export function calculateFernScore(inputs: FernScoreDto["inputs"], resourceCount: number): FernScoreDto {
   if (resourceCount === 0 || inputs.spend <= 0) return { score: null, subScores: { waste: null, security: null, budget: null, anomaly: null }, inputs };
+  const utilization = inputs.budgetAmount > 0 ? inputs.budgetForecast / inputs.budgetAmount : Infinity;
   const subScores = {
     waste: clamp(100 - (inputs.idleWaste / inputs.spend) * 500),
     security: clamp(inputs.securityScore),
-    budget: inputs.budgetAmount > 0 ? clamp((1.30 - inputs.budgetForecast / inputs.budgetAmount) * 250) : 0,
+    budget: utilization <= 0.90 ? 100 : utilization >= 1.30 ? 0 : clamp((1.30 - utilization) * 250),
     anomaly: clamp(100 - 25 * inputs.activeAnomalies),
   };
   const score = Math.round(subScores.waste * 0.35 + subScores.security * 0.25 + subScores.budget * 0.20 + subScores.anomaly * 0.20);
