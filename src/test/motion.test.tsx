@@ -35,7 +35,7 @@ describe("Motion v2 numbers and rings", () => {
     await waitFor(() => expect(visibleText(container)).toBe("62.5"), { timeout: 1600 });
     const active = container.querySelectorAll("circle")[1]!;
     const expected = 2 * Math.PI * 42 * (1 - 0.625);
-    await waitFor(() => expect(Number(getComputedStyle(active).strokeDashoffset)).toBeCloseTo(expected, 1), { timeout: 1800 });
+    await waitFor(() => expect(Number(active.getAttribute("stroke-dashoffset"))).toBeCloseTo(expected, 6), { timeout: 1800 });
   });
 
   it("reduced motion is immediate and every timed preset stays within 200–700ms", async () => {
