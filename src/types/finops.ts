@@ -161,3 +161,12 @@ export interface DailyInsightDto {
   link: InsightLink;
 }
 export interface InsightsDto { insights: DailyInsightDto[] }
+
+export interface CommitmentDto { id: string; provider: CloudProvider; name: string; monthlyEligible: number; committedSpend: number; coveragePct: number; utilizationPct: number; expires: string; daysRemaining: number; expiringSoon: boolean }
+export interface CommitmentRecommendationDto { provider: CloudProvider; stableBaseline: number; uncoveredStable: number; monthlySaving: number; upfront: number; breakEvenMonths: number }
+export interface CommitmentsDto { eligibleSpend: number; committedSpend: number; coveragePct: number; commitments: CommitmentDto[]; recommendations: CommitmentRecommendationDto[] }
+export interface ShowbackTeamDto { team: Team; spend: number; previousSpend: number; changePct: number; budgetAmount: number; forecast: number; budgetUsagePct: number; resources: ResourceRow[]; topResources: ResourceRow[]; trend: DailyCost[] }
+export interface TeamsDto { total: number; teams: ShowbackTeamDto[] }
+export type NotificationType = "anomaly" | "budget" | "security" | "recommendation";
+export interface NotificationDto { id: string; type: NotificationType; title: string; sentence: string; figure: { value: number; unit: "USD" | "count" }; link: InsightLink; sourceId: string }
+export interface NotificationsDto { items: NotificationDto[]; counts: Record<NotificationType, number> }

@@ -26,8 +26,9 @@ export function recordSearch(n: NavigationSession, search: string): NavigationSe
   const text = search.trim();
   return text ? { ...n, searches: [text, ...n.searches.filter((s) => s !== text)].slice(0, 5) } : n;
 }
-interface State { navigation: NavigationSession; reports: PastReport[]; schedules: ScheduleRow[]; integrations: Record<string, "Connected" | "Not connected">; settings: DemoSettings; recs: Record<string, RecState>; budgets: SessionBudget[]; rules: AlertRule[]; anomalies: Record<string, AnomalyStatus>; findings: Record<string, FindingState> }
+interface State { notificationReads: Record<string, boolean>; navigation: NavigationSession; reports: PastReport[]; schedules: ScheduleRow[]; integrations: Record<string, "Connected" | "Not connected">; settings: DemoSettings; recs: Record<string, RecState>; budgets: SessionBudget[]; rules: AlertRule[]; anomalies: Record<string, AnomalyStatus>; findings: Record<string, FindingState> }
 let state: State = {
+  notificationReads: {},
   navigation: emptyNavigation(),
   reports: [], schedules: [], integrations: {}, settings: { notify: {}, density: "comfortable", reduceMotion: false, theme: "light" },
   findings: {},
