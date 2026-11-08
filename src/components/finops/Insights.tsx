@@ -14,20 +14,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 const Label = ({ children }: { children: ReactNode }) => <p className="text-[15px] font-medium leading-snug text-foreground">{children}</p>;
 const tip = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, color: "var(--foreground)" };
 
-/** Animated number counter that re-tweens whenever value changes. */
-export function CountUp({ value, format }: { value: number; format: (n: number) => string }) {
-  const [shown, setShown] = useState(value);
-  const prev = useRef(value);
-  const reduce = useAppReducedMotion();
-  useEffect(() => {
-    if (reduce) { setShown(value); prev.current = value; return; }
-    const c = animate(prev.current, value, { duration: 0.8, ease: [0.22, 1, 0.36, 1], onUpdate: setShown });
-    prev.current = value;
-    return () => c.stop();
-  }, [value, reduce]);
-  return <>{format(shown)}</>;
-}
-
 /** Subtle 3D tilt wrapper for bento cards. */
 export function Tilt({ children, className = "" }: { children: ReactNode; className?: string }) {
   const reduce = useAppReducedMotion();
