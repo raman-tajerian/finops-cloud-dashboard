@@ -8,6 +8,8 @@ import { buildSecurity } from "@/data/security";
 import { buildReport } from "@/data/reports";
 import { buildIntegrations } from "@/data/integrations";
 import { buildSettings } from "@/data/settings";
+import { buildFernScore, buildInsights } from "@/data/insights";
+import type { FernScoreDto, InsightsDto } from "@/types/finops";
 import type { IntegrationsDto, ReportDto, ReportTemplateId, SettingsDto } from "@/types/finops";
 import type { AlertsDto, SavingsDto, BudgetDto, KubernetesDto, ScenarioDto, DashboardDto, ExploreDto, GroupBy, ResourceDetailDto, ResourcesDto, SecurityDto, SustainabilityDto } from "@/types/finops";
 
@@ -25,6 +27,8 @@ async function call<T>(path: string, mock: () => T): Promise<T> {
 }
 
 export const api = {
+  getFernScore: (f: Filters) => call<FernScoreDto>(`/fern-score?${qs(f)}`, () => buildFernScore(masterResources, f)),
+  getInsights: (f: Filters) => call<InsightsDto>(`/insights?${qs(f)}`, () => buildInsights(masterResources, f)),
   getDashboard: (f: Filters) => call<DashboardDto>(`/dashboard?${qs(f)}`, () => buildDashboard(masterResources, f)),
   getExplore: (f: Filters, groupBy: GroupBy) => call<ExploreDto>(`/costs/explore?${qs(f, { groupBy })}`, () => buildExplore(masterResources, f, groupBy)),
   getResources: (f: Filters) => call<ResourcesDto>(`/resources?${qs(f)}`, () => buildResources(masterResources, f)),
