@@ -1,6 +1,6 @@
 # Fern API contract
 
-Set `VITE_API_BASE_URL` to switch the 16 read functions in [`src/lib/api.ts`](../src/lib/api.ts) from demo builders to `GET {base}/api/v1/...`. One trailing slash is removed from the base. JSON must match [`src/types/finops.ts`](../src/types/finops.ts); it is cast, not runtime-validated. The read client has no authentication headers or write methods. Non-2xx responses throw `Request failed (<status>)`. Demo requests wait a simulated 300–800 ms before returning builder results.
+Set `VITE_API_BASE_URL` to switch the 19 read functions in [`src/lib/api.ts`](../src/lib/api.ts) from demo builders to `GET {base}/api/v1/...`. One trailing slash is removed from the base. JSON must match [`src/types/finops.ts`](../src/types/finops.ts); it is cast, not runtime-validated. The read client has no authentication headers or write methods. Non-2xx responses throw `Request failed (<status>)`. Demo requests wait a simulated 300–800 ms before returning builder results.
 
 ## Complete function inventory
 
@@ -24,6 +24,9 @@ Set `VITE_API_BASE_URL` to switch the 16 read functions in [`src/lib/api.ts`](..
 | getSecurity(f) | GET | /api/v1/security | F | SecurityDto |
 | getFernScore(f) | GET | /api/v1/fern-score | F | FernScoreDto |
 | getInsights(f) | GET | /api/v1/insights | F | InsightsDto |
+| getCommitments(f) | GET | /api/v1/commitments | F | CommitmentsDto |
+| getTeams(f) | GET | /api/v1/teams | F | TeamsDto |
+| getNotifications(f) | GET | /api/v1/notifications | F | NotificationsDto |
 
 App normalization (`src/lib/filters.ts`) accepts range `7d|mtd|q3|custom` (default mtd), providers AWS/Azure/GCP (default all), env All/Production/Staging/Development (default All), team All/Platform/Data/FinOps/Media (default All). Custom means last 30 days, not an arbitrary interval; `30d` is not a separate normalized URL value. The API client itself does not apply defaults to its supplied Filters.
 
@@ -172,3 +175,15 @@ Query: global filters F. Returns `InsightsDto`: `{insights:DailyInsightDto[]}`. 
 Rules run in fixed order and return at most five entries, one per applicable rule. No matching resources returns an empty array; unavailable rules are skipped, so narrow filters can produce fewer than three entries. Empty output displays “Nothing needs attention”. Figures reconcile to existing aggregates; no generated/AI text or invented figures. Session-only demo status/budget edits are not inputs: these endpoints describe the aggregate default state, as do the existing read endpoints.
 
 Both new endpoints follow the existing read-client pattern: local pure builders in demo mode, actual GET requests to the configured C# API in live mode. This project does not host `/api/v1` HTTP handlers; the replacement backend must implement these paths. Both queries have separate loading/error/retry states keyed by all global filters.
+
+
+## GET /api/v1/commitments
+Query F. Returns `CommitmentsDto` `{eligibleSpend,committedSpend,coveragePct,commitments,recommendations}`. Headline eligible/committed spend uses the selected period. Commitment rows: `{id,provider,name,monthlyEligible,committedSpend,coveragePct,utilizationPct,expires,daysRemaining,expiringSoon}`; row money is monthly USD, expiration is ISO yyyy-mm-dd. Recommendations: `{provider,stableBaseline,uncoveredStable,monthlySaving,upfront,breakEvenMonths}`. Percentages are 0–100; monetary amounts stay USD. Empty inventory yields empty arrays and zero totals. These are illustrative commitments, not purchased reservations.
+
+## GET /api/v1/teams
+Query F. Returns `TeamsDto` `{total,teams:ShowbackTeamDto[]}`. Each team has `{team,spend,previousSpend,changePct,budgetAmount,forecast,budgetUsagePct,resources:ResourceRow[],topResources:ResourceRow[],trend:DailyCost[]}`. Spend and comparison match `/costs/explore?groupBy=team`; total equals Overview selected-period spend. Teams follow the global team filter; with All, four named teams are returned, including zero-spend teams. Resources rank by monthlyCost; topResources takes three. Monthly budget and forecast follow existing scoped defaults. The `/teams/{teamId}` UI uses this same filtered response, not an extra endpoint. CSV includes unrounded USD fields plus display-formatted spend.
+
+## GET /api/v1/notifications
+Query F. Returns `NotificationsDto` `{items:NotificationDto[],counts:{anomaly,budget,security,recommendation}}`. Notification fields `{id,type,title,sentence,figure:{value,unit:USD|count},link:{to,tab},sourceId}`. Sentences carry `{figure}` for the shared display formatter. One notification per active anomaly, open security finding and saving group; one per built-in budget scope at its highest reached threshold (80% or 100%). Stable IDs key client read state. Empty resource selections return no notifications even if raw account-level findings exist. Read/unread filtering and mark-all are session overlays, not API writes; the bell and page share this response and map. Default source statuses match the read aggregates, not session remediation overlays.
+
+New paths follow the existing mock/future C# GET pattern; no hosted `/api/v1` handlers are added. See DEMO_DATA for precise eligibility, baseline, seeds and thresholds.

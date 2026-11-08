@@ -24,6 +24,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SustainabilityRouteImport } from './routes/sustainability'
 import { Route as TeamsRouteImport } from './routes/teams'
 import { Route as ApiAnomalyAnalysisRouteImport } from './routes/api/anomaly-analysis'
+import { Route as TeamsIndexRouteImport } from './routes/teams.index'
 import { Route as TeamsTeamIdRouteImport } from './routes/teams.$teamId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -101,6 +102,11 @@ const ApiAnomalyAnalysisRoute = ApiAnomalyAnalysisRouteImport.update({
   path: '/api/anomaly-analysis',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeamsIndexRoute = TeamsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TeamsRoute,
+} as any)
 const TeamsTeamIdRoute = TeamsTeamIdRouteImport.update({
   id: '/$teamId',
   path: '/$teamId',
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/teams': typeof TeamsRouteWithChildren
   '/api/anomaly-analysis': typeof ApiAnomalyAnalysisRoute
   '/teams/$teamId': typeof TeamsTeamIdRoute
+  '/teams/': typeof TeamsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -139,9 +146,9 @@ export interface FileRoutesByTo {
   '/security': typeof SecurityRoute
   '/settings': typeof SettingsRoute
   '/sustainability': typeof SustainabilityRoute
-  '/teams': typeof TeamsRouteWithChildren
   '/api/anomaly-analysis': typeof ApiAnomalyAnalysisRoute
   '/teams/$teamId': typeof TeamsTeamIdRoute
+  '/teams': typeof TeamsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -161,6 +168,7 @@ export interface FileRoutesById {
   '/teams': typeof TeamsRouteWithChildren
   '/api/anomaly-analysis': typeof ApiAnomalyAnalysisRoute
   '/teams/$teamId': typeof TeamsTeamIdRoute
+  '/teams/': typeof TeamsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -181,6 +189,7 @@ export interface FileRouteTypes {
     | '/teams'
     | '/api/anomaly-analysis'
     | '/teams/$teamId'
+    | '/teams/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -196,9 +205,9 @@ export interface FileRouteTypes {
     | '/security'
     | '/settings'
     | '/sustainability'
-    | '/teams'
     | '/api/anomaly-analysis'
     | '/teams/$teamId'
+    | '/teams'
   id:
     | '__root__'
     | '/'
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/teams'
     | '/api/anomaly-analysis'
     | '/teams/$teamId'
+    | '/teams/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -344,6 +354,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAnomalyAnalysisRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teams/': {
+      id: '/teams/'
+      path: '/'
+      fullPath: '/teams/'
+      preLoaderRoute: typeof TeamsIndexRouteImport
+      parentRoute: typeof TeamsRoute
+    }
     '/teams/$teamId': {
       id: '/teams/$teamId'
       path: '/$teamId'
@@ -356,10 +373,12 @@ declare module '@tanstack/react-router' {
 
 interface TeamsRouteChildren {
   TeamsTeamIdRoute: typeof TeamsTeamIdRoute
+  TeamsIndexRoute: typeof TeamsIndexRoute
 }
 
 const TeamsRouteChildren: TeamsRouteChildren = {
   TeamsTeamIdRoute: TeamsTeamIdRoute,
+  TeamsIndexRoute: TeamsIndexRoute,
 }
 
 const TeamsRouteWithChildren = TeamsRoute._addFileChildren(TeamsRouteChildren)
