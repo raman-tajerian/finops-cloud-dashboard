@@ -36,7 +36,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const [budgetOpen, setBudgetOpen] = useState(false);
   const overlayTrigger = useRef<HTMLElement | null>(null);
   const searchButton = useRef<HTMLButtonElement>(null);
-  const returnFocus = () => { const el = overlayTrigger.current; if (el?.isConnected) el.focus(); else searchButton.current?.focus(); };
+  const returnFocus = () => { const el = overlayTrigger.current; if (el?.isConnected) el.focus(); else { const search = Array.from(document.querySelectorAll<HTMLButtonElement>('header button')).find((b) => b.offsetWidth > 0 && (b.getAttribute('aria-label') === 'Search' || b.textContent?.includes('Search'))); (search ?? searchButton.current)?.focus(); } };
   const captureFocus = () => { overlayTrigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; };
   const showPalette = () => { captureFocus(); setPalette(true); };
   const showHelp = () => { captureFocus(); setHelp(true); };

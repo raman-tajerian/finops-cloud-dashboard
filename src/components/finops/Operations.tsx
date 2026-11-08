@@ -6,6 +6,7 @@ import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useBudget, useKubernetes, useScenario } from "@/lib/queries";
 import { budgetTone, simulate } from "@/lib/scenario";
 import { useGlobalFilters } from "@/lib/filters";
+import { MetricInfo } from "./Help";
 import type { K8sClusterDto, K8sPodDto } from "@/types/finops";
 import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, StatusBadge, TableToggle } from "./States";
 import { CountUp } from "./Insights";
@@ -128,7 +129,7 @@ function BudgetCard({ d }: { d: NonNullable<ReturnType<typeof useBudget>["data"]
       <div className="flex items-start justify-between gap-3"><Title sub={`${d.period} · day ${d.dayOfMonth} of ${d.monthDays}`}>Budget & forecast</Title><StatusBadge tone={tone}>{budget > 0 ? `${pct.toFixed(1)}%` : "—"} of budget</StatusBadge></div>
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <div><p className="text-[13px] text-muted-foreground">Spend to date</p><p className="mt-1 metric-numbers text-[30px] leading-none"><CountUp value={d.spendToDate} format={(n) => fmtMoney(n)} /></p></div>
-        <div><p className="text-[13px] text-muted-foreground">Projected end of month</p><p className="mt-1 metric-numbers text-[30px] leading-none"><CountUp value={d.forecastEom} format={(n) => fmtMoney(n)} /></p></div>
+        <div><p className="flex items-center text-[13px] text-muted-foreground">Projected end of month<MetricInfo label="Forecast end of month" /></p><p className="mt-1 metric-numbers text-[30px] leading-none"><CountUp value={d.forecastEom} format={(n) => fmtMoney(n)} /></p></div>
       </div>
       <div className="mt-6">
         <div className="mb-2 flex justify-between text-xs text-muted-foreground"><span>Projected % of budget</span><span className="tabular-nums">{budget > 0 ? `${pct.toFixed(1)}%` : "—"}</span></div>

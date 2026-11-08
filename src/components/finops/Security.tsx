@@ -110,7 +110,7 @@ function ComplianceCards({ findings, frameworks }: { findings: SecurityFindingDt
   const active = results.find((x) => x.fw.id === open);
   return (
     <article className="organic-card h-full p-6">
-      <SectionHeading title="Compliance posture · Illustrative" description="Illustrative: these controls are simplified examples, not an audit. A control fails when an open finding of a mapped rule exists. Click a card to inspect its controls." />
+      <div className="flex items-start gap-1"><SectionHeading title="Compliance posture · Illustrative" description="Illustrative: these controls are simplified examples, not an audit. A control fails when an open finding of a mapped rule exists. Click a card to inspect its controls." /><MetricInfo label="Compliance control" /></div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {results.map(({ fw, r }) => (
           <button key={fw.id} onClick={() => setOpen(open === fw.id ? null : fw.id)} aria-expanded={open === fw.id} className={`rounded-xl border p-4 text-left transition-colors ${open === fw.id ? "border-foreground/40 bg-secondary" : "border-border hover:bg-secondary/50"}`}>
