@@ -87,7 +87,7 @@ function BudgetCards({ d }: { d: AlertsDto }) {
 
 const thresholdsAll = [50, 80, 100] as const;
 const channelsAll = ["Email", "Slack", "Teams"] as const;
-function CreateBudgetDialog({ open, onOpenChange, scopes }: { open: boolean; onOpenChange: (o: boolean) => void; scopes: ScopeSpendDto[] }) {
+export function CreateBudgetDialog({ open, onOpenChange, scopes }: { open: boolean; onOpenChange: (o: boolean) => void; scopes: ScopeSpendDto[] }) {
   const blank = { name: "", scope: "", amount: "", period: "monthly", thresholds: [80, 100] as number[], channels: ["Email"] as string[] };
   const [f, setF] = useState(blank);
   const [errors, setErrors] = useState<Record<string, string>>({});

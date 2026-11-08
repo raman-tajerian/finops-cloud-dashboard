@@ -9,7 +9,7 @@ export const SHORTCUTS: ShortcutDef[] = [
   { keys: "G S", action: "Go to Security", to: "/security" },
   { keys: "G K", action: "Go to Kubernetes", to: "/kubernetes" },
   { keys: "/", action: "Search" },
-  { keys: "?", action: "Keyboard shortcuts" },
+  { keys: "?", action: "Help and keyboard shortcuts" },
   { keys: "Esc", action: "Close dialog or drawer" },
   { keys: "⌘K", action: "Command palette" },
 ];

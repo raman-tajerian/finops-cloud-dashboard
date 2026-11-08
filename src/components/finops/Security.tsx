@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import { MetricInfo } from "./Help";
 
 export interface SecSearch { sev: string; fstatus: string; prov: string; rule: string; q: string; sort: string; finding: string }
 
@@ -71,7 +72,7 @@ function ScoreCard({ trend }: { trend: SecurityDto["scoreTrend"] }) {
   return (
     <article className="organic-card h-full p-6">
       <div className="flex items-start justify-between gap-3">
-        <div><p className="font-mono text-[10px] text-muted-foreground">Security score</p><p className="mt-1 text-[13px] text-muted-foreground">100 − weighted open findings (Critical 8 · High 4 · Medium 1.5 · Low 0.5), clamped at 0.</p></div>
+        <div><p className="flex items-center font-mono text-[10px] text-muted-foreground">Security score<MetricInfo label="Security score" /></p><p className="mt-1 text-[13px] text-muted-foreground">100 − weighted open findings (Critical 8 · High 4 · Medium 1.5 · Low 0.5), clamped at 0.</p></div>
         <TableToggle on={asTable} onChange={setAsTable} />
       </div>
       <div className="mt-4 flex items-center gap-6">
