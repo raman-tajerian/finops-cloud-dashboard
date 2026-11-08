@@ -171,7 +171,7 @@ function Tracker({ d, open }: { d: SavingsDto; open: number }) {
               <XAxis dataKey="month" tickFormatter={(v: string) => v.slice(0, 3)} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
               <YAxis width={48} tickFormatter={(v: number) => fmtMoneyCompact(Number(v))} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={tip} formatter={(v) => fmtMoney(Number(v))} cursor={{ fill: "var(--secondary)" }} />
-              <Bar dataKey="potential" name="Potential" fill="var(--chart-2)" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="potential" name="Potential" fill="var(--chart-2)" fillOpacity={0.78} radius={[6, 6, 0, 0]} />
               <Bar dataKey="realized" name="Realized (demo)" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
