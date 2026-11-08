@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MetricInfo } from "./Help";
+import { AnimatedNumber, MotionBar } from "@/components/motion";
 
 export type ChartType = "area" | "bar" | "line";
 export interface ExplorerState { group: GroupBy; chart: ChartType; compare: boolean }

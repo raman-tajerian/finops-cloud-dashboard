@@ -170,7 +170,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 ))}</ul>
               </PopoverContent>
             </Popover>
-            <Button onClick={scan} disabled={scanning} className="h-10 rounded-xl"><Radar className={scanning ? "animate-spin" : ""} /><span className="hidden sm:inline">{scanning ? "Scanning…" : "Run scan"}</span></Button>
+            <Button onClick={scan} disabled={scanning} className="h-10 rounded-xl"><Radar className="" /><span className="hidden sm:inline">{scanning ? "Scanning…" : "Run scan"}</span></Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild><button className="grid size-10 place-items-center rounded-full border border-border bg-card text-xs font-medium" aria-label="User menu">RT</button></DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">

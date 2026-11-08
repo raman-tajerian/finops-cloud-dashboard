@@ -18,7 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { Tilt } from "./Insights";
-import { AnimatedNumber } from "@/components/motion";
+import { AnimatedNumber, MotionBar } from "@/components/motion";
+import { motion } from "framer-motion";
 
 export type { Filters };
 
@@ -263,7 +264,7 @@ export function SavingsFeed() {
         <div><Label>Optimization recommendations</Label><p className="mt-1 text-[13px] text-muted-foreground">Executing all open actions saves <span className="metric-numbers text-foreground">{fmtMoney(pending)}/month</span></p></div>
         <div className="text-right"><Label>Realized</Label><p className="metric-numbers mt-1 text-xl text-success">{fmtMoney(realized)}</p></div>
       </div>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="progress-reveal h-full rounded-full bg-success transition-all duration-700" style={{ width: `${Math.min(100, (realized / Math.max(1, realized + pending)) * 100)}%` }} /></div>
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><motion.div className="h-full origin-left rounded-full bg-success" initial={{ scaleX: 0 }} animate={{ scaleX: Math.min(100, (realized / Math.max(1, realized + pending)) * 100) / 100 }} transition={{ type: "spring", stiffness: 120, damping: 20 }} /></div>
       {recommendations.length === 0 && <div className="mt-6 space-y-3 rounded-xl bg-secondary p-7 text-center"><p className="text-sm text-muted-foreground">No resources match the savings rules for the selected team and filters.</p><Button variant="secondary" onClick={reset}>Reset filters</Button></div>}
       <ul className="mt-5 divide-y divide-border">
         {recommendations.map((r) => {
@@ -332,18 +333,18 @@ export function K8sHealth({ onOpen }: { onOpen: (d: Detail) => void }) {
     <article className={`${card} flex h-full flex-col`}>
       <button className="flex w-full items-start justify-between text-left" onClick={() => onOpen({ title: cluster.name, description: "Kubernetes cluster details", rows: [["Region", cluster.region], ["Version", cluster.version], ["Nodes", `${cluster.nodes}`], ["CPU allocation", `${cpu}%`], ["Memory utilization", `${mem}%`], ["Pods healthy", `${cluster.podsHealthy}/${cluster.podsTotal}`], ["Pods pending", "2 (ImagePullBackOff)"]] })}>
         <div><Label>Kubernetes cluster</Label><p className="mt-1 font-medium">{cluster.name}</p><p className="metric-numbers text-xs text-muted-foreground">{cluster.region} · {cluster.version} · {cluster.nodes} nodes</p></div>
-        <div className="flex shrink-0 items-center gap-2"><span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">Demo telemetry</span><Pill tone="success"><span className="pulse-dot mr-1.5 size-1.5 rounded-full bg-success text-success" />Healthy</Pill></div>
+        <div className="flex shrink-0 items-center gap-2"><span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">Demo telemetry</span><Pill tone="success"><span className="mr-1.5 size-1.5 rounded-full bg-success text-success" />Healthy</Pill></div>
       </button>
       <div className="mt-6 space-y-4">
         {bars.map(([l, v, c, t]) => (
           <div key={l}><div className="flex justify-between text-xs"><span className="text-muted-foreground">{l}</span><span className="metric-numbers">{t}</span></div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div className="progress-reveal h-full rounded-full transition-all duration-700" style={{ width: `${v}%`, background: c }} /></div></div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><motion.div className="h-full origin-left rounded-full" initial={{ scaleX: 0 }} animate={{ scaleX: v / 100 }} style={{ background: c }} transition={{ type: "spring", stiffness: 120, damping: 20 }} /></div></div>
         ))}
       </div>
       <div className="mt-6 border-t border-border pt-4">
         <div className="flex items-center gap-2"><Bot className="size-3.5 text-muted-foreground" /><Label>Live automation</Label></div>
         <ul className="mt-3 space-y-2.5">
-          {ticker.map((x, i) => <li key={`${x.t}-${i}-${x.ago}`} className={`flex justify-between gap-3 text-xs ${i === 0 ? "animate-in fade-in slide-in-from-top-1 duration-300" : ""}`}><span className={i === 0 ? "text-foreground" : "text-muted-foreground"}>{x.t}</span><span className="metric-numbers shrink-0 text-muted-foreground">{x.ago === 0 ? "now" : `${x.ago}m ago`}</span></li>)}
+          {ticker.map((x, i) => <motion.li layout="position" key={`${x.t}-${i}-${x.ago}`} initial={i === 0 ? { opacity: 0, y: -4 } : false} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.24 }} className="flex justify-between gap-3 text-xs"><span className={i === 0 ? "text-foreground" : "text-muted-foreground"}>{x.t}</span><span className="metric-numbers shrink-0 text-muted-foreground">{x.ago === 0 ? "now" : `${x.ago}m ago`}</span></li>)}
         </ul>
       </div>
     </article>

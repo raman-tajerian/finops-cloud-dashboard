@@ -58,7 +58,7 @@ export function AnomalyAnalyst() {
       </div>
       {(text || error || busy) && (
         <div className="mt-5 rounded-xl border border-border bg-background/60 p-4">
-          {busy && !text && <p className="animate-pulse text-sm text-muted-foreground">Reading cost and resource data…</p>}
+          {busy && !text && <p className="text-sm text-muted-foreground">Reading cost and resource data…</p>}
           {text && <div className="whitespace-pre-wrap text-sm leading-relaxed">{text.replace(/^## /gm, "").replace(/\*\*/g, "")}</div>}
           {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
         </div>

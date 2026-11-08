@@ -5,7 +5,7 @@ import { ArrowDownRight, ArrowUpRight, ChevronRight, Minus } from "lucide-react"
 import { fmtMoney, fmtMoneyCompact } from "@/lib/finops-data";
 import { useDashboardData } from "@/lib/queries";
 import { DataTableView, PageHero, TableToggle } from "./States";
-import { AnimatedNumber } from "@/components/motion";
+import { AnimatedNumber, ChartReveal } from "@/components/motion";
 import { Spark } from "./Platform";
 import type { KpiValue } from "@/types/finops";
 import { MetricInfo } from "./Help";
@@ -79,13 +79,13 @@ export function CostTrendCard() {
       </div>
       <div className="mt-4 h-72">
         {asTable ? <DataTableView caption="Daily cost by provider with forecast" columns={["Day", ...providers, "Forecast", "Band", "Anomaly"]} rows={trend.map((t) => [t.day, ...providers.map((p) => (t.total ? fmtMoney(t[p]) : "—")), t.forecast === null ? "—" : fmtMoney(t.forecast), t.band ? `${fmtMoney(t.band[0])} – ${fmtMoney(t.band[1])}` : "—", t.anomaly ?? ""])} /> :
-        <ResponsiveContainer>
+        <ChartReveal className="h-full" motionKey={providers.join("-")}><ResponsiveContainer>
           <ComposedChart data={data} margin={{ left: -6, right: 8, top: 8 }}>
             <CartesianGrid stroke="var(--border)" strokeDasharray="2 4" vertical={false} />
             <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} minTickGap={24} />
             <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} formatter={(v, n) => [Array.isArray(v) ? `${fmtMoney(Number(v[0]))} – ${fmtMoney(Number(v[1]))}` : fmtMoney(Number(v)), String(n)]} />
-            {providers.map((p) => <Area key={p} dataKey={p} stackId="p" stroke={colors[p]} fill={colors[p]} fillOpacity={0.08} strokeWidth={1.5} animationDuration={700} />)}
+            {providers.map((p) => <Area key={p} dataKey={p} stackId="p" stroke={colors[p]} fill={colors[p]} fillOpacity={0.08} strokeWidth={1.5} isAnimationActive={false} />)}
             <Area dataKey="band" name="95% band" stroke="none" fill="var(--muted-foreground)" fillOpacity={0.12} />
             <Line dataKey="forecast" name="Forecast" stroke="var(--muted-foreground)" strokeDasharray="5 4" dot={false} strokeWidth={1.5} connectNulls />
             {markers.map((m) => (
@@ -94,7 +94,7 @@ export function CostTrendCard() {
                 label={{ value: "!", fill: "var(--card)", fontSize: 9, position: "center" }} />
             ))}
           </ComposedChart>
-        </ResponsiveContainer>}
+        </ResponsiveContainer></ChartReveal>}
       </div>
       {kpis.anomalies[0] && <p className="mt-3 text-xs text-muted-foreground">Click a red marker to investigate · top: <span className="text-foreground">{kpis.anomalies[0].title}</span> +{kpis.anomalies[0].change}%</p>}
     </article>

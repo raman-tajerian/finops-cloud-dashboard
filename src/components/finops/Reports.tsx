@@ -75,7 +75,7 @@ export function ReportsWorkspace({ tab = "generate", onTab }: { tab?: string; on
           <div className="grid gap-1.5"><Label>Date range</Label><Select value={range} onValueChange={setRange}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{RANGES.map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}</SelectContent></Select></div>
           <div className="grid gap-1.5"><Label>Format</Label><div className="flex gap-2">{FORMATS.map((f) => <Button key={f} type="button" variant={format === f ? "default" : "secondary"} aria-pressed={format === f} onClick={() => setFormat(f)}>{f}</Button>)}</div>{format === "PDF" && <p className="text-xs text-muted-foreground">Opens a print-friendly view; choose "Save as PDF".</p>}</div>
           {err && <p role="alert" className="text-sm text-destructive">{err}</p>}
-          <div><Button disabled={busy || !gen} onClick={generate}>{busy ? <><Loader2 className="size-4 animate-spin" />Building report…</> : "Generate"}</Button></div>
+          <div><Button disabled={busy || !gen} onClick={generate}>{busy ? <><Loader2 className="size-4" />Building report…</> : "Generate"}</Button></div>
         </section>
         </div>
       )}

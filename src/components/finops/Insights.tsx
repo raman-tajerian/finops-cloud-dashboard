@@ -76,7 +76,7 @@ export function Topology3D() {
             const below = i % 2 === 0;
             return (
               <g key={n.id} onPointerEnter={() => setHover(n)} onPointerLeave={() => setHover(null)} style={{ opacity: 0.55 + 0.45 * Math.min(1, p.s) }}>
-                {n.health !== "ok" && <circle cx={p.x} cy={p.y} r={r} fill={c} className="topo-pulse" />}
+                {n.health !== "ok" && <motion.circle cx={p.x} cy={p.y} r={r} fill={c} initial={{ opacity: 0.5, scale: 0.8 }} animate={{ opacity: 0, scale: 1.6 }} transition={{ duration: 0.6 }} />}
                 <circle cx={p.x} cy={p.y} r={r} fill="var(--card)" stroke={c} strokeWidth={n.kind === "region" ? 2 : 1.5} />
                 <circle cx={p.x} cy={p.y} r={r * 0.35} fill={c} />
                 <text x={p.x} y={below ? p.y + r + 15 : p.y - r - 7} textAnchor="middle" className="fill-muted-foreground font-mono" fontSize={12}
@@ -86,10 +86,10 @@ export function Topology3D() {
           })}
         </svg>
         {hover && (
-          <div className="pointer-events-none absolute left-3 top-3 rounded-xl border border-border bg-popover px-3 py-2 text-xs animate-in fade-in">
+          <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="pointer-events-none absolute left-3 top-3 rounded-xl border border-border bg-popover px-3 py-2 text-xs">
             <p className="font-medium">{hover.label} <span className="text-muted-foreground">· {hover.kind}</span></p>
             <p className="metric-numbers mt-0.5">{fmtMoney(hover.cost)}/mo · {hover.health === "ok" ? "healthy" : hover.health}</p>
-          </div>
+          </motion.div>
         )}
       </div>}
       <div className="mt-3 flex flex-wrap gap-4 text-[11px] text-muted-foreground">
@@ -144,7 +144,7 @@ export function AnomalyForecast() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><Label>Anomaly detection · spend forecast</Label><p className="mt-1 text-[13px] text-muted-foreground">Daily spend vs. 90% confidence band</p></div>
         <motion.span initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="inline-flex items-center gap-1.5 rounded-full bg-destructive-soft px-2.5 py-1 text-[11px] font-medium text-destructive">
-          <span className="size-1.5 animate-pulse rounded-full bg-destructive" /><TrendingUp className="size-3" />{top ? `+${top.change}% spike in ${top.title}` : "No active anomalies"}
+          <span className="size-1.5 rounded-full bg-destructive" /><TrendingUp className="size-3" />{top ? `+${top.change}% spike in ${top.title}` : "No active anomalies"}
         </motion.span>
         <TableToggle on={asTable} onChange={setAsTable} />
       </div>

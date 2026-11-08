@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDown, ArrowUp, Ban, ChevronLeft, ChevronRight, Columns3, Download, Lightbulb, Rows3, Search, Server, Tag, Users } from "lucide-react";
 import { toast } from "sonner";
@@ -250,7 +250,7 @@ function ResourceDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const axis = { tick: { fontSize: 10, fill: "var(--muted-foreground)" }, tickLine: false, axisLine: false } as const;
   return (
     <Sheet open={!!id} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-xl" onCloseAutoFocus={(e) => { const row = Array.from(document.querySelectorAll<HTMLElement>("[data-resource-row]")).find((el) => el.dataset.resourceRow === sourceId.current); if (row) { e.preventDefault(); row.focus(); } }}>
+      <SheetContent className="w-full overflow-y-auto sm:max-w-xl" onCloseAutoFocus={(e) => { const row = Array.from(document.querySelectorAll<HTMLElement>("[data-resource-row]")).find((el) => el.dataset["resourceRow"] === sourceId.current); if (row) { e.preventDefault(); row.focus(); } }}>
         {q.isPending && <div className="p-4"><CardSkeleton h="h-64" /></div>}
         {q.isError && <div className="p-4"><ErrorState message="We couldn't load this resource." onRetry={() => q.refetch()} /></div>}
         {q.isSuccess && !d && <><SheetHeader><SheetTitle>Resource not found</SheetTitle><SheetDescription>The link points to a resource that no longer exists.</SheetDescription></SheetHeader></>}
