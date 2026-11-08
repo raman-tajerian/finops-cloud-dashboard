@@ -51,7 +51,7 @@ function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string })
   );
   return (
     <div className="space-y-8">
-      {tab === "clusters" && <PageHero label={`${c.name} · monthly cost`} value={fmtMoney(c.monthlyCost)} change={`${c.podsHealthy}/${c.podsTotal} pods healthy`} description={`${c.provider} ${c.service} in ${c.region}, with ${c.nodes} nodes and resource-derived cluster health.`} />}
+      {tab === "clusters" && <PageHero label={`${c.name} · monthly cost`} value={<AnimatedNumber value={c.monthlyCost} format={fmtMoney} />} change={`${c.podsHealthy}/${c.podsTotal} pods healthy`} description={`${c.provider} ${c.service} in ${c.region}, with ${c.nodes} nodes and resource-derived cluster health.`} />}
       <section className="organic-card grid gap-4 p-7 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <Title sub={`${c.provider} ${c.service} · ${c.region} · ${c.environment}`}>Cluster</Title>
         <Select value={c.id} onValueChange={setId}>

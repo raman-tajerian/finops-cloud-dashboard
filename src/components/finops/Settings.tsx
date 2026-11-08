@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Copy, Moon, Pencil, Plus, Sun, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
+import { AnimatedNumber } from "@/components/motion";
 import { useSettings } from "@/lib/queries";
 import { setSession, useSession, type DemoSettings } from "@/lib/session-store";
 import { isEmail } from "@/lib/validators";
@@ -43,7 +44,7 @@ export function SettingsWorkspace({ tab, dialog, onTab, onDialog }: { tab: strin
       <PageTabs tabs={SETTINGS_TABS.map(([id, label]) => ({ id, label }))} value={tab} onChange={onTab} ariaLabel="Settings sections" />
       <p className="flex items-center gap-2 text-xs text-muted-foreground"><Demo /> Changes are kept for this session only.</p>
       <TabContent tab={tab}>
-      {tab === "profile" && <div className="space-y-8"><PageHero label="Profile completeness" value={`${profileCompleteness}%`} change={`${d.members.length} workspace members`} description="Your personal details and workspace preferences, kept together in one calm place." /><FormCard fields={[["name", "Name"], ["email", "Email"], ["title", "Title"]]} value={d.profile} validate={(v) => (isEmail(v["email"] ?? "") ? null : { email: "Enter a valid email." })} onSave={(v) => save({ profile: v as SettingsDto["profile"] })} /></div>}
+      {tab === "profile" && <div className="space-y-8"><PageHero label="Profile completeness" value={<AnimatedNumber value={profileCompleteness} format={(n) => `${Math.round(n)}%`} />} change={`${d.members.length} workspace members`} description="Your personal details and workspace preferences, kept together in one calm place." /><FormCard fields={[["name", "Name"], ["email", "Email"], ["title", "Title"]]} value={d.profile} validate={(v) => (isEmail(v["email"] ?? "") ? null : { email: "Enter a valid email." })} onSave={(v) => save({ profile: v as SettingsDto["profile"] })} /></div>}
       {tab === "workspace" && <FormCard fields={[["name", "Workspace name"], ["currency", "Currency"], ["timezone", "Timezone"]]} value={d.workspace} validate={(v) => ((v["name"] ?? "").trim() ? null : { name: "Name is required." })} onSave={(v) => save({ workspace: v as SettingsDto["workspace"] })} />}
       {tab === "members" && <Members d={d} open={dialog === "invite"} onOpen={(o) => onDialog(o ? "invite" : "")} save={save} />}
       {tab === "allocation" && <Allocation rows={d.mappings} save={save} />}

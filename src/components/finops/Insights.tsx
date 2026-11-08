@@ -57,7 +57,6 @@ export function Topology3D() {
   const [pitch, setPitch] = useState(-0.25);
   const [hover, setHover] = useState<TopoNode | null>(null);
   const drag = useRef<{ x: number; y: number } | null>(null);
-  const reduce = useAppReducedMotion();
   const project = (n: { x: number; y: number; z: number }) => {
     const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
     const x1 = n.x * cy - n.z * sy, z1 = n.x * sy + n.z * cy;

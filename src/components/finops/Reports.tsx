@@ -9,6 +9,7 @@ import { fmtDemoDate, DEMO_TODAY } from "@/data/resources";
 import { isEmail, parseEmails } from "@/lib/validators";
 import type { ReportDto, ReportFormat, ReportTemplateId } from "@/types/finops";
 import { Button } from "@/components/ui/button";
+import { AnimatedNumber } from "@/components/motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -67,7 +68,7 @@ export function ReportsWorkspace({ tab = "generate", onTab }: { tab?: string; on
     <div className="space-y-8">
       {tab === "generate" && (
         <div className="space-y-8">
-        <PageHero label="Reports generated this session" value={reports.length} change={`${REPORT_TEMPLATES.length} templates available`} description="Build a shareable cost, savings or compliance report from the same filtered figures as the dashboard." />
+        <PageHero label="Reports generated this session" value={<AnimatedNumber value={reports.length} format={(n) => String(Math.round(n))} />} change={`${REPORT_TEMPLATES.length} templates available`} description="Build a shareable cost, savings or compliance report from the same filtered figures as the dashboard." />
         <section className="organic-card max-w-2xl space-y-4 p-7" aria-label="Generate report">
           <SectionHeading title="Generate a report" description="Built from the same numbers as Overview, Cost Explorer, Recommendations and Security, using the active provider, environment and team filters." />
           <div className="grid gap-1.5"><Label>Template</Label><Select value={gen ?? ""} onValueChange={(v) => { setGen(v as ReportTemplateId); setErr(null); }}><SelectTrigger aria-label="Template"><SelectValue placeholder="Choose a template" /></SelectTrigger><SelectContent>{REPORT_TEMPLATES.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent></Select></div>

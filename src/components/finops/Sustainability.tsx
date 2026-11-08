@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUp, Leaf, TrendingDown } from "lucide-react";
 import { useSustainability } from "@/lib/queries";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { AnimatedNumber } from "@/components/motion";
 import { CardSkeleton, DataTableView, EmptyState, ErrorState, PageHero, StatusBadge, TableToggle } from "./States";
 import type { CarbonBreakdown, SustainabilityRegionDto } from "@/types/finops";
 import { MetricInfo } from "./Help";
@@ -44,7 +45,7 @@ export function SustainabilityDashboard({ tab = "overview" }: { tab?: string }) 
   if (!d.regions.length) return <EmptyState icon={Leaf} title="No sustainability data matches these filters." action="Reset filters" onAction={reset} />;
   return <div className="space-y-6">
     {tab === "overview" && <>
-      <PageHero label="Estimated CO₂e" value={tons(d.totalTons)} change={<span className={d.changePct > 0 ? "text-warning" : "text-success"}>{d.changePct >= 0 ? "+" : ""}{d.changePct.toFixed(1)}% vs previous period</span>} description="A directional emissions estimate for the selected cloud spend, regions and providers." />
+      <PageHero label="Estimated CO₂e" value={<AnimatedNumber value={d.totalTons} format={tons} />} change={<span className={d.changePct > 0 ? "text-warning" : "text-success"}>{d.changePct >= 0 ? "+" : ""}{d.changePct.toFixed(1)}% vs previous period</span>} description="A directional emissions estimate for the selected cloud spend, regions and providers." />
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"><Kpi label="Estimated CO₂e" value={tons(d.totalTons)} note={`${d.changePct >= 0 ? "+" : ""}${d.changePct.toFixed(1)}% vs previous period`} good={d.changePct < 0}/><Kpi label="Carbon intensity" value={`${d.kgPerThousandUsd.toFixed(1)} kg`} note="CO₂e per 1,000 USD spend"/><Kpi label="A/B-rated spend" value={`${d.abSpendShare.toFixed(1)}%`} note="Share of selected spend" good={d.abSpendShare >= 50}/><Kpi label="Greener moves" value={String(d.suggestions.length)} note="Prioritized workloads" good={d.suggestions.length > 0}/></div>
       <div className="grid gap-6 lg:grid-cols-2"><TrendChart data={d.trend}/><BreakdownChart title="CO₂e by provider" data={d.providers}/><BreakdownChart title="CO₂e by service" data={d.services}/></div>
     </>}
