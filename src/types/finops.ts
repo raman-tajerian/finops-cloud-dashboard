@@ -145,3 +145,19 @@ export interface MemberDto { id: string; name: string; email: string; role: Memb
 export interface TagMappingDto { id: string; tagKey: string; tagValue: string; team: string }
 export interface ApiKeyDto { id: string; name: string; masked: string; created: string; lastUsed: string | null }
 export interface SettingsDto { profile: { name: string; email: string; title: string }; workspace: { name: string; currency: string; timezone: string }; members: MemberDto[]; mappings: TagMappingDto[]; keys: ApiKeyDto[]; channels: string[]; events: string[] }
+
+export interface InsightLink { to: "/resources" | "/security" | "/budgets" | "/recommendations" | "/cost-explorer" | "/sustainability"; tab: string }
+export interface FernScoreDto {
+  score: number | null;
+  subScores: { waste: number | null; security: number | null; budget: number | null; anomaly: number | null };
+  inputs: { spend: number; idleWaste: number; securityScore: number; budgetForecast: number; budgetAmount: number; activeAnomalies: number };
+}
+export type InsightType = "cost-mover" | "saving" | "budget" | "security" | "greener-region";
+export interface DailyInsightDto {
+  id: string; type: InsightType;
+  /** Sentence template; the display formatter replaces {figure} exactly once. */
+  sentence: string;
+  figure: { value: number; unit: "USD" | "count" | "tCO2e" };
+  link: InsightLink;
+}
+export interface InsightsDto { insights: DailyInsightDto[] }

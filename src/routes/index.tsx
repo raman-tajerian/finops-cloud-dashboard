@@ -12,6 +12,7 @@ import { AnomalyForecast, GreenOps, Tilt, Topology3D } from "@/components/finops
 import { AnomalyAnalyst } from "@/components/finops/AnomalyAnalyst";
 import { OnboardingChecklist } from "@/components/finops/Onboarding";
 import { Reveal } from "@/components/motion";
+import { DailyBriefingCard, FernScoreCard } from "@/components/finops/Briefing";
 import { PAGE_TABS, PageTabs, TabContent, usePageTab } from "@/components/finops/PageTabs";
 
 export const Route = createFileRoute("/")({
@@ -48,6 +49,8 @@ function Index() {
           <section className="grid gap-8 xl:grid-cols-12">
             <div className="min-w-0 xl:col-span-12"><DataGate h="h-20"><OverviewHero /></DataGate></div>
             <Reveal className="min-w-0 xl:col-span-12"><DataGate h="h-16"><OverviewKpis group="summary" /></DataGate></Reveal>
+            <Reveal className="min-w-0 xl:col-span-4"><CardBoundary label="Fern score"><FernScoreCard /></CardBoundary></Reveal>
+            <Reveal className="min-w-0 xl:col-span-8"><CardBoundary label="Daily briefing"><DailyBriefingCard /></CardBoundary></Reveal>
             <Reveal className="min-w-0 xl:col-span-8"><DataGate h="h-72"><CostTrendCard /></DataGate></Reveal>
             <Reveal className="min-w-0 xl:col-span-4"><DataGate h="h-72"><TopMovers /></DataGate></Reveal>
             <Reveal className="min-w-0 xl:col-span-12"><CardBoundary label="Top resources"><TopResourcesCard /></CardBoundary></Reveal>

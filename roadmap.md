@@ -1,5 +1,9 @@
 # Roadmap
 
+- [x] Add filter-derived Fern score and daily briefing through typed API builders, preserving existing totals.
+- [x] Document both read endpoints and deterministic formulas; 18 new aggregate reconciliation and edge-case tests.
+- [x] All 212 tests pass; Overview and drawer checked at 375/768/1024/1440px, links and loading/error/retry/empty states verified, no console errors or overflow. Default score 40 with five insights. Read paths follow existing demo/C# API pattern; no hosted API handlers added.
+
 - [x] Motion v2: shared 200–700ms Framer presets, exact odometer numbers/currency changes, reusable spring ProgressRing and reduced-motion/hidden-tab guardrails.
 - [x] First-session skippable brand intro, Overview scroll/pointer hero motion, viewport reveals and shared card/resource/recommendation drawer transitions with focus return.
 - [x] Masked chart reveals, baseline-staggered bars, sweeping donut segments, series dimming, controls, palette and capped list layout motion; existing Sonner/Radix overlay transitions retained.

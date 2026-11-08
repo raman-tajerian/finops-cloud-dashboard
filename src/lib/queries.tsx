@@ -11,6 +11,15 @@ export function useDashboard() {
   return useQuery({ queryKey: ["dashboard", filters], queryFn: () => api.getDashboard(filters), placeholderData: keepPreviousData, staleTime: 60_000 });
 }
 
+export function useFernScore() {
+  const { filters } = useGlobalFilters();
+  return useQuery({ queryKey: ["fern-score", filters], queryFn: () => api.getFernScore(filters), staleTime: 60_000 });
+}
+export function useInsights() {
+  const { filters } = useGlobalFilters();
+  return useQuery({ queryKey: ["insights", filters], queryFn: () => api.getInsights(filters), staleTime: 60_000 });
+}
+
 /** Only call inside <DataGate>, which guarantees data is loaded. */
 export function useDashboardData(): DashboardDto {
   return useDashboard().data as DashboardDto;
