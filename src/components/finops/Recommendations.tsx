@@ -14,7 +14,7 @@ import { recStatus, setSession, useSession, type RecStatus } from "@/lib/session
 import type { Level, SavingCategory, SavingItemDto, SavingsDto } from "@/types/finops";
 import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, PageHero, TableToggle } from "./States";
 import { Button } from "@/components/ui/button";
-import { AnimatedNumber } from "@/components/motion";
+import { AnimatedNumber, MotionBar } from "@/components/motion";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -172,8 +172,8 @@ function Tracker({ d, open }: { d: SavingsDto; open: number }) {
               <XAxis dataKey="month" tickFormatter={(v: string) => v.slice(0, 3)} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
               <YAxis width={48} tickFormatter={(v: number) => fmtMoneyCompact(Number(v))} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={tip} formatter={(v) => fmtMoney(Number(v))} cursor={{ fill: "var(--secondary)" }} />
-              <Bar dataKey="potential" name="Potential" fill="var(--chart-2)" fillOpacity={0.78} radius={[6, 6, 0, 0]} />
-              <Bar dataKey="realized" name="Realized (demo)" fill="var(--chart-1)" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="potential" name="Potential" fill="var(--chart-2)" fillOpacity={0.78} isAnimationActive={false} shape={<MotionBar />} radius={[6, 6, 0, 0]} />
+              <Bar dataKey="realized" name="Realized (demo)" fill="var(--chart-1)" isAnimationActive={false} shape={<MotionBar />} radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}

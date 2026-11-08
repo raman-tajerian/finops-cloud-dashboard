@@ -143,10 +143,34 @@ export function MotionBar({ x = 0, y = 0, width = 0, height = 0, fill = "var(--c
 }) {
   const reduce = useAppReducedMotion();
   const rx = Array.isArray(radius) ? Number(radius[0] ?? 0) : Number(radius);
+  const horizontal = width > height;
   return <motion.rect x={x} y={y} width={width} height={height} rx={rx} fill={fill}
-    style={{ transformOrigin: `${x + width / 2}px ${y + height}px` }}
-    initial={reduce ? { scaleY: 1 } : { scaleY: 0 }} animate={{ scaleY: 1 }}
+    style={{ transformOrigin: horizontal ? `${x}px ${y + height / 2}px` : `${x + width / 2}px ${y + height}px` }}
+    initial={reduce ? { scaleX: 1, scaleY: 1 } : { scaleX: horizontal ? 0 : 1, scaleY: horizontal ? 1 : 0 }} animate={{ scaleX: 1, scaleY: 1 }}
     transition={reduce ? { duration: 0 } : { duration: MOTION.duration.slow, delay: Math.min(index, 24) * MOTION.chartStagger, ease: MOTION.easeOut }} />;
+}
+
+/** Donut slices draw with SVG path length; hovering one softly dims the rest. */
+export function MotionDonut({ data, formatValue, className = "" }: { data: { name: string; value: number; color: string }[]; formatValue: (value: number) => string; className?: string }) {
+  const reduce = useAppReducedMotion();
+  const [hover, setHover] = useState<number | null>(null);
+  const total = data.reduce((sum, d) => sum + Math.max(0, d.value), 0);
+  let start = 0;
+  return <svg viewBox="0 0 100 100" className={className} role="img" aria-label="Cost allocation donut">
+    <circle cx="50" cy="50" r="36" fill="none" stroke="var(--muted)" strokeWidth="14" opacity="0.45" />
+    {total > 0 && data.map((d, i) => {
+      const fraction = Math.max(0, d.value) / total;
+      const rotation = -90 + start * 360;
+      start += fraction;
+      return <motion.circle key={d.name} cx="50" cy="50" r="36" fill="none" stroke={d.color} strokeWidth="14"
+        transform={`rotate(${rotation} 50 50)`} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}
+        initial={reduce ? { pathLength: fraction, opacity: 1 } : { pathLength: 0, opacity: 0.4 }}
+        animate={{ pathLength: Math.max(0, fraction - 0.006), opacity: hover === null || hover === i ? 1 : 0.25 }}
+        transition={{ pathLength: { duration: reduce ? 0 : 0.5, delay: reduce ? 0 : i * 0.06, ease: MOTION.easeOut }, opacity: { duration: 0.2 } }}>
+        <title>{d.name}: {formatValue(d.value)}</title>
+      </motion.circle>;
+    })}
+  </svg>;
 }
 
 export function StaggerList({ children, className }: { children: ReactNode; className?: string }) {

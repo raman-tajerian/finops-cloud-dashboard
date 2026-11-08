@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, Treemap, XAxis, YAxis } from "recharts";
 import { SlidersHorizontal, AlertTriangle, BellPlus, Bot, ChevronRight, Download, EyeOff, FileJson, FileSpreadsheet, FileText, UserPlus, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { Tilt } from "./Insights";
-import { AnimatedNumber, MotionBar } from "@/components/motion";
+import { AnimatedNumber, MotionBar, MotionDonut } from "@/components/motion";
 import { motion } from "framer-motion";
 
 export type { Filters };
@@ -138,7 +138,7 @@ export function DetailDrawer({ detail, onClose }: { detail: Detail; onClose: () 
 
 export function Spark({ data: raw, color, className = "h-10 w-24" }: { data: number[]; color: string; className?: string }) {
   const data = useMemo(() => raw.map((v, i) => ({ i, v })), [raw]);
-  return <div className={className} aria-hidden><ResponsiveContainer><LineChart data={data}><Line dataKey="v" stroke={color} strokeWidth={1.5} dot={false} animationDuration={700} animationEasing="ease-out" /></LineChart></ResponsiveContainer></div>;
+  return <div className={className} aria-hidden><ResponsiveContainer><LineChart data={data}><Line dataKey="v" stroke={color} strokeWidth={1.5} dot={false} isAnimationActive={false} /></LineChart></ResponsiveContainer></div>;
 }
 
 /* ---------- KPI cards ---------- */
@@ -204,7 +204,7 @@ export function CostDistribution() {
         {asTable && <DataTableView caption={`Cost distribution ${view}`} columns={table.columns} rows={table.rows} />}
         {!asTable && view === "service" && (
           <div key="service" className="animate-in fade-in zoom-in-95 grid h-full gap-7 duration-300 md:grid-cols-[1fr_220px]">
-            <ResponsiveContainer><PieChart><Pie data={services} dataKey="value" nameKey="name" innerRadius="62%" outerRadius="90%" paddingAngle={2} stroke="none">{services.map((_, i) => <Cell key={i} fill={chartColors[i] ?? "var(--chart-4)"} />)}</Pie><Tooltip contentStyle={tip} formatter={(v) => [`${fmtMoney(Number(v))} · ${pct(Number(v))}`, "Cost"]} /></PieChart></ResponsiveContainer>
+            <MotionDonut className="h-full w-full" data={services.map((s, i) => ({ name: s.name, value: s.value, color: chartColors[i] ?? "var(--chart-4)" }))} formatValue={(v) => `${fmtMoney(v)} · ${pct(v)}`} />
             <ul className="hidden flex-col justify-center gap-3 md:flex">{services.map((s, i) => <li key={s.name} className="flex items-center gap-2 text-sm"><span className="size-2 rounded-full" style={{ background: chartColors[i] }} /><span className="flex-1 text-muted-foreground">{s.name}</span><span className="metric-numbers">{pct(s.value)}</span></li>)}</ul>
           </div>
         )}
@@ -212,14 +212,14 @@ export function CostDistribution() {
           <div key="region" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><BarChart data={d.regions}>
             <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="region" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} cursor={{ fill: "var(--secondary)" }} formatter={(v, n) => [fmtMoney(Number(v)), String(n)]} />
-            {providers.includes("AWS") && <Bar dataKey="AWS" stackId="a" fill="var(--aws)" />}
-            {providers.includes("Azure") && <Bar dataKey="Azure" stackId="a" fill="var(--azure)" />}
-            {providers.includes("GCP") && <Bar dataKey="GCP" stackId="a" fill="var(--gcp)" radius={[6, 6, 0, 0]} />}
+            {providers.includes("AWS") && <Bar dataKey="AWS" stackId="a" fill="var(--aws)" isAnimationActive={false} shape={<MotionBar />} />}
+            {providers.includes("Azure") && <Bar dataKey="Azure" stackId="a" fill="var(--azure)" isAnimationActive={false} shape={<MotionBar />} />}
+            {providers.includes("GCP") && <Bar dataKey="GCP" stackId="a" fill="var(--gcp)" isAnimationActive={false} shape={<MotionBar />} radius={[6, 6, 0, 0]} />}
           </BarChart></ResponsiveContainer></div>
         )}
         {!asTable && view === "team" && (
           <div key="team" className="animate-in fade-in h-full duration-300"><ResponsiveContainer>
-            <Treemap data={d.teams.map((t, i) => ({ ...t, fill: chartColors[i % chartColors.length] }))} dataKey="value" nameKey="name" stroke="var(--card)" isAnimationActive animationDuration={500}
+            <Treemap data={d.teams.map((t, i) => ({ ...t, fill: chartColors[i % chartColors.length] }))} dataKey="value" nameKey="name" stroke="var(--card)" isAnimationActive={false}
               content={<TreeCell total={total} />}>
               <Tooltip contentStyle={tip} formatter={(v) => [`${fmtMoney(Number(v))} · ${pct(Number(v))}`, "Cost"]} />
             </Treemap>
@@ -229,7 +229,7 @@ export function CostDistribution() {
           <div key="daily" className="animate-in fade-in h-full duration-300"><ResponsiveContainer><AreaChart data={daily}>
             <CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="day" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} interval={4} /><YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtMoneyCompact(Number(v))} />
             <Tooltip contentStyle={tip} formatter={(v) => [fmtMoney(Number(v)), "Spend"]} />
-            <Area dataKey="spend" stroke="var(--chart-1)" strokeWidth={2} fill="var(--chart-1)" fillOpacity={0.08} />
+            <Area dataKey="spend" stroke="var(--chart-1)" strokeWidth={2} fill="var(--chart-1)" fillOpacity={0.08} isAnimationActive={false} />
           </AreaChart></ResponsiveContainer></div>
         )}
       </div>

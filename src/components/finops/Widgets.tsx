@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Activity, ArrowDownRight, ArrowUpRight, Check, ChevronRight, CircleAlert, Cpu, Database, MemoryStick, Search, Server, Sparkles } from "lucide-react";
 import { allocation, fmtMoney, fmtMoneyCompact, type CostPoint, type ResourceStatus } from "@/lib/finops-data";
 import { useDashboardData, useResources } from "@/lib/queries";
@@ -8,7 +8,7 @@ import { CardSkeleton, ErrorState, FilterEmptyState } from "@/components/finops/
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { ProgressRing } from "@/components/motion";
+import { MotionDonut, ProgressRing } from "@/components/motion";
 
 const Label = ({ children }: { children: React.ReactNode }) => <p className="text-[15px] font-medium leading-snug text-foreground">{children}</p>;
 const tooltipStyle = { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 14, fontSize: 12, color: "var(--foreground)" };
@@ -84,7 +84,7 @@ export function SavingsWorkflow() {
 export function Allocation() {
   const total = allocation.reduce((sum, item) => sum + item.value, 0);
   return (
-    <article className="organic-card h-full p-7 md:p-8"><Label>Cost allocation</Label><h2 className="mt-2 text-xl font-medium">By service</h2><div className="relative mt-4 h-48"><ResponsiveContainer><PieChart><Pie data={allocation} dataKey="value" innerRadius={58} outerRadius={78} paddingAngle={4} stroke="none">{allocation.map((item) => <Cell key={item.name} fill={item.color} />)}</Pie><Tooltip contentStyle={tooltipStyle} formatter={(v) => fmtMoney(Number(v))} /></PieChart></ResponsiveContainer><div className="pointer-events-none absolute inset-0 grid place-items-center text-center"><div><p className="metric-numbers text-base font-medium">{fmtMoney(total)}</p><p className="text-[10px] text-muted-foreground">this month</p></div></div></div><ul className="space-y-3">{allocation.map((item) => <li key={item.name} className="flex items-center gap-3 text-xs"><i className="size-2 rounded-full" style={{ background: item.color }} /><span className="text-muted-foreground">{item.name}</span><span className="metric-numbers ml-auto">{Math.round(item.value / total * 100)}%</span></li>)}</ul></article>
+    <article className="organic-card h-full p-7 md:p-8"><Label>Cost allocation</Label><h2 className="mt-2 text-xl font-medium">By service</h2><div className="relative mt-4 h-48"><MotionDonut className="h-full w-full" data={allocation.map((item) => ({ name: item.name, value: item.value, color: item.color }))} formatValue={fmtMoney} /><div className="pointer-events-none absolute inset-0 grid place-items-center text-center"><div><p className="metric-numbers text-base font-medium">{fmtMoney(total)}</p><p className="text-[10px] text-muted-foreground">this month</p></div></div></div><ul className="space-y-3">{allocation.map((item) => <li key={item.name} className="flex items-center gap-3 text-xs"><i className="size-2 rounded-full" style={{ background: item.color }} /><span className="text-muted-foreground">{item.name}</span><span className="metric-numbers ml-auto">{Math.round(item.value / total * 100)}%</span></li>)}</ul></article>
   );
 }
 

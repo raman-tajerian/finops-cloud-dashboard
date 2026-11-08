@@ -9,7 +9,7 @@ import { useGlobalFilters } from "@/lib/filters";
 import { MetricInfo } from "./Help";
 import type { K8sClusterDto, K8sPodDto } from "@/types/finops";
 import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, PageHero, StatusBadge, TableToggle } from "./States";
-import { AnimatedNumber } from "@/components/motion";
+import { AnimatedNumber, MotionBar } from "@/components/motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -78,7 +78,7 @@ function Clusters({ clusters, tab }: { clusters: K8sClusterDto[]; tab: string })
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={16} />
                   <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={52} tickFormatter={(v: number) => fmtMoneyCompact(Number(v))} />
                   <Tooltip contentStyle={tip} cursor={{ fill: "var(--muted)" }} formatter={(v) => fmtMoney(Number(v))} />
-                  <Bar dataKey="cost" radius={[6, 6, 0, 0]}>{c.namespaces.map((n) => <Cell key={n.name} fill={n.overProvisioned ? "var(--chart-3)" : "var(--chart-1)"} />)}</Bar>
+                  <Bar dataKey="cost" isAnimationActive={false} shape={<MotionBar />} radius={[6, 6, 0, 0]}>{c.namespaces.map((n) => <Cell key={n.name} fill={n.overProvisioned ? "var(--chart-3)" : "var(--chart-1)"} />)}</Bar>
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -190,7 +190,7 @@ function Simulator({ d }: { d: NonNullable<ReturnType<typeof useScenario>["data"
               <XAxis type="number" hide domain={[0, "dataMax"]} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} width={72} />
               <Tooltip contentStyle={tip} cursor={{ fill: "var(--muted)" }} formatter={(v) => fmtMoney(Number(v))} />
-              <Bar dataKey="v" radius={[0, 6, 6, 0]} barSize={22}>{chart.map((c, i) => <Cell key={c.name} fill={i ? "var(--chart-1)" : "var(--chart-6)"} />)}</Bar>
+              <Bar dataKey="v" isAnimationActive={false} shape={<MotionBar />} radius={[0, 6, 6, 0]} barSize={22}>{chart.map((c, i) => <Cell key={c.name} fill={i ? "var(--chart-1)" : "var(--chart-6)"} />)}</Bar>
             </BarChart>
           </ResponsiveContainer>
         )}

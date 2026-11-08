@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { MetricInfo } from "./Help";
-import { AnimatedNumber, ProgressRing } from "@/components/motion";
+import { AnimatedNumber, MotionBar, ProgressRing } from "@/components/motion";
 
 export interface SecSearch { sev: string; fstatus: string; prov: string; rule: string; q: string; sort: string; finding: string }
 
@@ -91,7 +91,7 @@ function ScoreCard({ trend }: { trend: SecurityDto["scoreTrend"] }) {
                   <XAxis dataKey="month" tickLine={false} axisLine={false} fontSize={11} stroke="var(--muted-foreground)" />
                   <YAxis hide domain={[0, 100]} />
                   <Tooltip formatter={(v) => [fmtScore(Number(v)), "Score"]} cursor={{ fill: "var(--secondary)" }} contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", background: "var(--card)", fontSize: 12 }} />
-                  <Bar dataKey="score" radius={[6, 6, 0, 0]}>{trend.map((t, i) => <Cell key={t.month} fill={i === trend.length - 1 ? "var(--primary)" : "var(--chart-2)"} />)}</Bar>
+                  <Bar dataKey="score" isAnimationActive={false} shape={<MotionBar />} radius={[6, 6, 0, 0]}>{trend.map((t, i) => <Cell key={t.month} fill={i === trend.length - 1 ? "var(--primary)" : "var(--chart-2)"} />)}</Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
