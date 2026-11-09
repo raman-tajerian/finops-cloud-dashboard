@@ -13,12 +13,12 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tooltip as Hint, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip as Hint, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { CardBoundary, CardSkeleton, DataTableView, EmptyState, ErrorState, PageHero, StatusBadge, TableToggle } from './States';
 const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 const tip = { background: 'var(--popover)', color: 'var(--foreground)', border: '1px solid var(--border)', borderRadius: 8 };
 export function DemoModelBadge() {
-  return <Hint><TooltipTrigger asChild><Button variant="secondary" size="sm"><Sparkles className="size-4" />Demo model<Info className="size-3" /></Button></TooltipTrigger><TooltipContent className="max-w-xs">In demo mode, deterministic TypeScript runs in the browser. Synthetic evaluation only. ML.NET and the production pipeline are planned; no real training or deployment takes place here.</TooltipContent></Hint>;
+  return <TooltipProvider><Hint><TooltipTrigger asChild><Button variant="secondary" size="sm"><Sparkles className="size-4" />Demo model<Info className="size-3" /></Button></TooltipTrigger><TooltipContent className="max-w-xs">In demo mode, deterministic TypeScript runs in the browser. Synthetic evaluation only. ML.NET and the production pipeline are planned; no real training or deployment takes place here.</TooltipContent></Hint></TooltipProvider>;
 }
 function Card({ title, children, right }: { title: string; children: ReactNode; right?: ReactNode }) {
   return <CardBoundary label={title}><section className="organic-card min-w-0 p-7"><div className="mb-5 flex flex-wrap items-center justify-between gap-3"><h2 className="font-semibold">{title}</h2>{right}</div>{children}</section></CardBoundary>;
