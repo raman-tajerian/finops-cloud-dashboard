@@ -26,8 +26,9 @@ export function recordSearch(n: NavigationSession, search: string): NavigationSe
   const text = search.trim();
   return text ? { ...n, searches: [text, ...n.searches.filter((s) => s !== text)].slice(0, 5) } : n;
 }
-interface State { notificationReads: Record<string, boolean>; navigation: NavigationSession; reports: PastReport[]; schedules: ScheduleRow[]; integrations: Record<string, "Connected" | "Not connected">; settings: DemoSettings; recs: Record<string, RecState>; budgets: SessionBudget[]; rules: AlertRule[]; anomalies: Record<string, AnomalyStatus>; findings: Record<string, FindingState> }
+interface State { model: import('@/types/ml').ModelSession; notificationReads: Record<string, boolean>; navigation: NavigationSession; reports: PastReport[]; schedules: ScheduleRow[]; integrations: Record<string, "Connected" | "Not connected">; settings: DemoSettings; recs: Record<string, RecState>; budgets: SessionBudget[]; rules: AlertRule[]; anomalies: Record<string, AnomalyStatus>; findings: Record<string, FindingState> }
 let state: State = {
+  model: { active: 'v3', previous: null },
   notificationReads: {},
   navigation: emptyNavigation(),
   reports: [], schedules: [], integrations: {}, settings: { notify: {}, density: "comfortable", reduceMotion: false, theme: "light" },

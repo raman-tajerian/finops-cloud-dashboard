@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { Link } from '@tanstack/react-router';
 import { Area, ComposedChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { BellRing, Pencil, Plus, Trash2, Wallet } from "lucide-react";
 import { toast } from "sonner";
@@ -194,6 +195,7 @@ function Anomalies({ rows }: { rows: AnomalyRowDto[] }) {
   return (
     <section className="organic-card min-w-0 p-7" aria-label="Anomalies">
       <Title sub="Same anomalies as Overview: last 3 days vs the prior 14-day baseline. Status is demo-only.">Anomalies · {rows.length}</Title>
+      <Button asChild variant="ghost" size="sm" className="mt-2"><Link to="/model-insights" search={prev => ({ ...prev, tab: 'detection' })}>See model detection</Link></Button>
       {rows.length === 0 ? <div className="mt-5"><EmptyState icon={BellRing} title="No cost increases meet the anomaly rule for the selected filters." action="Reset filters" onAction={reset} /></div> : (
         <div className="mt-4 overflow-x-auto">
           <table className="density-table w-full min-w-[640px] text-left text-sm">

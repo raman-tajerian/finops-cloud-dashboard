@@ -1,5 +1,7 @@
 // Typed API client. Uses the seeded master dataset unless VITE_API_BASE_URL is set, then calls GET {base}/api/v1/...
 import { masterResources } from "@/data/resources";
+import { buildMlAnomalies, buildMlForecast, buildMlModels, buildMlPipeline } from '@/data/ml';
+import { DEFAULT_MODEL_VERSION, type ModelVersion, type MlAnomaliesDto, type MlForecastDto, type MlModelsDto, type MlPipelineDto } from '@/types/ml';
 import { buildDashboard, buildExplore, buildResourceDetail, buildResources, buildSustainability } from "@/data/aggregate";
 import type { Filters } from "@/lib/filters";
 import { buildAlerts, buildSavings } from "@/data/budgets";
@@ -29,6 +31,10 @@ async function call<T>(path: string, mock: () => T): Promise<T> {
 }
 
 export const api = {
+  getMlAnomalies: (f: Filters, version: ModelVersion = DEFAULT_MODEL_VERSION) => call<MlAnomaliesDto>(`/ml/anomalies?${qs(f, { modelVersion: version })}`, () => buildMlAnomalies(masterResources, f, version)),
+  getMlForecast: (f: Filters, version: ModelVersion = DEFAULT_MODEL_VERSION) => call<MlForecastDto>(`/ml/forecast?${qs(f, { modelVersion: version })}`, () => buildMlForecast(masterResources, f, version)),
+  getMlModels: (f: Filters, version: ModelVersion = DEFAULT_MODEL_VERSION) => call<MlModelsDto>(`/ml/models?${qs(f, { modelVersion: version })}`, () => buildMlModels(version)),
+  getMlPipeline: (f: Filters, version: ModelVersion = DEFAULT_MODEL_VERSION) => call<MlPipelineDto>(`/ml/pipeline?${qs(f, { modelVersion: version })}`, () => buildMlPipeline(masterResources, f, version)),
   getCommitments: (f: Filters) => call<CommitmentsDto>(`/commitments?${qs(f)}`, () => buildCommitments(masterResources, f)),
   getTeams: (f: Filters) => call<TeamsDto>(`/teams?${qs(f)}`, () => buildTeams(masterResources, f)),
   getNotifications: (f: Filters) => call<NotificationsDto>(`/notifications?${qs(f)}`, () => buildNotifications(masterResources, f)),

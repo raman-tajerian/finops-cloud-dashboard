@@ -1,4 +1,4 @@
-import { Activity, BarChart3, Bell, Boxes, FileText, Gauge, Handshake, Leaf, Plug, Server, Settings, ShieldCheck, Target, Users, Wallet, type LucideIcon } from "lucide-react";
+import { Activity, BarChart3, Bell, Boxes, FileText, Gauge, Handshake, Leaf, Plug, Server, Settings, ShieldCheck, Sparkles, Target, Users, Wallet, type LucideIcon } from "lucide-react";
 
 export interface NavItem { to: string; label: string; icon: LucideIcon; description: string }
 export interface NavGroup { label: string; items: NavItem[] }
@@ -12,6 +12,7 @@ export const navGroups: NavGroup[] = [
     { to: "/teams", label: "Teams", icon: Users, description: "Team showback, resources and budgets" },
   ] },
   { label: "Optimize", items: [
+    { to: '/model-insights', label: 'Model Insights', icon: Sparkles, description: 'Demo detection, forecasting, model registry and planned MLOps' },
     { to: "/recommendations", label: "Recommendations", icon: Target, description: "Savings actions ranked by impact" },
     { to: "/commitments", label: "Commitments", icon: Handshake, description: "Savings plans, reservations and coverage" },
     { to: "/kubernetes", label: "Kubernetes", icon: Boxes, description: "Cluster health, utilization and live events" },

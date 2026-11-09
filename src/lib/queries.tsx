@@ -1,11 +1,29 @@
 import type { ReactNode } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { useSession } from '@/lib/session-store';
 import { useGlobalFilters } from "@/lib/filters";
 import { CardBoundary, CardSkeleton, ErrorState } from "@/components/finops/States";
 import type { DashboardDto, GroupBy } from "@/types/finops";
 
 /** Dashboard data for the active URL filters; the key includes every filter. */
+export function useMlAnomalies() {
+  const { filters } = useGlobalFilters(), version = useSession(s => s.model.active);
+  return useQuery({ queryKey: ['ml-anomalies', filters, version], queryFn: () => api.getMlAnomalies(filters, version), staleTime: 60_000 });
+}
+export function useMlForecast() {
+  const { filters } = useGlobalFilters(), version = useSession(s => s.model.active);
+  return useQuery({ queryKey: ['ml-forecast', filters, version], queryFn: () => api.getMlForecast(filters, version), staleTime: 60_000 });
+}
+export function useMlModels() {
+  const { filters } = useGlobalFilters(), version = useSession(s => s.model.active);
+  return useQuery({ queryKey: ['ml-models', filters, version], queryFn: () => api.getMlModels(filters, version), staleTime: 60_000 });
+}
+export function useMlPipeline() {
+  const { filters } = useGlobalFilters(), version = useSession(s => s.model.active);
+  return useQuery({ queryKey: ['ml-pipeline', filters, version], queryFn: () => api.getMlPipeline(filters, version), staleTime: 60_000 });
+}
+
 export function useDashboard() {
   const { filters } = useGlobalFilters();
   return useQuery({ queryKey: ["dashboard", filters], queryFn: () => api.getDashboard(filters), placeholderData: keepPreviousData, staleTime: 60_000 });
