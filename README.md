@@ -2,7 +2,7 @@
 
 Multi-cloud cost and sustainability dashboard
 
-Fern is a multi-cloud workspace for exploring cloud spend, resource usage and estimated sustainability impact. Its demo workspace, **Fjord Labs**, represents a fictional customer, not a connected cloud account. Eleven pages share typed responses and a seeded resource dataset so related totals reconcile for the same filters. The frontend demonstrates FinOps workflows while a production data backend remains planned.
+Fern is a multi-cloud workspace for exploring cloud spend, resource usage and estimated sustainability impact. Its demo workspace, **Fjord Labs**, represents a fictional customer, not a connected cloud account. The workspace pages share typed responses and a seeded resource dataset so related totals reconcile for the same filters. The frontend demonstrates FinOps workflows while a production data backend remains planned.
 
 **Live demo:** https://finops-cloud-dashboard.lovable.app
 
@@ -17,6 +17,7 @@ In default demo mode, figures come from a seeded, simulated dataset of **61 fict
 - **Integrations:** connection states and sync histories are fictional. “Test connection” checks identifier format only; it does not contact a provider.
 - **Reports and members:** downloads are real browser downloads, but report sending, schedules, notifications and member invitations are not delivered or executed.
 - **API keys:** Settings creates fake demonstration strings, not usable credentials. Team members, role changes and tag mappings are session-only examples, not authentication or authorization.
+- **Model Insights:** a small deterministic TypeScript demo model, synthetic evaluation metrics, simulated latency telemetry and seeded run history; no real training or deployment. Model promotion is session-only.
 - **Currency:** USD is the base; EUR, SEK and GBP use fixed demo exchange rates, not live FX.
 - **Actions:** scans, optimization, stopping/tagging resources, resolving findings, budgets and alert rules demonstrate interactions only. Nothing is actually scanned, connected, remediated or sent to cloud accounts or report recipients.
 
@@ -40,6 +41,11 @@ The demo connection/key workflows do not connect to providers or persist credent
 ### Recommendations
 - Six savings categories with search/filter/sort, resource details, effort, risk, confidence and savings tracker.
 - Session-only assign/implement/ignore/reopen actions and 7/30-day snooze dates calculated from the fixed demo date; no cloud changes are executed.
+
+### Model Insights
+- Detection | Forecast | Models | Pipeline tabs, with global filters, currency, chart tables and retryable states.
+- Deterministic browser demo detectors, a 14-day forecast/backtest, four genuinely different configurations, synthetic precision/recall/F1 and session-only promotion/rollback.
+- A planned pipeline diagram with seeded demo run history, computed quality gates and demo telemetry/drift. Existing rule-based Active anomalies are unchanged.
 
 ### Kubernetes
 - Filtered EKS/AKS/GKE clusters, node and pod totals, namespace costs/efficiency, sortable namespace table and pod grid/drawer.
@@ -76,6 +82,18 @@ The demo connection/key workflows do not connect to providers or persist credent
 - Loading skeletons, empty states, retryable errors, error boundaries and chart/table alternatives.
 - One “No resources match these filters” / “Reset filters” state for resource-dependent pages, including Reports and the simulator. Settings and Integrations remain available; unavailable Overview comparisons and zero-budget ratios show “—”.
 
+## MLOps
+
+Today: browser demo model, registry and pipeline views driven by seeded data; metrics computed on six synthetic service series. “Production” means the active demo configuration. No claim of accuracy on real data. Planned: ML.NET in the C# backend, GitHub Actions training/evaluation, versioned artifacts, quality gates, Docker packaging, Terraform deployment, rollback and monitoring. See [MLOPS.md](docs/MLOPS.md).
+
+## Page tabs
+
+- Model Insights: Detection | Forecast | Models | Pipeline.
+- Commitments: Coverage | Commitments | Recommendations.
+- Teams: Overview | Resources | Budgets, including independently addressable team details.
+- Notifications: All | Unread | Read.
+- Existing pages retain their shared URL-backed tab registry in `src/components/finops/PageTabs.tsx`.
+
 ## Tech stack
 
 From `package.json` (declared dependency ranges, not a claim about resolved lockfile versions):
@@ -89,7 +107,7 @@ From `package.json` (declared dependency ranges, not a claim about resolved lock
 
 ## Architecture
 
-`src/types/finops.ts` defines resource and response contracts. The typed client in `src/lib/api.ts` exposes 14 read functions, consumed through TanStack Query in `src/lib/queries.tsx`; query keys include relevant global filters. With no `VITE_API_BASE_URL`, each request waits a simulated 300–800 ms and calls pure response builders in `src/data` over the master dataset (Settings uses a fixed fixture builder). Temporary demo edits live in a shared in-memory session store, separate from aggregate data.
+`src/types/finops.ts` defines resource and response contracts. The typed client in `src/lib/api.ts` exposes 23 read functions, consumed through TanStack Query in `src/lib/queries.tsx`; query keys include relevant global filters. With no `VITE_API_BASE_URL`, each request waits a simulated 300–800 ms and calls pure response builders in `src/data` over the master dataset (Settings uses a fixed fixture builder). Temporary demo edits live in a shared in-memory session store, separate from aggregate data.
 
 Independent daily user/request histories live in `src/data/usage.ts`. `buildUnitEconomics` supplies Overview, Explorer and Reports without changing resource costs or financial totals. The shared Shell uses the filtered dashboard response to gate zero-resource pages; report generation calls the same typed client on demand.
 
@@ -128,13 +146,20 @@ There is **no typecheck script** in `package.json`. With the installed native-pr
 
 ## Roadmap
 
-- [x] Eleven-page frontend workspace and shared URL filters, navigation and states.
+- [x] Multi-page frontend workspace and shared URL filters, navigation and states.
 - [x] Seeded master dataset, typed read client and consistent cost/savings/carbon aggregates.
 - [x] Independent usage histories, shared unit economics and zero-resource robustness.
 - [x] Resources, recommendations, Kubernetes, budgets, security and what-if demo workflows.
 - [x] Reports, integrations and settings demonstrations.
 - [x] Currency, density, keyboard shortcuts, onboarding and reduced-motion controls.
 - [x] Unit and component tests for aggregate consistency and demo rules.
+- [x] Model Insights demo detection, forecast, registry and planned pipeline views.
+- [ ] ML.NET anomaly detection and forecasting in the C# backend.
+- [ ] Training and evaluation in GitHub Actions.
+- [ ] Versioned model artifacts with a quality gate.
+- [ ] Model packaged in the API Docker image.
+- [ ] Model rollback.
+- [ ] Monitoring and drift alerts.
 - [ ] C# .NET Web API implementing the contract, including real mutation endpoints.
 - [ ] PostgreSQL for historical cost data.
 - [ ] Dockerfiles for frontend and backend.
