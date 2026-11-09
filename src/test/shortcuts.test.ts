@@ -3,7 +3,7 @@ import { CHORD_TIMEOUT_MS, isDialogOpen, resolveChord, SHORTCUTS } from "@/lib/s
 
 describe("keyboard shortcuts", () => {
   it("maps every G-chord to an existing route", () => {
-    const routes = ["/", "/cost-explorer", "/resources", "/security", "/kubernetes"];
+    const routes = ["/", "/cost-explorer", "/resources", "/security", "/kubernetes", "/model-insights"];
     for (const s of SHORTCUTS.filter((x) => x.keys.startsWith("G "))) expect(routes).toContain(s.to);
   });
   it("resolves chords only within the timeout", () => {
