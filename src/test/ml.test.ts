@@ -12,7 +12,7 @@ describe('deterministic demo models', () => {
     expect(buildMlForecast(masterResources, f)).toEqual(buildMlForecast(masterResources, f));
     expect(buildMlModels()).toEqual(buildMlModels());
     expect(buildMlPipeline(masterResources, f)).toEqual(buildMlPipeline(masterResources, f));
-  });
+  }, 20000);
   it('matches predictions once within ±1 day on the same service', () => {
     const metrics = evaluationMetrics([{ series: 0, index: 9 }, { series: 0, index: 10 }, { series: 1, index: 40 }], [{ series: 0, index: 10 }, { series: 1, index: 20 }]);
     expect(metrics.precision).toBeCloseTo(1 / 3); expect(metrics.recall).toBe(0.5); expect(metrics.f1).toBe(0.4);

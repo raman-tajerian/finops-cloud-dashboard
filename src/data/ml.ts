@@ -18,11 +18,12 @@ const iso = (d: Date) => d.toISOString().slice(0, 10);
 const dateAdd = (d: Date, days: number) => new Date(d.getTime() + days * 86400000);
 function fit(values: number[], days: string[], p: ModelParams) {
   const start = Math.max(0, values.length - p.windowDays), history = values.slice(start), dates = days.slice(start), center = median(history);
+  const firstWeekday = dates[0] ? new Date(`${dates[0]}T00:00:00Z`).getUTCDay() : 0;
   const profile = Array.from({ length: 7 }, (_, weekday) => {
-    const group = history.filter((_, i) => new Date(`${dates[i]}T00:00:00Z`).getUTCDay() === weekday);
+    const group = history.filter((_, i) => (firstWeekday + i) % 7 === weekday);
     return group.length ? median(group) - center : 0;
   });
-  const adjusted = history.map((v, i) => v - (profile[new Date(`${dates[i]}T00:00:00Z`).getUTCDay()] ?? 0));
+  const adjusted = history.map((v, i) => v - (profile[(firstWeekday + i) % 7] ?? 0));
   let level = adjusted[0] ?? 0;
   for (const v of adjusted.slice(1)) level = p.alpha * v + (1 - p.alpha) * level;
   const med = median(adjusted), spread = Math.max(1.4826 * median(adjusted.map(v => Math.abs(v - med))), mean(history) * 0.01, 0.01);
