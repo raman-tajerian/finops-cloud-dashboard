@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Add Model Insights detection, forecast, computed registry and planned pipeline through typed APIs; preserve existing totals.
+- [ ] Document demo formulas, endpoints and planned production architecture; test deterministic metrics, gate, drift and session promotion.
+- [ ] Verify all tabs, responsive layouts, keyboard, error/empty/loading states and run the full test suite.
+
 - [x] Add Commitments, Teams/showback and Notifications through typed APIs and master-data builders, preserving totals.
 - [x] Add navigation, team detail URLs, chart tables, verified CSV export and shared session-only read state; bell/center count agrees.
 - [x] Document three read contracts and rules; all 226 tests pass. Four new views × four widths × three tabs checked with no overflow/console errors; keyboard, source links, filter preservation and loading/error/retry/empty/reset verified. Automatic build OK. Read endpoints follow existing demo/future C# API pattern, not hosted handlers.
