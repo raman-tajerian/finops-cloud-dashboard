@@ -329,3 +329,32 @@ Team current spend, previous spend and change use `buildExplore(...,team)` rows 
 Fixed order: anomalies, budgets, security, recommendations. One row per shared detected anomaly, one per Open/In progress security finding, one per saving group. Built-in budget keys are All:All, Provider:AWS, Provider:Azure, Team:Platform, Environment:Production, matching existing default cards. A scope emits a row if defaultAmount>0 and forecast/defaultAmount>=80%; use only highest crossed threshold (100% if forecast>=amount, otherwise 80%), not both. Figures are the source monthly anomaly impact, forecast, count=1 for a finding, or monthly group saving. Source IDs and type form stable notification IDs (budget also includes threshold). Dates are not invented.
 
 No resources means zero notifications, including account-level security rows. Read flags are ID-keyed in the existing in-memory session store, never localStorage; mark-all affects the current filter's notification IDs and preserves other read flags. The bell unread count uses the exact same filtered DTO and read map as the page. Session-only remediation/status changes do not mutate source read aggregates. Tests in `workspaces.test.ts` cover bounds, dates, 30% discount, break-even, team reconciliation, source notification counts, deterministic output, read behavior and empty fallbacks.
+
+
+## Model Insights — deterministic demo only
+
+`src/data/ml.ts` is a pure TypeScript implementation, called by the typed API. No ML library, real training, artifact or deployment. All calculations are read-only; Active anomalies and financial totals are unchanged. Group filtered resources by provider + named service, sum their daily costs, and retain the history through `windowOf(range).end`. Detection displays only the selected window; fitting uses earlier data (no future leakage). Forecast uses the history available at that end and projects 14 days forward. Telemetry covers the last 30 days ending there, independent of how short the selected display window is.
+
+### Configurations
+| Version | Window | Alpha | Sensitivity k | Illustrative trained date |
+| --- | --- | --- | --- | --- |
+| v1 | 28 | 0.30 | 4.5 | 2026-07-29 |
+| v2 | 42 | 0.20 | 3.5 | 2026-08-19 |
+| v3 (default active) | 56 | 0.30 | 3.0 | 2026-09-09 |
+| v4 | 84 | 0.15 | 2.5 | 2026-09-30 |
+Dates are DEMO_TODAY −75 +21×versionIndex days. Active configuration is labelled Production (demo only); v4 is Staging unless active, other inactive versions Archived. Promotion/rollback share the in-memory session store and affect all four version-keyed queries. No persistence or real deployment.
+
+### Detection and forecast
+Baseline uses preceding 14 observations: population standard deviation, |actual−mean|/std >3. Constant baseline flags differing actual values. Both detectors require 14 earlier days. Seasonal model uses up to windowDays earlier observations: weekday offsets = weekday median − overall median; deseasonalize by subtracting offsets, initialize level with first value, then level = alpha×value +(1−alpha)×level. Expected = max(0, level + weekday offset). Spread = max(1.4826×MAD of deseasonalized observations, 1%×mean cost, 0.01 USD). Expected band = [max(0,expected−k×spread),expected+k×spread]. Actual outside the band means a model flag.
+Score=clamp(|actual−expected|/spread×10,0,100). Distance=max(low−actual,actual−high,0). Confidence=clamp(distance/(distance+spread)×100,0,100): a heuristic, not correctness probability. Severity: High score≥70, Medium≥40, else Low. DetectedBy is model/baseline/both, with counts that sum to table rows. Baseline-only items can be inside the model band and have zero model confidence.
+Forecast=nonnegative last fitted level + weekday offset. Future half-width=k×spread×sqrt(1+horizonDay/7); baseline=last seven observations mean. Backtest withholds last 14 observations before fitting, uses fixed-origin predictions with no feedback from held-out values. MAPE=mean(|actual−prediction|/actual)×100 for positive actuals; no valid actuals yields zero. Bands are not calibrated confidence intervals.
+
+### Synthetic evaluation
+Mulberry32 seed 20261012; six series ×365 dates ending DEMO_TODAY. Service level=100+35×serviceIndex, Sunday −22%, other weekdays +6%, linear trend 0.0002×dayIndex, uniform ±5% noise. After generating all base values, inject exactly 20 single-day anomalies with seeded series/date and multiplicative magnitude 1.3–3.1; indices 90–359, same-series events at least eight days apart. Parameters differ by version and metrics are recomputed, not hardcoded. Score predictions only on indices 90–364 after warm-up.
+A same-service prediction within ±1 day of an injected event is a hit, matched once per prediction/event in chronological order; duplicate alerts count as false positives. Precision=hits/predictions, recall=hits/20, F1=2PR/(P+R); zero denominators yield zero. Baseline evaluated identically. Synthetic metrics do not establish real-world accuracy; baseline may outperform the seasonal demo model.
+
+### Planned pipeline and monitoring
+Eight seeded runs start at DEMO_TODAY −3×runIndex days, cycle candidate v1–v4 and schedule/push/manual triggers. Seed 20260912 supplies stage durations (5–119s). Quality gate: candidate F1≥active F1−0.02 AND candidate recall≥0.70. Fail at Quality gate skips Package/Deploy/Monitor; earlier stages are illustrative Passed. Run gate status always comes from computed registry metrics, not manual labels; recomputed when active model changes.
+Latency p95=8–20ms from the same PRNG after durations: simulated, not measured. Daily flags count model detector flags on each filtered provider/service, over last 30 days at selected period end. Drift compares the preceding configuration-sized training window (ending before last 14 days) to last 14 observed costs: abs(meanRecent−meanTraining)/max(sqrt((varianceTraining+varianceRecent)/2),abs(meanTraining)×0.01,0.01). Display maximum across services and each score. Warning and Retrain recommended only when >0.5 (not ≥). Constant/empty windows remain finite; identical windows yield zero.
+
+`src/test/ml.test.ts` covers reproducibility, one-to-one metrics, gate pass/fail/boundaries, drift, promotion/rollback, filtered spend reconciliation, warm-up, bands, flags/gates and safe zero-resource values. The production GitHub Actions / ML.NET / Docker / Terraform pipeline is planned, not running.

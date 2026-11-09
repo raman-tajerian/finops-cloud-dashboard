@@ -15,6 +15,7 @@ import { Route as CommitmentsRouteImport } from './routes/commitments'
 import { Route as CostExplorerRouteImport } from './routes/cost-explorer'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
 import { Route as KubernetesRouteImport } from './routes/kubernetes'
+import { Route as ModelInsightsRouteImport } from './routes/model-insights'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as RecommendationsRouteImport } from './routes/recommendations'
 import { Route as ReportsRouteImport } from './routes/reports'
@@ -55,6 +56,11 @@ const IntegrationsRoute = IntegrationsRouteImport.update({
 const KubernetesRoute = KubernetesRouteImport.update({
   id: '/kubernetes',
   path: '/kubernetes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModelInsightsRoute = ModelInsightsRouteImport.update({
+  id: '/model-insights',
+  path: '/model-insights',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificationsRoute = NotificationsRouteImport.update({
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/cost-explorer': typeof CostExplorerRoute
   '/integrations': typeof IntegrationsRoute
   '/kubernetes': typeof KubernetesRoute
+  '/model-insights': typeof ModelInsightsRoute
   '/notifications': typeof NotificationsRoute
   '/recommendations': typeof RecommendationsRoute
   '/reports': typeof ReportsRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/cost-explorer': typeof CostExplorerRoute
   '/integrations': typeof IntegrationsRoute
   '/kubernetes': typeof KubernetesRoute
+  '/model-insights': typeof ModelInsightsRoute
   '/notifications': typeof NotificationsRoute
   '/recommendations': typeof RecommendationsRoute
   '/reports': typeof ReportsRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/cost-explorer': typeof CostExplorerRoute
   '/integrations': typeof IntegrationsRoute
   '/kubernetes': typeof KubernetesRoute
+  '/model-insights': typeof ModelInsightsRoute
   '/notifications': typeof NotificationsRoute
   '/recommendations': typeof RecommendationsRoute
   '/reports': typeof ReportsRoute
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/cost-explorer'
     | '/integrations'
     | '/kubernetes'
+    | '/model-insights'
     | '/notifications'
     | '/recommendations'
     | '/reports'
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/cost-explorer'
     | '/integrations'
     | '/kubernetes'
+    | '/model-insights'
     | '/notifications'
     | '/recommendations'
     | '/reports'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/cost-explorer'
     | '/integrations'
     | '/kubernetes'
+    | '/model-insights'
     | '/notifications'
     | '/recommendations'
     | '/reports'
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   CostExplorerRoute: typeof CostExplorerRoute
   IntegrationsRoute: typeof IntegrationsRoute
   KubernetesRoute: typeof KubernetesRoute
+  ModelInsightsRoute: typeof ModelInsightsRoute
   NotificationsRoute: typeof NotificationsRoute
   RecommendationsRoute: typeof RecommendationsRoute
   ReportsRoute: typeof ReportsRoute
@@ -289,6 +302,13 @@ declare module '@tanstack/react-router' {
       path: '/kubernetes'
       fullPath: '/kubernetes'
       preLoaderRoute: typeof KubernetesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/model-insights': {
+      id: '/model-insights'
+      path: '/model-insights'
+      fullPath: '/model-insights'
+      preLoaderRoute: typeof ModelInsightsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notifications': {
@@ -390,6 +410,7 @@ const rootRouteChildren: RootRouteChildren = {
   CostExplorerRoute: CostExplorerRoute,
   IntegrationsRoute: IntegrationsRoute,
   KubernetesRoute: KubernetesRoute,
+  ModelInsightsRoute: ModelInsightsRoute,
   NotificationsRoute: NotificationsRoute,
   RecommendationsRoute: RecommendationsRoute,
   ReportsRoute: ReportsRoute,

@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 
 export interface ShortcutDef { keys: string; action: string; to?: string }
 export const SHORTCUTS: ShortcutDef[] = [
+  { keys: 'G M', action: 'Go to Model Insights', to: '/model-insights' },
   { keys: "G O", action: "Go to Overview", to: "/" },
   { keys: "G C", action: "Go to Cost Explorer", to: "/cost-explorer" },
   { keys: "G R", action: "Go to Resources", to: "/resources" },
@@ -15,7 +16,7 @@ export const SHORTCUTS: ShortcutDef[] = [
 ];
 
 export const CHORD_TIMEOUT_MS = 800;
-const CHORDS: Record<string, string> = { o: "/", c: "/cost-explorer", r: "/resources", s: "/security", k: "/kubernetes" };
+const CHORDS: Record<string, string> = { m: '/model-insights', o: "/", c: "/cost-explorer", r: "/resources", s: "/security", k: "/kubernetes" };
 
 /** True when the event target is a text entry field where shortcuts must not fire. */
 export function isEditableTarget(t: EventTarget | null): boolean {

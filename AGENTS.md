@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Keep FinOps feature data local and typed so it can later be replaced by the planned C# API without changing presentation components.
+- Model Insights uses pure builders in src/data/ml.ts and separate DTOs; version-keyed queries share the session model selection so detector, forecast and gate cannot drift, without altering source aggregates.
 - Fern score and daily briefing are read-only projections in src/data/insights.ts exposed through the typed API; sentence templates carry structured figures for display-only currency conversion and never alter source totals.
 - Commitments, team showback and notification read models use pure builders in src/data/workspaces.ts; notifications share an ID-keyed session read map with the bell, and Teams uses an Outlet layout with index/detail leaves so team URLs remain independently addressable.
 - Treat the dashboard as a single responsive bento workspace; operational widgets own their temporary interactive state.

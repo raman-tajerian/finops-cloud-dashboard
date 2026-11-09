@@ -117,6 +117,8 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
+        {/* Dev bundles can evaluate shared chunks before their refresh preamble. */}
+        {import.meta.env.DEV && <script dangerouslySetInnerHTML={{ __html: "window.$RefreshReg$ ||= () => {}; window.$RefreshSig$ ||= () => type => type;" }} />}
         <HeadContent />
       </head>
       <body>

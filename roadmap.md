@@ -1,5 +1,9 @@
 # Roadmap
 
+- [x] Add Model Insights detection, forecast, computed registry and planned pipeline through typed APIs; preserve existing totals.
+- [x] Document demo formulas, endpoints and planned production architecture; test deterministic metrics, gate, drift and session promotion.
+- [x] Verify all tabs at 375/768/1024/1440px, promotion/rollback, drawer focus return and 240 passing tests; automatic typecheck/build OK. Loading/error/empty states implemented; exhaustive forced-state browser checks not completed. Fixed development-only React refresh initialization and missing tooltip provider. Production ML.NET/pipeline and live endpoints remain planned.
+
 - [x] Add Commitments, Teams/showback and Notifications through typed APIs and master-data builders, preserving totals.
 - [x] Add navigation, team detail URLs, chart tables, verified CSV export and shared session-only read state; bell/center count agrees.
 - [x] Document three read contracts and rules; all 226 tests pass. Four new views × four widths × three tabs checked with no overflow/console errors; keyboard, source links, filter preservation and loading/error/retry/empty/reset verified. Automatic build OK. Read endpoints follow existing demo/future C# API pattern, not hosted handlers.

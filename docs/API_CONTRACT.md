@@ -1,6 +1,6 @@
 # Fern API contract
 
-Set `VITE_API_BASE_URL` to switch the 19 read functions in [`src/lib/api.ts`](../src/lib/api.ts) from demo builders to `GET {base}/api/v1/...`. One trailing slash is removed from the base. JSON must match [`src/types/finops.ts`](../src/types/finops.ts); it is cast, not runtime-validated. The read client has no authentication headers or write methods. Non-2xx responses throw `Request failed (<status>)`. Demo requests wait a simulated 300–800 ms before returning builder results.
+Set `VITE_API_BASE_URL` to switch the 23 read functions in [`src/lib/api.ts`](../src/lib/api.ts) from demo builders to `GET {base}/api/v1/...`. One trailing slash is removed from the base. JSON must match [`src/types/finops.ts`](../src/types/finops.ts); it is cast, not runtime-validated. The read client has no authentication headers or write methods. Non-2xx responses throw `Request failed (<status>)`. Demo requests wait a simulated 300–800 ms before returning builder results.
 
 ## Complete function inventory
 
@@ -27,6 +27,10 @@ Set `VITE_API_BASE_URL` to switch the 19 read functions in [`src/lib/api.ts`](..
 | getCommitments(f) | GET | /api/v1/commitments | F | CommitmentsDto |
 | getTeams(f) | GET | /api/v1/teams | F | TeamsDto |
 | getNotifications(f) | GET | /api/v1/notifications | F | NotificationsDto |
+| getMlAnomalies(f, version) | GET | /api/v1/ml/anomalies | F + modelVersion | MlAnomaliesDto |
+| getMlForecast(f, version) | GET | /api/v1/ml/forecast | F + modelVersion | MlForecastDto |
+| getMlModels(f, version) | GET | /api/v1/ml/models | F + modelVersion | MlModelsDto |
+| getMlPipeline(f, version) | GET | /api/v1/ml/pipeline | F + modelVersion | MlPipelineDto |
 
 App normalization (`src/lib/filters.ts`) accepts range `7d|mtd|q3|custom` (default mtd), providers AWS/Azure/GCP (default all), env All/Production/Staging/Development (default All), team All/Platform/Data/FinOps/Media (default All). Custom means last 30 days, not an arbitrary interval; `30d` is not a separate normalized URL value. The API client itself does not apply defaults to its supplied Filters.
 
@@ -187,3 +191,15 @@ Query F. Returns `TeamsDto` `{total,teams:ShowbackTeamDto[]}`. Each team has `{t
 Query F. Returns `NotificationsDto` `{items:NotificationDto[],counts:{anomaly,budget,security,recommendation}}`. Notification fields `{id,type,title,sentence,figure:{value,unit:USD|count},link:{to,tab},sourceId}`. Sentences carry `{figure}` for the shared display formatter. One notification per active anomaly, open security finding and saving group; one per built-in budget scope at its highest reached threshold (80% or 100%). Stable IDs key client read state. Empty resource selections return no notifications even if raw account-level findings exist. Read/unread filtering and mark-all are session overlays, not API writes; the bell and page share this response and map. Default source statuses match the read aggregates, not session remediation overlays.
 
 New paths follow the existing mock/future C# GET pattern; no hosted `/api/v1` handlers are added. See DEMO_DATA for precise eligibility, baseline, seeds and thresholds.
+
+
+## Model Insights read endpoints
+
+All four use F and `modelVersion=v1|v2|v3|v4` (default v3). Each query key includes filters and the shared session active version. This explicit parameter keeps detection, forecast, registry status and gate comparisons aligned after demo promotion, with no write endpoint. Registry evaluation is intentionally filter-independent synthetic data, even though transport/query keys retain F. The UI labels active status Production as a demo configuration only.
+
+- **GET /api/v1/ml/anomalies**: `MlAnomaliesDto` `{modelVersion, items:[{id,day,service,provider,actual,expectedLow,expectedHigh,score,confidence,severity,detectedBy,modelVersion,reason}], counts:{both,modelOnly,baselineOnly}, series:[{id,service,provider,points:[{day,actual,expected,expectedLow,expectedHigh,baselineFlag,modelFlag,score,confidence}]}], resourceCount}`. Service names are named services (EC2, RDS, etc.), not Explorer categories. Items and chart points use the selected period, with preceding history for fitting.
+- **GET /api/v1/ml/forecast**: `MlForecastDto` `{modelVersion,horizonDays:14,points:[{day,forecast,low,high,baseline}],backtest:{mapeModel,mapeBaseline},resourceCount}`. MAPE is percentage units. Future points start after the selected period end; training uses available history through that end.
+- **GET /api/v1/ml/models**: `MlModelsDto` `{models:[{version,status,trainedAt,trainingWindowDays,algorithm,params:{windowDays,alpha,k},metrics:{precision,recall,f1},notes}],baseline:{precision,recall,f1},evaluation:{series:6,days:365,injectedAnomalies:20}}`. Metrics are fractions in [0,1], trainedAt is seeded ISO date, never evidence of training.
+- **GET /api/v1/ml/pipeline**: `MlPipelineDto` `{stages:string[],runs:[{id,startedAt,trigger,candidateVersion,stages:[{name,status,durationSec}],gate:{passed,rule,detail,candidateF1,productionF1,candidateRecall}}],monitoring:{days:string[],latencyP95Ms:number[],flaggedPerDay:number[],drift:{score,threshold:0.5,status,services:[{service,score}]}},resourceCount}`. Stage status Passed/Failed/Skipped; trigger schedule/push/manual; drift OK/Warning. Latency is seeded simulation; flags/drift are computed. Days label both telemetry arrays. Runs remain simulated and gates recompute against the current active model.
+
+All money stays USD. No matching resources: detection/forecast arrays empty, counts/backtest zero, telemetry arrays empty and drift zero; registry and seeded planned history still exist. The global shell offers Reset filters. These are local demo builders or future C# GET contracts, not hosted HTTP handlers. No training/deployment service is built. [MLOPS.md](MLOPS.md) contains formulas, evaluation and production plans.
