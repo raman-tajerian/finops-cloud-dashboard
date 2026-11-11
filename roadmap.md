@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Restore previous visual design on request; undo all Sand and forest v3 changes without altering features or values.
+
 - [x] Add Model Insights detection, forecast, computed registry and planned pipeline through typed APIs; preserve existing totals.
 - [x] Document demo formulas, endpoints and planned production architecture; test deterministic metrics, gate, drift and session promotion.
 - [x] Verify all tabs at 375/768/1024/1440px, promotion/rollback, drawer focus return and 240 passing tests; automatic typecheck/build OK. Loading/error/empty states implemented; exhaustive forced-state browser checks not completed. Fixed development-only React refresh initialization and missing tooltip provider. Production ML.NET/pipeline and live endpoints remain planned.
